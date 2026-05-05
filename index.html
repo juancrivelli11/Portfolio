@@ -142,7 +142,6 @@ body{background:#0a0a0f;color:#e8e8f0;font-family:'Segoe UI',sans-serif;min-heig
   </div>
 </div>
 
-<!-- Add Asset Modal -->
 <div class="modal-bg" id="modal-asset">
   <div class="modal">
     <div class="modal-hdr"><span class="modal-title">Agregar activo</span><button class="modal-x" onclick="closeModal('asset')">×</button></div>
@@ -154,6 +153,19 @@ body{background:#0a0a0f;color:#e8e8f0;font-family:'Segoe UI',sans-serif;min-heig
     <div class="fld"><label>Cantidad</label><input id="a-qty" type="number" placeholder="10"></div>
     <div class="fld"><label>Precio promedio compra (USD)</label><input id="a-avg" type="number" placeholder="150.00"></div>
     <div class="fld"><label>Precio manual actual (si la API no lo tiene)</label><input id="a-manual" type="number" placeholder="Dejar vacío para automático"></div>
+    <div class="fld"><label>Broker (opcional)</label>
+      <select id="a-broker">
+        <option value="">— Seleccionar —</option>
+        <option value="Interactive Brokers">Interactive Brokers</option>
+        <option value="IOL">IOL</option>
+        <option value="Balanz">Balanz</option>
+        <option value="PPI">PPI</option>
+        <option value="TDA">TDA</option>
+        <option value="Binance">Binance</option>
+        <option value="Lemon">Lemon</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
     <div class="mbtns">
       <button class="btn-ok" onclick="addAsset()">Agregar</button>
       <button class="btn-cn" onclick="closeModal('asset')">Cancelar</button>
@@ -161,7 +173,6 @@ body{background:#0a0a0f;color:#e8e8f0;font-family:'Segoe UI',sans-serif;min-heig
   </div>
 </div>
 
-<!-- Add Order Modal -->
 <div class="modal-bg" id="modal-order">
   <div class="modal">
     <div class="modal-hdr"><span class="modal-title">Nueva orden</span><button class="modal-x" onclick="closeModal('order')">×</button></div>
@@ -193,7 +204,6 @@ body{background:#0a0a0f;color:#e8e8f0;font-family:'Segoe UI',sans-serif;min-heig
   </div>
 </div>
 
-<!-- TradingView Modal -->
 <div class="tv-modal" id="modal-tv">
   <div class="tv-hdr">
     <div style="display:flex;align-items:center;gap:10px">
@@ -377,7 +387,7 @@ function syncPF(){
     const{qty,avgPrice}=calcPos(ticker);
     const ex=portfolio.find(a=>a.ticker===ticker);
     if(ex){ex.qty=qty;ex.avgPrice=avgPrice;}
-    else if(qty>0) portfolio.push({id:Date.now()+Math.random(),ticker,name:'',type:'Acción USA',qty,avgPrice,manualPrice:0});
+    else if(qty>0) portfolio.push({id:Date.now()+Math.random(),ticker,name:'',type:'Acción USA',qty,avgPrice,manualPrice:0,broker:''});
   });
   portfolio=portfolio.filter(a=>a.qty>0);
 }
@@ -426,9 +436,11 @@ function render(){
         <div><span>Cant. </span>${fmt(a.qty,4)}</div>
         <div><span>Precio </span>${a.price>0?fU(a.price):'—'}</div>
         <div><span>P.M. </span>${fU(a.avgPrice)}</div>
+        <div><span>Broker </span>${a.broker || '—'}</div>
       </div>
       <div class="ac-foot">
         <button class="btn-tv" onclick="openTV('${a.ticker}','${a.type}')">📈 Ver gráfico</button>
+        <button class="btn-tv" style="background:#ff9f1c22;border-color:#ff9f1c44;color:#ff9f1c" onclick="editManualPrice('${a.ticker}')">✏️ Editar precio</button>
         <button class="btn-del" onclick="delAsset('${a.id}')">Eliminar</button>
       </div>
     </div>`).join('');
@@ -481,10 +493,23 @@ function addAsset(){
   const ticker=document.getElementById('a-ticker').value.trim();
   const qty=parseFloat(document.getElementById('a-qty').value);
   if(!ticker||!qty) return;
-  portfolio.push({id:Date.now(),ticker,name:document.getElementById('a-name').value,type:document.getElementById('a-type').value,qty,avgPrice:parseFloat(document.getElementById('a-avg').value)||0,manualPrice:parseFloat(document.getElementById('a-manual').value)||0});
-  persist();closeModal('asset');
-  ['a-ticker','a-name','a-qty','a-avg','a-manual'].forEach(id=>document.getElementById(id).value='');
-  render();refresh();
+  
+  portfolio.push({
+    id:Date.now(),
+    ticker,
+    name:document.getElementById('a-name').value,
+    type:document.getElementById('a-type').value,
+    qty,
+    avgPrice:parseFloat(document.getElementById('a-avg').value)||0,
+    manualPrice:parseFloat(document.getElementById('a-manual').value)||0,
+    broker:document.getElementById('a-broker').value
+  });
+  
+  persist();
+  closeModal('asset');
+  ['a-ticker','a-name','a-qty','a-avg','a-manual','a-broker'].forEach(id=>document.getElementById(id).value='');
+  render();
+  refresh();
 }
 
 function addOrder(){
@@ -492,11 +517,24 @@ function addOrder(){
   const qty=parseFloat(document.getElementById('o-qty').value);
   const price=parseFloat(document.getElementById('o-price').value);
   if(!ticker||!qty||!price) return;
-  orders.push({id:Date.now(),ticker,action:document.getElementById('o-action').value,qty,price,date:document.getElementById('o-date').value||new Date().toISOString().split('T')[0],broker:document.getElementById('o-broker').value,notes:document.getElementById('o-notes').value});
-  syncPF();persist();closeModal('order');
+  orders.push({
+    id:Date.now(),
+    ticker,
+    action:document.getElementById('o-action').value,
+    qty,
+    price,
+    date:document.getElementById('o-date').value||new Date().toISOString().split('T')[0],
+    broker:document.getElementById('o-broker').value,
+    notes:document.getElementById('o-notes').value
+  });
+  
+  syncPF();
+  persist();
+  closeModal('order');
   ['o-ticker','o-qty','o-price','o-notes'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('o-broker').value='';
-  render();refresh();
+  render();
+  refresh();
 }
 
 function delAsset(id){portfolio=portfolio.filter(a=>String(a.id)!==String(id));persist();render();}
@@ -512,6 +550,20 @@ function openTV(ticker,type){
   const lEl=document.getElementById('tv-logo');
   if(logo){lEl.src=logo;lEl.style.display='block';}else{lEl.style.display='none';}
   document.getElementById('modal-tv').classList.add('open');
+}
+
+function editManualPrice(ticker){
+  const p = prompt(`Ingresa el precio manual (USD) para ${ticker}:`, prices[ticker] || '');
+  if(p !== null && !isNaN(p) && p.trim() !== ''){
+    const val = parseFloat(p);
+    const asset = portfolio.find(a => a.ticker === ticker);
+    if(asset){
+      asset.manualPrice = val;
+      prices[ticker] = val;
+    }
+    persist();
+    render();
+  }
 }
 
 // ── UI ───────────────────────────────────────────────────────────────────────
