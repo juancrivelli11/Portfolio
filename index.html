@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Financiero</title>
+    <title>Portfolio Personalizado</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -17,129 +17,207 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, sans-serif;
             margin: 0; padding: 20px; display: flex; justify-content: center;
         }
 
         .container { width: 100%; max-width: 1000px; }
 
-        /* Header */
+        /* Estructura Superior */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .brand { font-weight: bold; font-size: 1.2rem; }
-        .brand span { color: var(--accent-color); }
-
-        /* Resumen */
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 25px; }
         .summary-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
         .summary-card label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; }
-        .summary-card h3 { margin: 8px 0 0; font-size: 1.5rem; }
 
-        /* Tabs */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { background: #21262d; border: none; color: var(--text-secondary); padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        /* Navegación */
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { background: #21262d; border: none; color: var(--text-secondary); padding: 10px 18px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
         .tab-btn.active { background: var(--accent-color); color: #0d1117; font-weight: bold; }
-        .tab-btn:hover { background: #30363d; }
 
-        /* Área Principal */
-        .main-content { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; min-height: 300px; padding: 40px; position: relative; }
-        .tab-content { display: none; text-align: center; }
+        /* Áreas de Contenido */
+        .main-content { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; min-height: 400px; }
+        .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Botón Actualizar Animación */
-        .loading { opacity: 0.5; pointer-events: none; }
-
-        /* Ventana de Brokers */
-        #brokers-panel {
-            background: #0d1117; border: 1px solid var(--accent-color); border-radius: 8px;
-            padding: 15px; margin-top: 15px; display: none;
-        }
-        .broker-link { color: var(--accent-color); text-decoration: none; display: block; margin: 5px 0; }
+        /* Formularios e Inputs */
+        .form-box { background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+        input { width: 100%; padding: 10px; background: #161b22; border: 1px solid var(--border-color); color: white; border-radius: 6px; margin: 8px 0; box-sizing: border-box; }
         
-        .btn-mint { background: var(--accent-color); color: #0d1117; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: var(--text-secondary); padding: 12px; border-bottom: 2px solid var(--border-color); }
+        td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+
+        /* Grid de Brokers Dinámicos */
+        .broker-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
+        .broker-item { background: #21262d; padding: 12px; border-radius: 8px; text-align: center; text-decoration: none; color: var(--accent-color); border: 1px solid var(--border-color); }
+
+        .btn-action { background: var(--accent-color); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-small { padding: 5px 10px; font-size: 0.8rem; background: #ff4d4d; color: white; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div class="brand"><span>⬡</span> Portfolio</div>
-        <button class="btn-mint" id="btn-actualizar">Actualizar Precios</button>
+        <div style="font-size: 1.5rem; font-weight: bold;"><span>⬡</span> Portfolio</div>
+        <div id="clock" style="color: var(--text-secondary); font-size: 0.9rem;"></div>
     </div>
 
     <div class="summary-grid">
-        <div class="summary-card"><label>Valor Total</label><h3 id="val-total">$0,00</h3></div>
-        <div class="summary-card"><label>P&L Total</label><h3 id="val-pl" style="color: var(--accent-color)">$0,00</h3></div>
-        <div class="summary-card"><label>Dólar MEP</label><h3 style="color: #f1c40f">$1.150</h3></div>
+        <div class="summary-card"><label>Patrimonio USD</label><h3 id="total-usd">$0.00</h3></div>
+        <div class="summary-card"><label>Rendimiento</label><h3 id="total-pct" style="color: var(--accent-color)">0.00%</h3></div>
+        <div class="summary-card"><label>Dólar MEP</label><input type="number" id="mep-val" value="1145" style="margin:0; padding:5px; font-size: 1.2rem; width: 80px; font-weight: bold; border:none; background:transparent; color:#f1c40f"></div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('portfolio')">Portfolio</button>
-        <button class="tab-btn" onclick="showTab('ordenes')">Órdenes</button>
-        <button class="tab-btn" onclick="toggleBrokers()">Brokers 🏦</button>
-    </div>
-
-    <div id="brokers-panel">
-        <p style="margin-top:0">Accesos directos:</p>
-        <a href="https://www.invertironline.com/" target="_blank" class="broker-link">→ Invertir Online</a>
-        <a href="https://www.balanz.com/" target="_blank" class="broker-link">→ Balanz</a>
-        <a href="https://www.binance.com/" target="_blank" class="broker-link">→ Binance</a>
+        <button class="tab-btn active" onclick="switchTab('portfolio')">Mi Portfolio</button>
+        <button class="tab-btn" onclick="switchTab('graficos')">Análisis Gráfico</button>
+        <button class="tab-btn" onclick="switchTab('config-brokers')">Config. Brokers</button>
     </div>
 
     <div class="main-content">
         <div id="portfolio" class="tab-content active">
-            <div style="font-size: 3rem">📮</div>
-            <p>No hay activos cargados todavía.</p>
-            <button class="btn-mint" onclick="alert('Funcionalidad para agregar activos en desarrollo')">+ Agregar Activo</button>
+            <div class="form-box">
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
+                    <input type="text" id="asset-name" placeholder="Ticker (BIOX, GD30, BTC...)">
+                    <input type="number" id="asset-qty" placeholder="Cant.">
+                    <input type="number" id="asset-price" placeholder="PPC (USD)">
+                    <button class="btn-action" onclick="addAsset()">Agregar</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Activo</th>
+                        <th>Cantidad</th>
+                        <th>PPC</th>
+                        <th>Total USD</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="asset-table-body"></tbody>
+            </table>
         </div>
-        
-        <div id="ordenes" class="tab-content">
-            <h3>Historial de Órdenes</h3>
-            <p style="color: var(--text-secondary)">Aquí aparecerán tus compras y ventas.</p>
+
+        <div id="graficos" class="tab-content">
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="chart-ticker" placeholder="Escribí Ticker (ej: NASDAQ:MSTR)" style="flex: 1;">
+                <button class="btn-action" style="width: auto;" onclick="updateChart()">Ver Gráfico</button>
+            </div>
+            <div id="tv-container" style="height: 400px; background: #000; border-radius: 8px;">
+                <p style="text-align: center; padding-top: 150px; color: var(--text-secondary);">Ingresá un ticker para cargar la vista.</p>
+            </div>
+        </div>
+
+        <div id="config-brokers" class="tab-content">
+            <h3>Gestionar Accesos a Brokers</h3>
+            <div class="form-box">
+                <input type="text" id="broker-name" placeholder="Nombre del Broker (ej: PPI)">
+                <input type="text" id="broker-url" placeholder="URL (https://...)">
+                <button class="btn-action" onclick="addBroker()">Guardar Broker</button>
+            </div>
+            <div id="broker-display" class="broker-list"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. Lógica de Pestañas
-    function showTab(tabId) {
-        // Ocultar todos los contenidos
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-        // Quitar clase active de los botones
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        // Mostrar la elegida
-        document.getElementById(tabId).classList.add('active');
+    // Persistencia en LocalStorage
+    let assets = JSON.parse(localStorage.getItem('assets')) || [];
+    let brokers = JSON.parse(localStorage.getItem('brokers')) || [];
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
     }
 
-    // 2. Mostrar/Ocultar Panel de Brokers
-    function toggleBrokers() {
-        const panel = document.getElementById('brokers-panel');
-        panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    // --- LÓGICA DE ACTIVOS ---
+    function addAsset() {
+        const name = document.getElementById('asset-name').value.toUpperCase();
+        const qty = parseFloat(document.getElementById('asset-qty').value);
+        const price = parseFloat(document.getElementById('asset-price').value);
+
+        if (name && qty && price) {
+            assets.push({ name, qty, price });
+            localStorage.setItem('assets', JSON.stringify(assets));
+            renderAssets();
+            // Limpiar campos
+            document.getElementById('asset-name').value = '';
+            document.getElementById('asset-qty').value = '';
+            document.getElementById('asset-price').value = '';
+        }
     }
 
-    // 3. Simulación de Actualización de Precios
-    document.getElementById('btn-actualizar').addEventListener('click', function() {
-        const btn = this;
-        btn.innerText = "Actualizando...";
-        btn.classList.add('loading');
+    function removeAsset(index) {
+        assets.splice(index, 1);
+        localStorage.setItem('assets', JSON.stringify(assets));
+        renderAssets();
+    }
 
-        // Simulamos una demora de red (como si buscara en una API)
-        setTimeout(() => {
-            btn.innerText = "Actualizar Precios";
-            btn.classList.remove('loading');
-            
-            // Simulamos cambio de valores (aquí iría la lógica de fetching real)
-            document.getElementById('val-total').innerText = "$1.250,50";
-            document.getElementById('val-pl').innerText = "+$45,20";
-            
-            alert("Precios actualizados (Simulado)");
-        }, 1500);
-    });
+    function renderAssets() {
+        const body = document.getElementById('asset-table-body');
+        body.innerHTML = '';
+        let totalVal = 0;
+
+        assets.forEach((a, i) => {
+            const subtotal = a.qty * a.price;
+            totalVal += subtotal;
+            body.innerHTML += `
+                <tr>
+                    <td><b>${a.name}</b></td>
+                    <td>${a.qty}</td>
+                    <td>$${a.price.toFixed(2)}</td>
+                    <td>$${subtotal.toLocaleString()}</td>
+                    <td><button class="btn-small" onclick="removeAsset(${i})">Eliminar</button></td>
+                </tr>
+            `;
+        });
+        document.getElementById('total-usd').innerText = `$${totalVal.toLocaleString()}`;
+    }
+
+    // --- LÓGICA DE BROKERS ---
+    function addBroker() {
+        const name = document.getElementById('broker-name').value;
+        const url = document.getElementById('broker-url').value;
+        if (name && url) {
+            brokers.push({ name, url });
+            localStorage.setItem('brokers', JSON.stringify(brokers));
+            renderBrokers();
+            document.getElementById('broker-name').value = '';
+            document.getElementById('broker-url').value = '';
+        }
+    }
+
+    function renderBrokers() {
+        const container = document.getElementById('broker-display');
+        container.innerHTML = '';
+        brokers.forEach(b => {
+            container.innerHTML += `<a href="${b.url}" target="_blank" class="broker-item">${b.name}</a>`;
+        });
+    }
+
+    // --- LÓGICA DE GRÁFICOS ---
+    function updateChart() {
+        const symbol = document.getElementById('chart-ticker').value || "NASDAQ:MSTR";
+        const container = document.getElementById('tv-container');
+        container.innerHTML = `
+            <iframe scrolling="no" allowtransparency="true" frameborder="0" 
+                src="https://s.tradingview.com/embed-widget/symbol-overview/?fontColor=white&symbols=${symbol}&gridLineColor=rgba(42,46,57,0)&backgroundColor=rgba(22,27,34,1)" 
+                style="width: 100%; height: 100%;"></iframe>`;
+    }
+
+    // Reloj
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleString();
+    }, 1000);
+
+    // Inicialización
+    renderAssets();
+    renderBrokers();
 </script>
 
 </body>
