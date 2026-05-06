@@ -6,15 +6,13 @@
     <title>Dashboard Financiero</title>
     <style>
         :root {
-            /* Paleta azul violáceo */
-            --bg-main: #0F0C31;
-            --bg-panel: #1E1B4B;
-            --bg-card: #2E2A72;
+            --bg-main: #121236;
+            --bg-panel: #212163;
             --text-main: #FFFFFF;
-            --text-muted: #C7C5EA;
+            --text-muted: #B0B0E0;
             --accent: #00FFFF;
-            --accent-violet: #7C3AED;
-            --border-color: rgba(124, 58, 237, 0.4);
+            --accent-violet: #8A2BE2;
+            --border-color: rgba(255, 255, 255, 0.1);
         }
 
         * {
@@ -82,7 +80,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .graph-placeholder {
@@ -91,7 +89,7 @@
             text-align: center;
         }
 
-        /* Panel Lateral / Ventanas (30%) */
+        /* Panel de Brokers y Operaciones (30%) */
         .sidebar-section {
             flex: 3;
             display: flex;
@@ -104,7 +102,7 @@
             background-color: var(--bg-panel);
             border-radius: 8px;
             padding: 1.2rem;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .card h2 {
@@ -113,42 +111,32 @@
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 0.5rem;
         }
 
-        /* Ventana de Brokers */
-        .broker-window {
-            display: block; /* Siempre visible al lado de las gráficas como se solicitó */
-            background-color: var(--bg-card);
-            border-radius: 6px;
-            padding: 0.8rem;
-            margin-top: 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
+        /* Lista de Brokers */
         .broker-list {
             list-style: none;
         }
 
         .broker-item {
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.5rem;
         }
 
         .broker-name {
             font-weight: 600;
             color: var(--text-main);
-            padding: 0.4rem 0.6rem;
+            padding: 0.4rem;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 4px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.2s;
         }
 
         .broker-name:hover {
-            background: rgba(124, 58, 237, 0.3);
+            background: rgba(138, 43, 226, 0.2);
         }
 
         .asset-list {
@@ -164,10 +152,9 @@
 
         .asset-item {
             font-size: 0.85rem;
-            padding: 0.3rem 0;
+            padding: 0.25rem 0;
             color: var(--text-muted);
             cursor: pointer;
-            transition: color 0.2s;
         }
 
         .asset-item:hover {
@@ -212,7 +199,7 @@
             top: 100%;
             left: 0;
             width: 100%;
-            background-color: var(--bg-card);
+            background-color: var(--bg-main);
             border: 1px solid var(--accent-violet);
             border-radius: 4px;
             max-height: 140px;
@@ -232,7 +219,7 @@
         }
 
         .autocomplete-item:hover, .autocomplete-item.active {
-            background-color: rgba(124, 58, 237, 0.4);
+            background-color: rgba(138, 43, 226, 0.3);
             color: var(--accent);
         }
 
@@ -257,7 +244,7 @@
         }
 
         .btn-action:hover {
-            background-color: #6D28D9;
+            background-color: #9A3BE8;
         }
     </style>
 </head>
@@ -286,32 +273,30 @@
 
         <section class="sidebar-section">
             <div class="card">
-                <h2>🏦 Brokers y Activos <span style="font-size: 0.8rem; color: var(--accent);">Ventana activa</span></h2>
-                <div class="broker-window">
-                    <ul class="broker-list">
-                        <li class="broker-item">
-                            <div class="broker-name" onclick="toggleBroker('broker1')">
-                                <span>Interactive Brokers</span>
-                                <span>▼</span>
-                            </div>
-                            <ul class="asset-list" id="broker1">
-                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Acciones USA (MSTR)</li>
-                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Bioceres (BIOX)</li>
-                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Criptomonedas (BTC/ETH)</li>
-                            </ul>
-                        </li>
-                        <li class="broker-item">
-                            <div class="broker-name" onclick="toggleBroker('broker2')">
-                                <span>PPI Global / Balanz</span>
-                                <span>▼</span>
-                            </div>
-                            <ul class="asset-list" id="broker2">
-                                <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Bonos AL30, GD35, GD41</li>
-                                <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Acciones (MSTR, BIOX)</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
+                <h2>🏦 Brokers y Activos</h2>
+                <ul class="broker-list">
+                    <li class="broker-item">
+                        <div class="broker-name" onclick="toggleBroker('broker1')">
+                            <span>Interactive Brokers</span>
+                            <span>▼</span>
+                        </div>
+                        <ul class="asset-list" id="broker1">
+                            <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Acciones USA (MSTR)</li>
+                            <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Bioceres (BIOX)</li>
+                            <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Criptomonedas (BTC/ETH)</li>
+                        </ul>
+                    </li>
+                    <li class="broker-item">
+                        <div class="broker-name" onclick="toggleBroker('broker2')">
+                            <span>PPI Global / Balanz</span>
+                            <span>▼</span>
+                        </div>
+                        <ul class="asset-list" id="broker2">
+                            <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Bonos AL30, GD35, GD41</li>
+                            <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Acciones (MSTR, BIOX)</li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
 
             <div class="card">
