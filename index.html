@@ -3,441 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financiero</title>
+    <title>Portfolio Financiero</title>
     <style>
+        /* 1. RESTAURACIÓN DE COLORES MINT ORIGINALES */
         :root {
-            /* Paleta azul violáceo */
-            --bg-main: #0B0826;
-            --bg-panel: #151042;
-            --bg-card: #20185A;
-            --text-main: #FFFFFF;
-            --text-muted: #A39DE0;
-            --accent: #00FFFF;
-            --accent-violet: #8B5CF6;
-            --border-color: #6D28D9;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            --bg-color: #0d1117;           /* Fondo oscuro profundo de la foto 1 */
+            --card-bg: #161b22;            /* Fondo de tarjetas */
+            --accent-color: #00ffa3;       /* Verde Mint exacto */
+            --text-primary: #ffffff;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;       /* Bordes sutiles */
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
             display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            justify-content: center;
         }
 
-        /* Cabecera */
+        .container {
+            width: 100%;
+            max-width: 1000px; /* Centrado para que se vea bien en desktop */
+        }
+
+        /* 2. HEADER - Estilo Foto 1 */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
-            background-color: var(--bg-panel);
-            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
         }
 
-        .header h1 {
-            font-size: 1.3rem;
-            color: var(--text-main);
-        }
+        .brand { font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .brand span { color: var(--accent-color); }
 
-        .header-controls select {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            border: 1px solid var(--accent-violet);
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        /* Contenedor Principal */
-        .main-container {
-            display: flex;
-            flex: 1;
-            padding: 1.5rem;
-            gap: 1.5rem;
-            overflow: hidden;
-        }
-
-        /* Ventana de Gráficas */
-        .graph-section {
-            flex: 7;
-            background-color: var(--bg-panel);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid var(--border-color);
-        }
-
-        .graph-placeholder {
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        /* Panel Lateral */
-        .sidebar-section {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            overflow-y: auto;
-        }
-
-        .card {
-            background-color: var(--bg-card);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .card h2 {
-            font-size: 1.1rem;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .broker-window-toggle {
-            background-color: var(--accent-violet);
-            color: var(--text-main);
+        .btn-group { display: flex; gap: 10px; }
+        .btn {
             border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .broker-window-toggle:hover {
-            background-color: #6D28D9;
-        }
-
-        /* Ventana de Brokers */
-        .broker-window {
-            display: none;
-            background-color: var(--bg-panel);
-            border: 1px solid var(--accent-violet);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-top: 1rem;
-            max-height: 220px;
-            overflow-y: auto;
-        }
-
-        .broker-list {
-            list-style: none;
-        }
-
-        .broker-item {
-            margin-bottom: 0.6rem;
-        }
-
-        .broker-name {
-            background-color: rgba(124, 58, 237, 0.2);
-            color: var(--text-main);
-            padding: 0.5rem;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-weight: 600;
+        }
+        .btn-secondary { background: #21262d; color: white; border: 1px solid var(--border-color); }
+        .btn-mint { background: var(--accent-color); color: #0d1117; }
+
+        /* 3. GRID DE TARJETAS (Composición recuperada) */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
         }
 
-        .broker-name:hover {
-            background-color: rgba(124, 58, 237, 0.4);
-        }
-
-        .asset-list {
-            list-style: none;
-            padding-left: 0.8rem;
-            margin-top: 0.3rem;
-            display: none;
-        }
-
-        .asset-list.show {
-            display: block;
-        }
-
-        .asset-item {
-            font-size: 0.85rem;
-            padding: 0.3rem 0;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        .asset-item:hover {
-            color: var(--accent);
-            text-decoration: underline;
-        }
-
-        /* Formulario */
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 0.3rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            background-color: var(--bg-main);
-            color: var(--text-main);
+        .summary-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
-            padding: 0.6rem;
-            border-radius: 6px;
-            font-size: 0.9rem;
         }
 
-        .form-group input:focus {
-            border-color: var(--accent);
-            outline: none;
+        .summary-card label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* Autocompletado */
-        .autocomplete-container {
+        .summary-card h3 { margin: 8px 0 0; font-size: 1.5rem; }
+        .summary-card p { margin: 4px 0 0; font-size: 0.85rem; }
+
+        /* 4. TABS - Estilo Foto 1 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: #21262d;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-color);
+            color: #0d1117;
+            font-weight: bold;
+        }
+
+        /* 5. ÁREA CENTRAL (Sin sidebar molesto) */
+        .main-display {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             position: relative;
         }
 
-        .autocomplete-dropdown {
+        .empty-state { text-align: center; color: var(--text-secondary); }
+        .empty-icon { font-size: 3rem; margin-bottom: 10px; }
+
+        /* Botón de Agregar flotante o integrado */
+        .add-btn {
             position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            background-color: var(--bg-panel);
-            border: 1px solid var(--accent-violet);
-            border-radius: 6px;
-            max-height: 120px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-        }
-
-        .autocomplete-item {
-            padding: 0.5rem;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .autocomplete-item:hover {
-            background-color: rgba(124, 58, 237, 0.4);
-            color: var(--accent);
-        }
-
-        .badge {
-            font-size: 0.65rem;
-            padding: 2px 5px;
-            border-radius: 4px;
-            background-color: var(--bg-main);
-            color: var(--accent);
-            border: 1px solid var(--accent-violet);
-        }
-
-        .btn-action {
-            width: 100%;
-            background-color: var(--accent-violet);
-            color: var(--text-main);
+            top: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            color: #000;
             border: none;
-            padding: 0.7rem;
+            padding: 8px 15px;
             border-radius: 6px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-action:hover {
-            background-color: #6D28D9;
         }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <h1>Dashboard Financiero</h1>
-        <div class="header-controls">
-            <select id="timeframe">
-                <option value="15m">15m</option>
-                <option value="1h">1h</option>
-                <option value="4h">4h</option>
-                <option value="1d">1D</option>
-            </select>
+<div class="container">
+    <div class="header">
+        <div class="brand"><span>⬡</span> Portfolio</div>
+        <div class="btn-group">
+            <button class="btn btn-secondary">USD</button>
+            <button class="btn btn-mint">Actualizar</button>
         </div>
-    </header>
+    </div>
 
-    <main class="main-container">
-        
-        <section class="graph-section">
-            <div class="graph-placeholder">
-                <p>📊 Ventana de Gráficas</p>
-                <span style="font-size: 0.85rem; color: var(--text-muted);">Cargando visualización en tiempo real...</span>
-            </div>
-        </section>
+    <div class="summary-grid">
+        <div class="summary-card">
+            <label>Valor Total</label>
+            <h3>$0,00</h3>
+            <p style="color: var(--text-secondary)">≈ $0 ARS</p>
+        </div>
+        <div class="summary-card">
+            <label>P&L Total</label>
+            <h3 style="color: var(--accent-color)">$0,00</h3>
+            <p style="color: var(--accent-color)">+0,00%</p>
+        </div>
+        <div class="summary-card">
+            <label>Costo Base</label>
+            <h3>$0,00</h3>
+        </div>
+        <div class="summary-card">
+            <label>USD/ARS Blue</label>
+            <h3 style="color: #f1c40f">$1.000</h3>
+        </div>
+    </div>
 
-        <section class="sidebar-section">
-            
-            <div class="card">
-                <h2>
-                    <span>🏦 Gestión de Brokers</span>
-                    <button class="broker-window-toggle" onclick="toggleBrokerWindow()">Mostrar</button>
-                </h2>
-                
-                <div id="broker-window" class="broker-window">
-                    <ul class="broker-list">
-                        <li class="broker-item">
-                            <div class="broker-name" onclick="toggleBrokerList('broker1')">
-                                <span>Interactive Brokers</span>
-                                <span>▼</span>
-                            </div>
-                            <ul class="asset-list" id="broker1">
-                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Acciones USA (MSTR)</li>
-                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Bioceres (BIOX)</li>
-                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Criptomonedas (BTC/ETH)</li>
-                            </ul>
-                        </li>
-                        <li class="broker-item">
-                            <div class="broker-name" onclick="toggleBrokerList('broker2')">
-                                <span>PPI Global / Balanz</span>
-                                <span>▼</span>
-                            </div>
-                            <ul class="asset-list" id="broker2">
-                                <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Bonos AL30, GD35, GD41</li>
-                                <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Acciones (MSTR, BIOX)</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+    <div class="tabs">
+        <button class="tab-btn active">Portfolio</button>
+        <button class="tab-btn">Órdenes</button>
+        <button class="tab-btn">Gráficas</button>
+        <button class="tab-btn" style="border: 1px dashed var(--accent-color);">Brokers 🏦</button>
+    </div>
 
-            <div class="card">
-                <h2>➕ Nueva Operación</h2>
-                <div class="form-group">
-                    <label for="asset-input">Selecciona activo:</label>
-                    <div class="autocomplete-container">
-                        <input type="text" id="asset-input" placeholder="Escribe el activo (ej. MSTR, BTC)..." autocomplete="off" oninput="filterAssets()">
-                        <div id="dropdown" class="autocomplete-dropdown"></div>
-                    </div>
-                </div>
+    <div class="main-display">
+        <button class="add-btn">+ Agregar</button>
+        <div class="empty-state">
+            <div class="empty-icon">📮</div>
+            <p>Cargá una operación para empezar.</p>
+        </div>
+    </div>
+</div>
 
-                <div class="form-group">
-                    <label for="volume-input">Volumen / Cantidad:</label>
-                    <input type="number" id="volume-input" placeholder="Cantidad...">
-                </div>
-
-                <div class="form-group">
-                    <label for="price-input">Precio estimado:</label>
-                    <input type="number" id="price-input" placeholder="Precio..." step="any">
-                </div>
-
-                <button class="btn-action" onclick="saveOperation()">Guardar Operación</button>
-            </div>
-        </section>
-
-    </main>
-
-    <script>
-        // Activos para autocompletado
-        const assets = [
-            { name: "AL30", category: "Bono", broker: "PPI" },
-            { name: "GD35", category: "Bono", broker: "PPI" },
-            { name: "GD41", category: "Bono", broker: "PPI" },
-            { name: "MSTR", category: "Acción", broker: "Interactive Brokers" },
-            { name: "BIOX", category: "Acción", broker: "Interactive Brokers" },
-            { name: "BTC", category: "Cripto", broker: "Binance" },
-            { name: "ETH", category: "Cripto", broker: "Binance" }
-        ];
-
-        // Alternar visibilidad de la ventana de brokers
-        function toggleBrokerWindow() {
-            const window = document.getElementById('broker-window');
-            const button = document.querySelector('.broker-window-toggle');
-            if (window.style.display === 'block') {
-                window.style.display = 'none';
-                button.textContent = 'Mostrar';
-            } else {
-                window.style.display = 'block';
-                button.textContent = 'Ocultar';
-            }
-        }
-
-        // Mostrar u ocultar la lista interna de un broker
-        function toggleBrokerList(id) {
-            const list = document.getElementById(id);
-            list.classList.toggle('show');
-        }
-
-        // Autocompletar activos al teclear
-        function filterAssets() {
-            const input = document.getElementById('asset-input').value.toLowerCase();
-            const dropdown = document.getElementById('dropdown');
-
-            dropdown.innerHTML = '';
-
-            if (input.length === 0) {
-                dropdown.style.display = 'none';
-                return;
-            }
-
-            const filtered = assets.filter(item => 
-                item.name.toLowerCase().includes(input) || 
-                item.category.toLowerCase().includes(input)
-            );
-
-            if (filtered.length > 0) {
-                dropdown.style.display = 'block';
-                filtered.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'autocomplete-item';
-                    div.onclick = () => selectAsset(item.name);
-
-                    div.innerHTML = `
-                        <span><strong>${item.name}</strong></span>
-                        <span class="badge">${item.category}</span>
-                    `;
-                    dropdown.appendChild(div);
-                });
-            } else {
-                dropdown.style.display = 'none';
-            }
-        }
-
-        function selectAsset(name) {
-            document.getElementById('asset-input').value = name;
-            document.getElementById('dropdown').style.display = 'none';
-        }
-
-        function saveOperation() {
-            const asset = document.getElementById('asset-input').value;
-            const volume = document.getElementById('volume-input').value;
-            const price = document.getElementById('price-input').value;
-
-            if (asset && volume && price) {
-                alert(`Operación guardada exitosamente:\nActivo: ${asset} | Cantidad: ${volume} | Precio: ${price}`);
-                // Limpiar campos
-                document.getElementById('asset-input').value = '';
-                document.getElementById('volume-input').value = '';
-                document.getElementById('price-input').value = '';
-            } else {
-                alert('Por favor, completa todos los campos para guardar la operación.');
-            }
-        }
-    </script>
 </body>
 </html>
