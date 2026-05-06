@@ -1,262 +1,621 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Manager Pro</title>
-    <style>
-        :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --accent-color: #00ffa3;
-            --text-primary: #ffffff;
-            --text-secondary: #8b949e;
-            --border-color: #30363d;
-            --hover-bg: #21262d;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Portfolio</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#fff;font-family:-apple-system,'Segoe UI',sans-serif;min-height:100vh}
+:root{--a:#00ffa3;--r:#ff4d6d;--g:#f0a500;--c:#161b22;--s:#0d1117;--b:#30363d;--m:#8b949e}
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: -apple-system, sans-serif;
-            margin: 0; padding: 20px; display: flex; justify-content: center;
-        }
+/* HEADER */
+.hdr{background:#161b22;border-bottom:1px solid var(--b);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.hdr-title{font-size:18px;font-weight:800;color:var(--a)}
+.hdr-sub{font-size:11px;color:var(--m);margin-top:2px}
+.hdr-btns{display:flex;gap:8px;flex-shrink:0}
+.btn-cur{padding:6px 12px;border-radius:8px;border:1px solid var(--b);background:#21262d;color:#fff;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
+.btn-ref{padding:6px 12px;border-radius:8px;border:1px solid #00ffa344;background:#00ffa322;color:var(--a);cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
 
-        .container { width: 100%; max-width: 1000px; }
+/* SUMMARY */
+.sum{padding:14px 16px 0;display:flex;gap:8px;flex-wrap:wrap}
+.sc{background:var(--c);border:1px solid var(--b);border-radius:11px;padding:12px 14px;flex:1;min-width:120px}
+.sc-l{font-size:10px;color:var(--m);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.sc-v{font-size:17px;font-weight:700;font-family:monospace}
+.sc-s{font-size:11px;color:var(--m);margin-top:2px}
 
-        /* HEADER & TABS */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        .tab-link { 
-            background: transparent; border: none; color: var(--text-secondary); 
-            padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
-        }
-        .tab-link.active { background: var(--accent-color); color: #0d1117; }
+/* TABS */
+.tabs-wrap{padding:12px 16px 0}
+.tabs{display:flex;gap:3px;background:#161b22;padding:4px;border-radius:10px;border:1px solid var(--b);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{padding:8px 12px;border:none;border-radius:7px;cursor:pointer;font-weight:600;font-size:12px;font-family:inherit;background:transparent;color:var(--m);white-space:nowrap;flex-shrink:0}
+.tab.active{background:var(--a);color:#000}
 
-        /* FORMULARIO DE OPERACIÓN */
-        .op-form { 
-            background: var(--card-bg); padding: 20px; border-radius: 12px; 
-            border: 1px solid var(--border-color); margin-bottom: 25px;
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
-        }
-        .op-form input, .op-form select {
-            background: #0d1117; border: 1px solid var(--border-color);
-            color: white; padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box;
-        }
+.content{padding:13px 16px 60px}
 
-        /* BROKER GRID */
-        .broker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-        .broker-card {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            padding: 20px; border-radius: 12px; text-align: center; cursor: pointer;
-            transition: 0.2s;
-        }
-        .broker-card:hover { border-color: var(--accent-color); transform: translateY(-3px); }
-        .broker-card h4 { margin: 0; color: var(--accent-color); }
-        .broker-card span { font-size: 0.8rem; color: var(--text-secondary); }
+/* STAT CARDS */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sec-title{font-size:12px;color:var(--m);font-weight:600;letter-spacing:1px}
+.btn-add{padding:7px 14px;border-radius:8px;border:none;background:var(--a);color:#000;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
 
-        /* VISTA DETALLE BROKER */
-        #broker-detail-view { display: none; }
-        .back-btn { background: none; border: 1px solid var(--text-secondary); color: var(--text-secondary); padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
+/* ASSET CARDS */
+.ac-card{background:var(--c);border:1px solid var(--b);border-radius:13px;padding:14px;margin-bottom:10px}
+.ac-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ac-left{display:flex;align-items:center;gap:9px}
+.logo{width:32px;height:32px;border-radius:7px;object-fit:contain;background:#ffffff22;flex-shrink:0}
+.logo-fb{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.tkr{font-size:15px;font-weight:800}
+.bdg{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:#8b949e22;color:var(--m);border:1px solid #8b949e33;margin-left:5px}
+.ac-name{font-size:12px;color:var(--m);margin-top:1px}
+.ac-val{font-size:16px;font-weight:700;text-align:right}
+.ac-pnl{font-size:12px;font-weight:600;text-align:right}
+.ac-stats{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;font-size:12px}
+.ac-stats span{color:var(--m);font-size:11px}
+.ac-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:9px;border-top:1px solid var(--b)}
+.btn-tv{background:#00ffa322;border:1px solid #00ffa344;border-radius:7px;padding:5px 11px;color:var(--a);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
+.btn-del{background:none;border:none;color:var(--m);cursor:pointer;font-size:12px;font-family:inherit}
 
-        /* TABLAS */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: var(--text-secondary); padding: 12px; border-bottom: 2px solid var(--border-color); font-size: 0.85rem; }
-        td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+/* BROKER GRID */
+.broker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.broker-card{background:var(--c);border:1px solid var(--b);padding:18px;border-radius:12px;text-align:center;cursor:pointer;transition:.2s}
+.broker-card:hover{border-color:var(--a);transform:translateY(-2px)}
+.broker-card h4{margin:0 0 4px;color:var(--a);font-size:14px}
+.broker-card span{font-size:12px;color:var(--m)}
+.back-btn{background:none;border:1px solid var(--m);color:var(--m);padding:6px 12px;border-radius:6px;cursor:pointer;margin-bottom:14px;font-family:inherit;font-size:13px}
 
-        .btn-save { background: var(--accent-color); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; }
-    </style>
+/* TABLE */
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+th{text-align:left;color:var(--m);padding:10px 8px;border-bottom:2px solid var(--b);font-size:11px;letter-spacing:.5px}
+td{padding:10px 8px;border-bottom:1px solid var(--b)}
+
+/* MODAL - slides up from bottom */
+.modal-bg{display:none;position:fixed;inset:0;background:#000000cc;z-index:200;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#161b22;border:1px solid var(--b);border-radius:20px 20px 0 0;padding:20px 18px 34px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-x{background:none;border:none;color:var(--m);font-size:26px;cursor:pointer;line-height:1;padding:0 4px}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:12px;color:var(--m);margin-bottom:5px;font-weight:600;letter-spacing:.3px}
+.fld input,.fld select{width:100%;background:#0d1117;border:1px solid var(--b);border-radius:8px;padding:12px;color:#fff;font-size:15px;outline:none;font-family:inherit;-webkit-appearance:none;appearance:none}
+.fld select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M6 8L0 0h12z' fill='%238b949e'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.mbtns{display:flex;gap:10px;margin-top:16px}
+.btn-ok{background:var(--a);color:#000;border:none;border-radius:8px;padding:13px;cursor:pointer;font-weight:700;font-size:15px;font-family:inherit;flex:1}
+.btn-cn{background:transparent;color:var(--a);border:1px solid var(--a);border-radius:8px;padding:13px;cursor:pointer;font-weight:700;font-size:15px;font-family:inherit;flex:1}
+
+/* TV MODAL */
+.tv-modal{display:none;position:fixed;inset:0;background:#000000ee;z-index:300;flex-direction:column}
+.tv-modal.open{display:flex}
+.tv-hdr{background:#161b22;border-bottom:1px solid var(--b);padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
+.tv-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#131722;padding:28px;text-align:center}
+.btn-tv-go{background:var(--a);color:#000;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:800;font-size:16px;display:inline-block}
+
+.chart-box{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:15px;margin-bottom:14px}
+.chart-lbl{font-size:11px;color:var(--m);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.pie-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+.pie-dot{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:7px}
+.empty{text-align:center;padding:50px 20px;color:var(--m)}
+.empty-ic{font-size:44px;margin-bottom:10px}
+.green{color:var(--a)}.red{color:var(--r)}.gold{color:var(--g)}
+.hidden{display:none!important}
+.add-broker-row{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px dashed var(--b)}
+.add-broker-row input{flex:1;background:#0d1117;border:1px solid var(--b);border-radius:8px;padding:10px 12px;color:#fff;font-size:14px;outline:none;font-family:inherit}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div style="font-size: 1.5rem; font-weight: bold;"><span>⬡</span> Portfolio Tracker</div>
-    </div>
+<div class="hdr">
+  <div>
+    <div class="hdr-title">⬡ Portfolio</div>
+    <div class="hdr-sub" id="status">Tocá Actualizar para obtener precios</div>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn-cur" onclick="toggleCur()" id="btnCur">USD</button>
+    <button class="btn-ref" onclick="refresh()" id="btnRef">Actualizar</button>
+  </div>
+</div>
 
-    <div class="nav-tabs">
-        <button class="tab-link active" onclick="showSection('portfolio')">Portfolio Total</button>
-        <button class="tab-link" onclick="showSection('brokers')">Mis Brokers</button>
-        <button class="tab-link" onclick="showSection('nueva-op')">+ Nueva Operación</button>
-    </div>
+<div class="sum">
+  <div class="sc"><div class="sc-l">Valor Total</div><div class="sc-v" id="totVal">$0,00</div><div class="sc-s" id="totSub">—</div></div>
+  <div class="sc"><div class="sc-l">P&L Total</div><div class="sc-v" id="totPnl">$0,00</div><div class="sc-s" id="totPct">—</div></div>
+  <div class="sc"><div class="sc-l">Costo Base</div><div class="sc-v" id="totCost">$0,00</div></div>
+  <div class="sc"><div class="sc-l">USD/ARS Blue</div><div class="sc-v gold" id="usdArs">$1.000</div></div>
+</div>
 
-    <div id="nueva-op" class="content-section" style="display:none">
-        <h3>Cargar Operación</h3>
-        <div class="op-form">
-            <input type="text" id="in-ticker" placeholder="Activo (ej: BIOX)">
-            <input type="number" id="in-price" placeholder="Precio Compra">
-            <input type="number" id="in-qty" placeholder="Cantidad">
-            <input type="number" id="in-comm" placeholder="Comisión (USD)">
-            <select id="in-broker">
-                <option value="">Seleccionar Broker</option>
-                <option value="Bull Market">Bull Market</option>
-                <option value="IOL">IOL</option>
-                <option value="IOL Dólares">IOL Dólares</option>
-                <option value="Santander">Santander</option>
-                <option value="Galicia">Galicia</option>
-                <option value="Binance">Binance</option>
-                <option value="Gate.io">Gate.io</option>
-                <option value="Kucoin">Kucoin</option>
-            </select>
-            <button class="btn-save" onclick="saveOp()">Guardar</button>
-        </div>
-    </div>
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('portfolio',this)">Portfolio</button>
+    <button class="tab" onclick="showTab('orders',this)">Órdenes</button>
+    <button class="tab" onclick="showTab('brokers',this)">Brokers</button>
+    <button class="tab" onclick="showTab('charts',this)">Gráficas</button>
+  </div>
+</div>
 
-    <div id="portfolio" class="content-section">
-        <h3>Resumen General de Activos</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Activo</th>
-                    <th>Cant. Total</th>
-                    <th>PPC Promedio</th>
-                    <th>Inversión + Comis.</th>
-                </tr>
-            </thead>
-            <tbody id="main-table-body"></tbody>
-        </table>
-    </div>
+<!-- PORTFOLIO TAB -->
+<div class="content" id="tab-portfolio">
+  <div class="sec-hdr"><span class="sec-title">MIS ACTIVOS</span><button class="btn-add" onclick="openModal('order')">+ Nueva orden</button></div>
+  <div id="assetList"><div class="empty"><div class="empty-ic">📭</div><div>Cargá una orden para empezar.</div></div></div>
+</div>
 
-    <div id="brokers" class="content-section" style="display:none">
-        <div id="broker-grid-view">
-            <h3>Seleccioná un Broker para ver operaciones</h3>
-            <div class="broker-grid" id="broker-grid-container">
-                </div>
-            <div style="margin-top: 30px; border-top: 1px dashed var(--border-color); padding-top: 20px;">
-                <h4>Agregar Broker Personalizado</h4>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="new-broker-name" placeholder="Nombre del Broker" style="background:#161b22; border:1px solid var(--border-color); color:white; padding:10px; border-radius:6px; flex:1">
-                    <button class="btn-save" onclick="addCustomBroker()" style="padding: 0 20px;">Añadir</button>
-                </div>
-            </div>
-        </div>
+<!-- ORDERS TAB -->
+<div class="content hidden" id="tab-orders">
+  <div class="sec-hdr"><span class="sec-title">HISTORIAL</span><button class="btn-add" onclick="openModal('order')">+ Nueva orden</button></div>
+  <div id="orderList"><div class="empty"><div class="empty-ic">📋</div><div>Sin órdenes todavía.</div></div></div>
+</div>
 
-        <div id="broker-detail-view">
-            <button class="back-btn" onclick="hideBrokerDetail()">← Volver a Brokers</button>
-            <h3 id="detail-title">Operaciones en [Broker]</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Activo</th>
-                        <th>Precio</th>
-                        <th>Cant.</th>
-                        <th>Comisión</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody id="detail-table-body"></tbody>
-            </table>
-        </div>
+<!-- BROKERS TAB -->
+<div class="content hidden" id="tab-brokers">
+  <div id="broker-grid-view">
+    <div class="sec-hdr"><span class="sec-title">MIS BROKERS</span></div>
+    <div class="broker-grid" id="brokerGrid"></div>
+    <div class="add-broker-row">
+      <input id="newBrokerName" placeholder="Agregar broker personalizado...">
+      <button class="btn-ok" style="flex:0;padding:10px 16px;font-size:13px" onclick="addCustomBroker()">+ Agregar</button>
     </div>
+  </div>
+  <div id="broker-detail-view" class="hidden">
+    <button class="back-btn" onclick="hideBrokerDetail()">← Volver a Brokers</button>
+    <div class="sec-title" id="brokerDetailTitle" style="margin-bottom:12px"></div>
+    <table>
+      <thead><tr><th>Activo</th><th>Precio</th><th>Cant.</th><th>Comisión</th><th>Total</th><th>Fecha</th></tr></thead>
+      <tbody id="brokerDetailBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CHARTS TAB -->
+<div class="content hidden" id="tab-charts">
+  <div class="chart-box">
+    <div class="chart-lbl">Evolución del portfolio (90 días)</div>
+    <div id="noChart" style="text-align:center;padding:30px;color:var(--m);font-size:13px">Actualizá precios cada día para ver la evolución.</div>
+    <canvas id="lineChart" class="hidden" height="180"></canvas>
+  </div>
+  <div class="chart-box">
+    <div class="chart-lbl">Composición</div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <canvas id="pieChart" width="170" height="170"></canvas>
+      <div id="pieLabels" style="flex:1"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Order Modal -->
+<div class="modal-bg" id="modal-order">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title">Nueva orden</span><button class="modal-x" onclick="closeModal('order')">×</button></div>
+    <div class="fld"><label>Acción</label>
+      <select id="o-action"><option>Compra</option><option>Venta</option></select>
+    </div>
+    <div class="fld"><label>Ticker (ej: AAPL, VIST, BTC)</label>
+      <input id="o-ticker" placeholder="AAPL" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div class="fld"><label>Tipo de activo</label>
+      <select id="o-type">
+        <option value="Acción USA">Acción USA</option>
+        <option value="ETF">ETF</option>
+        <option value="Cripto">Cripto</option>
+        <option value="Bono/Renta Fija">Bono/Renta Fija</option>
+        <option value="Acción Argentina">Acción Argentina</option>
+      </select>
+    </div>
+    <div class="fld"><label>Cantidad</label>
+      <input id="o-qty" type="number" inputmode="decimal" placeholder="10">
+    </div>
+    <div class="fld"><label>Precio (USD)</label>
+      <input id="o-price" type="number" inputmode="decimal" placeholder="150.00">
+    </div>
+    <div class="fld"><label>Comisión (USD)</label>
+      <input id="o-comm" type="number" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="fld"><label>Broker</label>
+      <select id="o-broker">
+        <option value="">— Seleccionar —</option>
+      </select>
+    </div>
+    <div class="fld"><label>Fecha</label>
+      <input id="o-date" type="date">
+    </div>
+    <div class="fld"><label>Notas (opcional)</label>
+      <input id="o-notes" placeholder="Notas...">
+    </div>
+    <div class="mbtns">
+      <button class="btn-ok" onclick="addOrder()">Registrar</button>
+      <button class="btn-cn" onclick="closeModal('order')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TradingView Modal -->
+<div class="tv-modal" id="modal-tv">
+  <div class="tv-hdr">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img id="tv-logo" style="width:26px;height:26px;border-radius:6px;object-fit:contain;background:#ffffff22" onerror="this.style.display='none'">
+      <span id="tv-ticker" style="font-weight:800;font-size:17px"></span>
+    </div>
+    <button class="modal-x" onclick="closeModal('tv')">×</button>
+  </div>
+  <div class="tv-body">
+    <div style="font-size:52px">📊</div>
+    <div style="font-size:17px;font-weight:700" id="tv-title"></div>
+    <div style="color:var(--m);font-size:14px;max-width:280px">Gráfico interactivo completo en TradingView</div>
+    <a id="tv-link" href="#" target="_blank" class="btn-tv-go">Abrir en TradingView →</a>
+    <div style="color:var(--m);font-size:12px;margin-top:4px" id="tv-sym"></div>
+  </div>
 </div>
 
 <script>
-    let ops = JSON.parse(localStorage.getItem('operations')) || [];
-    let customBrokers = JSON.parse(localStorage.getItem('customList')) || ["Bull Market", "IOL", "IOL Dólares", "Santander", "Galicia", "Binance", "Gate.io", "Kucoin"];
+const AV_KEY = '8X9MWKFC0MU3LNSY';
+const COLS = ['#00ffa3','#f0a500','#ff4d6d','#7c6af7','#00b4d8','#fb8500','#8ecae6'];
+const DEFAULT_BROKERS = ['IOL','IOL Dólares','Binance','Santander','Galicia','Bull Market','Interactive Brokers','Balanz','PPI','TDA','Lemon','Gate.io','Kucoin'];
 
-    function showSection(id) {
-        document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
-        document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
-        document.getElementById(id).style.display = 'block';
-        event.currentTarget.classList.add('active');
-        if(id === 'portfolio') renderMainPortfolio();
-        if(id === 'brokers') renderBrokerGrid();
+let orders    = JSON.parse(localStorage.getItem('pf5_or')||'[]');
+let snapshots = JSON.parse(localStorage.getItem('pf5_sn')||'[]');
+let brokers   = JSON.parse(localStorage.getItem('pf5_br')||JSON.stringify(DEFAULT_BROKERS));
+let prices    = {};
+let currency  = 'USD';
+let lineChart = null, pieChart = null;
+
+function persist(){
+  localStorage.setItem('pf5_or', JSON.stringify(orders));
+  localStorage.setItem('pf5_sn', JSON.stringify(snapshots));
+  localStorage.setItem('pf5_br', JSON.stringify(brokers));
+}
+
+// ── FORMAT ────────────────────────────────────────────────────────────────────
+function fmt(n,d=2){ return isNaN(n)||n==null?'—':new Intl.NumberFormat('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n); }
+const fU = n=>`$${fmt(n)}`;
+const fA = n=>`$${fmt(n,0)}`;
+const fP = n=>`${n>=0?'+':''}${fmt(n)}%`;
+const ars = ()=>prices['USD_ARS']||1000;
+const dv  = v=>currency==='USD'?fU(v):fA(v*ars());
+
+// ── LOGO ─────────────────────────────────────────────────────────────────────
+const DOMAINS = {
+  AAPL:'apple.com',MSFT:'microsoft.com',GOOGL:'google.com',GOOG:'google.com',
+  AMZN:'amazon.com',META:'meta.com',NVDA:'nvidia.com',TSLA:'tesla.com',
+  JPM:'jpmorganchase.com',V:'visa.com',MA:'mastercard.com',WMT:'walmart.com',
+  MELI:'mercadolibre.com',GLOB:'globant.com',BABA:'alibaba.com',
+  VIST:'vistaoil.com',SUPV:'gruposupervielle.com.ar',GGAL:'galicia.ar',
+  YPF:'ypf.com',PAMP:'pampaenergia.com',BMA:'macro.com.ar',
+  BBAR:'bbva.com.ar',CEPU:'central-puerto.com',LOMA:'lomanegra.com.ar',
+  PDYN:'palladyne.ai',VSEE:'vsee.com',CYCU:'cycurion.com',
+  TXAR:'terniumargentina.com',ALUA:'aluar.com.ar',TECO2:'telecom.com.ar',
+};
+const CRYPTO_LOGOS = {
+  BTC:'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
+  ETH:'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  SOL:'https://assets.coingecko.com/coins/images/4128/small/solana.png',
+  BNB:'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
+  XRP:'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
+  DOGE:'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
+  ADA:'https://assets.coingecko.com/coins/images/975/small/cardano.png',
+};
+
+function getLogoUrl(ticker,type){
+  if(type==='Cripto') return CRYPTO_LOGOS[ticker?.toUpperCase()]||null;
+  const domain=DOMAINS[ticker?.toUpperCase()]||`${ticker?.toLowerCase()}.com`;
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+}
+function logoHTML(ticker,type,size=32){
+  const src=getLogoUrl(ticker,type);
+  const c=COLS[(ticker||'?').charCodeAt(0)%COLS.length];
+  const init=(ticker||'?').slice(0,2).toUpperCase();
+  const fb=`<div class="logo-fb" style="width:${size}px;height:${size}px;font-size:${Math.round(size*0.34)}px;background:${c}33;color:${c};border:1px solid ${c}55">${init}</div>`;
+  if(!src) return fb;
+  return `<img class="logo" src="${src}" style="width:${size}px;height:${size}px" onerror="this.outerHTML=\`${fb.replace(/`/g,"'")}\`" alt="${ticker}">`;
+}
+
+// ── PORTFOLIO CALC ────────────────────────────────────────────────────────────
+function getPortfolio(){
+  const map={};
+  orders.forEach(o=>{
+    if(!map[o.ticker]) map[o.ticker]={ticker:o.ticker,type:o.type||'Acción USA',qty:0,cost:0,totalComm:0};
+    if(o.action==='Compra'){
+      map[o.ticker].qty+=o.qty;
+      map[o.ticker].cost+=o.qty*o.price+(o.comm||0);
+      map[o.ticker].totalComm+=(o.comm||0);
+    } else {
+      const ratio=map[o.ticker].qty>0?o.qty/map[o.ticker].qty:0;
+      map[o.ticker].cost-=map[o.ticker].cost*ratio;
+      map[o.ticker].qty-=o.qty;
     }
+  });
+  return Object.values(map).filter(a=>a.qty>0).map(a=>({
+    ...a,
+    avgPrice:a.qty>0?a.cost/a.qty:0
+  }));
+}
 
-    function saveOp() {
-        const op = {
-            ticker: document.getElementById('in-ticker').value.toUpperCase(),
-            price: parseFloat(document.getElementById('in-price').value),
-            qty: parseFloat(document.getElementById('in-qty').value),
-            comm: parseFloat(document.getElementById('in-comm').value) || 0,
-            broker: document.getElementById('in-broker').value
-        };
+// ── PRICES ───────────────────────────────────────────────────────────────────
+async function refresh(){
+  const pf=getPortfolio();
+  if(!pf.length) return;
+  setStatus('Obteniendo precios...', true);
+  document.getElementById('btnRef').textContent='...';
+  document.getElementById('btnRef').disabled=true;
 
-        if(!op.ticker || !op.price || !op.broker) return alert("Faltan datos");
+  const cryptos=pf.filter(a=>a.type==='Cripto');
+  const stocks=pf.filter(a=>a.type!=='Cripto');
 
-        ops.push(op);
-        localStorage.setItem('operations', JSON.stringify(ops));
-        alert("Operación guardada");
-        showSection('portfolio');
+  if(cryptos.length){
+    const IDS={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',BNB:'binancecoin',XRP:'ripple',ADA:'cardano',DOGE:'dogecoin',USDT:'tether'};
+    const ids=cryptos.map(a=>IDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase()).filter(Boolean).join(',');
+    try{
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+      const d=await r.json();
+      cryptos.forEach(a=>{
+        const id=IDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase();
+        if(d[id]) prices[a.ticker]=d[id].usd;
+      });
+    }catch(e){}
+  }
+
+  for(const asset of stocks){
+    let p=null;
+    const ticker=asset.type==='Acción Argentina'?asset.ticker+'.BA':asset.ticker;
+    try{
+      const r=await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${AV_KEY}`);
+      const d=await r.json();
+      const val=parseFloat(d?.['Global Quote']?.['05. price']);
+      if(val&&val>0) p=val;
+    }catch(e){}
+    if(!p&&asset.type!=='Acción Argentina'){
+      try{
+        const r=await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=NYSE%3A${asset.ticker}&apikey=${AV_KEY}`);
+        const d=await r.json();
+        const val=parseFloat(d?.['Global Quote']?.['05. price']);
+        if(val&&val>0) p=val;
+      }catch(e){}
     }
+    if(p&&p>0) prices[asset.ticker]=p;
+    console.log(asset.ticker+':',p||'no price');
+  }
 
-    function renderMainPortfolio() {
-        const body = document.getElementById('main-table-body');
-        body.innerHTML = '';
-        const summary = {};
+  // USD/ARS
+  try{
+    const r=await fetch('https://dolarapi.com/v1/dolares/blue');
+    const d=await r.json();
+    if(d.venta>100) prices['USD_ARS']=d.venta;
+  }catch(e){
+    try{
+      const r=await fetch('https://api.bluelytics.com.ar/v2/latest');
+      const d=await r.json();
+      if(d.blue?.value_sell>100) prices['USD_ARS']=d.blue.value_sell;
+    }catch(e){}
+  }
 
-        ops.forEach(o => {
-            if(!summary[o.ticker]) summary[o.ticker] = { qty: 0, cost: 0 };
-            summary[o.ticker].qty += o.qty;
-            summary[o.ticker].cost += (o.price * o.qty) + o.comm;
-        });
+  const got=Object.keys(prices).filter(k=>k!=='USD_ARS').length;
+  setStatus(`${got}/${pf.length} precios · Blue $${Math.round(prices['USD_ARS']||1000)}`,false);
+  document.getElementById('btnRef').textContent='Actualizar';
+  document.getElementById('btnRef').disabled=false;
 
-        for(let t in summary) {
-            body.innerHTML += `<tr>
-                <td><b>${t}</b></td>
-                <td>${summary[t].qty}</td>
-                <td>$${(summary[t].cost / summary[t].qty).toFixed(2)}</td>
-                <td>$${summary[t].cost.toLocaleString()}</td>
-            </tr>`;
-        }
-    }
+  const today=new Date().toISOString().split('T')[0];
+  const total=pf.reduce((s,a)=>s+a.qty*(prices[a.ticker]||0),0);
+  snapshots=[...snapshots.filter(s=>s.date!==today),{date:today,totalUSD:total}].slice(-365);
+  persist();
+  render();
+}
 
-    function renderBrokerGrid() {
-        const container = document.getElementById('broker-grid-container');
-        const select = document.getElementById('in-broker');
-        container.innerHTML = '';
-        select.innerHTML = '<option value="">Seleccionar Broker</option>';
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render(){
+  const pf=getPortfolio();
+  const en=pf.map(a=>{
+    const price=prices[a.ticker]||0;
+    const hasPx=price>0;
+    const value=a.qty*price;
+    const pnl=hasPx?value-a.cost:null;
+    const pnlPct=hasPx&&a.cost>0?(pnl/a.cost)*100:null;
+    return{...a,price,hasPx,value,pnl,pnlPct};
+  });
 
-        customBrokers.forEach(b => {
-            const count = ops.filter(o => o.broker === b).length;
-            container.innerHTML += `
-                <div class="broker-card" onclick="viewBrokerDetail('${b}')">
-                    <h4>${b}</h4>
-                    <span>${count} operaciones</span>
-                </div>`;
-            select.innerHTML += `<option value="${b}">${b}</option>`;
-        });
-    }
+  const totUSD=en.reduce((s,a)=>s+a.value,0);
+  const totCost=en.reduce((s,a)=>s+a.cost,0);
+  const totPnL=totUSD-totCost;
+  const totPct=totCost>0?(totPnL/totCost)*100:0;
 
-    function viewBrokerDetail(name) {
-        document.getElementById('broker-grid-view').style.display = 'none';
-        document.getElementById('broker-detail-view').style.display = 'block';
-        document.getElementById('detail-title').innerText = `Operaciones en ${name}`;
-        
-        const body = document.getElementById('detail-table-body');
-        body.innerHTML = '';
-        const filtered = ops.filter(o => o.broker === name);
+  document.getElementById('totVal').textContent=dv(totUSD);
+  document.getElementById('totSub').textContent=currency==='USD'?`≈ ${fA(totUSD*ars())} ARS`:`≈ ${fU(totUSD)} USD`;
+  const pnlEl=document.getElementById('totPnl');
+  pnlEl.textContent=dv(totPnL);
+  pnlEl.className='sc-v '+(totPnL>=0?'green':'red');
+  document.getElementById('totPct').textContent=fP(totPct);
+  document.getElementById('totCost').textContent=dv(totCost);
+  document.getElementById('usdArs').textContent=`$${fmt(ars(),0)}`;
 
-        filtered.forEach(o => {
-            const total = (o.price * o.qty) + o.comm;
-            body.innerHTML += `<tr>
-                <td><b>${o.ticker}</b></td>
-                <td>$${o.price}</td>
-                <td>${o.qty}</td>
-                <td>$${o.comm}</td>
-                <td>$${total.toFixed(2)}</td>
-            </tr>`;
-        });
-    }
+  // Assets
+  const al=document.getElementById('assetList');
+  if(!en.length){
+    al.innerHTML='<div class="empty"><div class="empty-ic">📭</div><div>Cargá una orden para empezar.</div></div>';
+  } else {
+    al.innerHTML=en.map(a=>`
+      <div class="ac-card">
+        <div class="ac-top">
+          <div class="ac-left">${logoHTML(a.ticker,a.type,32)}
+            <div><div><span class="tkr">${a.ticker}</span><span class="bdg">${a.type}</span></div>
+            <div class="ac-name">${fU(a.avgPrice)} PPC · Comis. ${fU(a.totalComm)}</div></div>
+          </div>
+          <div>
+            <div class="ac-val">${a.hasPx?dv(a.value):'—'}</div>
+            <div class="ac-pnl ${a.hasPx?(a.pnl>=0?'green':'red'):'gold'}">${a.hasPx?`${dv(a.pnl)} (${fP(a.pnlPct)})`:'Sin precio aún'}</div>
+          </div>
+        </div>
+        <div class="ac-stats">
+          <div><span>Cant. </span>${fmt(a.qty,4)}</div>
+          <div><span>Precio </span>${a.price>0?fU(a.price):'—'}</div>
+          <div><span>P.M. </span>${fU(a.avgPrice)}</div>
+        </div>
+        <div class="ac-foot">
+          <button class="btn-tv" onclick="openTV('${a.ticker}','${a.type}')">📈 Ver gráfico</button>
+          <button class="btn-del" onclick="delByTicker('${a.ticker}')">Eliminar</button>
+        </div>
+      </div>`).join('');
+  }
 
-    function hideBrokerDetail() {
-        document.getElementById('broker-grid-view').style.display = 'block';
-        document.getElementById('broker-detail-view').style.display = 'none';
-    }
+  // Orders
+  const ol=document.getElementById('orderList');
+  const sorted=[...orders].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!sorted.length){
+    ol.innerHTML='<div class="empty"><div class="empty-ic">📋</div><div>Sin órdenes todavía.</div></div>';
+  } else {
+    ol.innerHTML=sorted.map(o=>`
+      <div style="background:var(--c);border:1px solid ${o.action==='Compra'?'#00ffa344':'#ff4d6d44'};border-radius:11px;padding:12px 14px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;gap:8px;align-items:center">
+            ${logoHTML(o.ticker,o.type||'Acción USA',26)}
+            <div>
+              <div><span class="bdg ${o.action==='Compra'?'bdg-b':'bdg-s'}" style="${o.action==='Compra'?'background:#00ffa322;color:var(--a);border:1px solid #00ffa344':'background:#ff4d6d22;color:var(--r);border:1px solid #ff4d6d44'}">${o.action}</span> <strong>${o.ticker}</strong></div>
+              <div style="font-size:12px;color:var(--m);margin-top:2px">${o.date}${o.broker?' · '+o.broker:''}${o.comm?' · Comis. '+fU(o.comm):''}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:monospace;font-weight:600;font-size:13px">${fmt(o.qty,4)} × ${fU(o.price)}</div>
+            <div style="font-size:12px;color:var(--m)">Total: ${fU(o.qty*o.price+(o.comm||0))}</div>
+          </div>
+        </div>
+        ${o.notes?`<div style="font-size:12px;color:var(--m);font-style:italic;margin-top:7px">${o.notes}</div>`:''}
+        <div style="text-align:right;margin-top:7px"><button class="btn-del" onclick="delOrder('${o.id}')">Eliminar</button></div>
+      </div>`).join('');
+  }
 
-    function addCustomBroker() {
-        const name = document.getElementById('new-broker-name').value;
-        if(name && !customBrokers.includes(name)) {
-            customBrokers.push(name);
-            localStorage.setItem('customList', JSON.stringify(customBrokers));
-            renderBrokerGrid();
-            document.getElementById('new-broker-name').value = '';
-        }
-    }
+  renderBrokers();
+  renderCharts(en,totUSD);
+}
 
-    // Inicio
-    renderMainPortfolio();
+function renderBrokers(){
+  const grid=document.getElementById('brokerGrid');
+  const sel=document.getElementById('o-broker');
+  grid.innerHTML='';
+  sel.innerHTML='<option value="">— Seleccionar —</option>';
+  brokers.forEach(b=>{
+    const count=orders.filter(o=>o.broker===b).length;
+    const total=orders.filter(o=>o.broker===b).reduce((s,o)=>s+o.qty*o.price+(o.comm||0),0);
+    grid.innerHTML+=`<div class="broker-card" onclick="viewBroker('${b}')">
+      <h4>${b}</h4>
+      <span>${count} operaciones</span>
+      ${total>0?`<div style="font-size:11px;color:var(--m);margin-top:4px">${fU(total)}</div>`:''}
+    </div>`;
+    sel.innerHTML+=`<option value="${b}">${b}</option>`;
+  });
+}
+
+function viewBroker(name){
+  document.getElementById('broker-grid-view').classList.add('hidden');
+  document.getElementById('broker-detail-view').classList.remove('hidden');
+  document.getElementById('brokerDetailTitle').textContent='OPERACIONES EN '+name.toUpperCase();
+  const body=document.getElementById('brokerDetailBody');
+  const filtered=orders.filter(o=>o.broker===name).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!filtered.length){body.innerHTML='<tr><td colspan="6" style="color:var(--m);text-align:center;padding:20px">Sin operaciones</td></tr>';return;}
+  body.innerHTML=filtered.map(o=>`<tr>
+    <td><strong>${o.ticker}</strong><br><span style="font-size:11px;color:var(--m)">${o.date}</span></td>
+    <td style="color:${o.action==='Compra'?'var(--a)':'var(--r)'}">${o.action}<br>${fU(o.price)}</td>
+    <td>${fmt(o.qty,4)}</td>
+    <td>${fU(o.comm||0)}</td>
+    <td>${fU(o.qty*o.price+(o.comm||0))}</td>
+    <td><button class="btn-del" onclick="delOrder('${o.id}');viewBroker('${name}')">✕</button></td>
+  </tr>`).join('');
+}
+
+function hideBrokerDetail(){
+  document.getElementById('broker-grid-view').classList.remove('hidden');
+  document.getElementById('broker-detail-view').classList.add('hidden');
+}
+
+function addCustomBroker(){
+  const name=document.getElementById('newBrokerName').value.trim();
+  if(name&&!brokers.includes(name)){
+    brokers.push(name);persist();renderBrokers();
+    document.getElementById('newBrokerName').value='';
+  }
+}
+
+function renderCharts(en,totUSD){
+  const s90=snapshots.slice(-90);
+  const lc=document.getElementById('lineChart');
+  const nm=document.getElementById('noChart');
+  if(s90.length>=2){
+    nm.classList.add('hidden');lc.classList.remove('hidden');
+    const labels=s90.map(s=>s.date.slice(5));
+    const vals=s90.map(s=>currency==='USD'?s.totalUSD:s.totalUSD*ars());
+    if(lineChart) lineChart.destroy();
+    lineChart=new Chart(lc,{type:'line',data:{labels,datasets:[{data:vals,borderColor:'#00ffa3',backgroundColor:'#00ffa318',fill:true,tension:0.4,pointRadius:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8b949e',maxTicksLimit:6},grid:{color:'#30363d'}},y:{ticks:{color:'#8b949e',callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#30363d'}}}}});
+  }else{nm.classList.remove('hidden');lc.classList.add('hidden');}
+
+  const pc=document.getElementById('pieChart');
+  const pd=en.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  if(pieChart) pieChart.destroy();
+  if(pd.length){
+    pieChart=new Chart(pc,{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#161b22'}]},options:{responsive:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fU(ctx.raw)}`}}}}});
+    document.getElementById('pieLabels').innerHTML=pd.map((d,i)=>`
+      <div class="pie-row"><div><span class="pie-dot" style="background:${COLS[i%COLS.length]}"></span><strong>${d.name}</strong></div>
+      <div style="text-align:right"><div style="font-family:monospace;font-size:13px">${fU(d.value)}</div><div style="font-size:11px;color:var(--m)">${fmt(totUSD>0?(d.value/totUSD)*100:0)}%</div></div></div>`).join('');
+  }
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────────────────────
+function addOrder(){
+  const ticker=document.getElementById('o-ticker').value.trim();
+  const qty=parseFloat(document.getElementById('o-qty').value);
+  const price=parseFloat(document.getElementById('o-price').value);
+  if(!ticker||!qty||!price){alert('Faltan datos obligatorios');return;}
+  const order={
+    id:Date.now(),ticker,
+    type:document.getElementById('o-type').value,
+    action:document.getElementById('o-action').value,
+    qty,price,
+    comm:parseFloat(document.getElementById('o-comm').value)||0,
+    broker:document.getElementById('o-broker').value,
+    date:document.getElementById('o-date').value||new Date().toISOString().split('T')[0],
+    notes:document.getElementById('o-notes').value
+  };
+  orders.push(order);
+  persist();closeModal('order');
+  ['o-ticker','o-qty','o-price','o-comm','o-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('o-broker').value='';
+  render();refresh();
+}
+
+function delOrder(id){
+  orders=orders.filter(o=>String(o.id)!==String(id));
+  persist();render();
+}
+
+function delByTicker(ticker){
+  if(confirm(`Eliminar todas las órdenes de ${ticker}?`)){
+    orders=orders.filter(o=>o.ticker!==ticker);
+    persist();render();
+  }
+}
+
+function openTV(ticker,type){
+  const sym=type==='Acción Argentina'?`BCBA:${ticker}`:type==='Cripto'?`BINANCE:${ticker}USDT`:ticker;
+  document.getElementById('tv-ticker').textContent=ticker;
+  document.getElementById('tv-title').textContent=`Gráfico de ${ticker}`;
+  document.getElementById('tv-sym').textContent=`Symbol: ${sym}`;
+  document.getElementById('tv-link').href=`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`;
+  const logo=getLogoUrl(ticker,type);
+  const lEl=document.getElementById('tv-logo');
+  if(logo){lEl.src=logo;lEl.style.display='block';}else{lEl.style.display='none';}
+  document.getElementById('modal-tv').classList.add('open');
+}
+
+// ── UI ────────────────────────────────────────────────────────────────────────
+function showTab(name,btn){
+  ['portfolio','orders','brokers','charts'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==name));
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  btn.classList.add('active');
+  if(name==='charts') render();
+  if(name==='brokers'){renderBrokers();hideBrokerDetail();}
+}
+function openModal(name){document.getElementById('modal-'+name).classList.add('open');}
+function closeModal(name){document.getElementById('modal-'+name).classList.remove('open');}
+function toggleCur(){currency=currency==='USD'?'ARS':'USD';document.getElementById('btnCur').textContent=currency;render();}
+function setStatus(msg,loading){const el=document.getElementById('status');el.textContent=msg;el.style.color=loading?'var(--a)':'var(--m)';}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('o-date').value=new Date().toISOString().split('T')[0];
+render();
+const pf=getPortfolio();
+if(pf.length) refresh();
 </script>
-
 </body>
 </html>
