@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Personalizado</title>
+    <title>Financial Dashboard</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -12,212 +12,174 @@
             --text-primary: #ffffff;
             --text-secondary: #8b949e;
             --border-color: #30363d;
+            --hover-bg: #21262d;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0; padding: 20px; display: flex; justify-content: center;
         }
 
-        .container { width: 100%; max-width: 1000px; }
+        .container { width: 100%; max-width: 900px; }
 
-        /* Estructura Superior */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 25px; }
-        .summary-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .summary-card label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; }
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .brand { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
+        .brand span { color: var(--accent-color); margin-right: 5px; }
 
-        /* Navegación */
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .tab-btn { background: #21262d; border: none; color: var(--text-secondary); padding: 10px 18px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
-        .tab-btn.active { background: var(--accent-color); color: #0d1117; font-weight: bold; }
+        /* RESUMEN SUPERIOR */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .summary-card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .summary-card label { color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        .summary-card h3 { margin: 8px 0 0; font-size: 1.4rem; font-weight: 600; }
 
-        /* Áreas de Contenido */
-        .main-content { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; min-height: 400px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* TABS (Morfología Claude) */
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .tab-link { 
+            background: transparent; border: none; color: var(--text-secondary); 
+            padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .tab-link:hover { background: var(--hover-bg); color: var(--text-primary); }
+        .tab-link.active { background: var(--accent-color); color: #0d1117; font-weight: 700; }
 
-        /* Formularios e Inputs */
-        .form-box { background: #0d1117; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; background: #161b22; border: 1px solid var(--border-color); color: white; border-radius: 6px; margin: 8px 0; box-sizing: border-box; }
-        
-        /* Tablas */
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: var(--text-secondary); padding: 12px; border-bottom: 2px solid var(--border-color); }
+        /* CONTENIDO */
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* BROKERS DISPLAY */
+        .broker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 20px; }
+        .broker-btn { 
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            padding: 15px; border-radius: 10px; text-align: center; 
+            text-decoration: none; color: var(--text-primary); font-weight: 500;
+            transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        .broker-btn:hover { border-color: var(--accent-color); background: var(--hover-bg); transform: translateY(-2px); }
+        .broker-btn i { font-size: 1.2rem; color: var(--accent-color); }
+
+        /* FORMULARIOS */
+        .manual-box { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px dashed var(--border-color); margin-top: 30px; }
+        .input-group { display: flex; gap: 10px; margin-top: 15px; }
+        input { 
+            flex: 1; background: #0d1117; border: 1px solid var(--border-color); 
+            color: white; padding: 10px; border-radius: 6px; 
+        }
+        .btn-add { background: var(--accent-color); color: #0d1117; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        /* TABLA PORTFOLIO */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: var(--text-secondary); font-size: 0.8rem; padding: 12px; border-bottom: 2px solid var(--border-color); }
         td { padding: 12px; border-bottom: 1px solid var(--border-color); }
 
-        /* Grid de Brokers Dinámicos */
-        .broker-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
-        .broker-item { background: #21262d; padding: 12px; border-radius: 8px; text-align: center; text-decoration: none; color: var(--accent-color); border: 1px solid var(--border-color); }
-
-        .btn-action { background: var(--accent-color); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn-small { padding: 5px 10px; font-size: 0.8rem; background: #ff4d4d; color: white; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div style="font-size: 1.5rem; font-weight: bold;"><span>⬡</span> Portfolio</div>
-        <div id="clock" style="color: var(--text-secondary); font-size: 0.9rem;"></div>
+        <div class="brand"><span>⬡</span> MyAssets</div>
+        <div id="mep-display" style="color: #f1c40f; font-size: 0.9rem; font-weight: bold;">MEP: $1.140</div>
     </div>
 
     <div class="summary-grid">
-        <div class="summary-card"><label>Patrimonio USD</label><h3 id="total-usd">$0.00</h3></div>
-        <div class="summary-card"><label>Rendimiento</label><h3 id="total-pct" style="color: var(--accent-color)">0.00%</h3></div>
-        <div class="summary-card"><label>Dólar MEP</label><input type="number" id="mep-val" value="1145" style="margin:0; padding:5px; font-size: 1.2rem; width: 80px; font-weight: bold; border:none; background:transparent; color:#f1c40f"></div>
+        <div class="summary-card"><label>Total USD</label><h3 id="main-total">$0.00</h3></div>
+        <div class="summary-card"><label>Day Change</label><h3 style="color: var(--accent-color)">+0.00%</h3></div>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('portfolio')">Mi Portfolio</button>
-        <button class="tab-btn" onclick="switchTab('graficos')">Análisis Gráfico</button>
-        <button class="tab-btn" onclick="switchTab('config-brokers')">Config. Brokers</button>
+    <div class="nav-tabs">
+        <button class="tab-link active" onclick="openTab(event, 'tab-portfolio')">Portfolio</button>
+        <button class="tab-link" onclick="openTab(event, 'tab-graficos')">Gráficos</button>
+        <button class="tab-link" onclick="openTab(event, 'tab-brokers')">Brokers 🏦</button>
     </div>
 
-    <div class="main-content">
-        <div id="portfolio" class="tab-content active">
-            <div class="form-box">
-                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px;">
-                    <input type="text" id="asset-name" placeholder="Ticker (BIOX, GD30, BTC...)">
-                    <input type="number" id="asset-qty" placeholder="Cant.">
-                    <input type="number" id="asset-price" placeholder="PPC (USD)">
-                    <button class="btn-action" onclick="addAsset()">Agregar</button>
-                </div>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Activo</th>
-                        <th>Cantidad</th>
-                        <th>PPC</th>
-                        <th>Total USD</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="asset-table-body"></tbody>
-            </table>
+    <div id="tab-portfolio" class="content-section active">
+        <table>
+            <thead>
+                <tr>
+                    <th>Activo</th>
+                    <th>Cantidad</th>
+                    <th>PPC</th>
+                    <th>Total USD</th>
+                </tr>
+            </thead>
+            <tbody id="portfolio-body">
+                <tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 40px;">No hay activos cargados.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="tab-graficos" class="content-section">
+        <div style="height: 400px; background: #161b22; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+            [ Área de Visualización TradingView ]
+        </div>
+    </div>
+
+    <div id="tab-brokers" class="content-section">
+        <div class="broker-grid">
+            <a href="https://www.bullmarketbrokers.com/" target="_blank" class="broker-btn"><span>📈</span> Bull Market</a>
+            <a href="https://www.invertironline.com/" target="_blank" class="broker-btn"><span>📊</span> IOL</a>
+            <a href="https://www.invertironline.com/" target="_blank" class="broker-btn"><span>💵</span> IOL Dólares</a>
+            <a href="https://www.santander.com.ar/" target="_blank" class="broker-btn"><span>🏛️</span> Santander</a>
+            <a href="https://www.galicia.ar/" target="_blank" class="broker-btn"><span>🏦</span> Galicia</a>
+            <a href="https://www.binance.com/" target="_blank" class="broker-btn"><span>₿</span> Binance</a>
+            <a href="https://www.gate.io/" target="_blank" class="broker-btn"><span>🌐</span> Gate.io</a>
+            <a href="https://www.kucoin.com/" target="_blank" class="broker-btn"><span>💎</span> Kucoin</a>
+            <div id="dynamic-brokers" style="display: contents;"></div>
         </div>
 
-        <div id="graficos" class="tab-content">
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <input type="text" id="chart-ticker" placeholder="Escribí Ticker (ej: NASDAQ:MSTR)" style="flex: 1;">
-                <button class="btn-action" style="width: auto;" onclick="updateChart()">Ver Gráfico</button>
+        <div class="manual-box">
+            <h4 style="margin:0">Agregar Broker Manual</h4>
+            <div class="input-group">
+                <input type="text" id="manual-broker-name" placeholder="Nombre">
+                <input type="text" id="manual-broker-url" placeholder="URL (https://...)">
+                <button class="btn-add" onclick="addCustomBroker()">Agregar</button>
             </div>
-            <div id="tv-container" style="height: 400px; background: #000; border-radius: 8px;">
-                <p style="text-align: center; padding-top: 150px; color: var(--text-secondary);">Ingresá un ticker para cargar la vista.</p>
-            </div>
-        </div>
-
-        <div id="config-brokers" class="tab-content">
-            <h3>Gestionar Accesos a Brokers</h3>
-            <div class="form-box">
-                <input type="text" id="broker-name" placeholder="Nombre del Broker (ej: PPI)">
-                <input type="text" id="broker-url" placeholder="URL (https://...)">
-                <button class="btn-action" onclick="addBroker()">Guardar Broker</button>
-            </div>
-            <div id="broker-display" class="broker-list"></div>
         </div>
     </div>
 </div>
 
 <script>
-    // Persistencia en LocalStorage
-    let assets = JSON.parse(localStorage.getItem('assets')) || [];
-    let brokers = JSON.parse(localStorage.getItem('brokers')) || [];
-
-    function switchTab(id) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
+    function openTab(evt, tabName) {
+        var i, content, tablinks;
+        content = document.getElementsByClassName("content-section");
+        for (i = 0; i < content.length; i++) { content[i].classList.remove("active"); }
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
     }
 
-    // --- LÓGICA DE ACTIVOS ---
-    function addAsset() {
-        const name = document.getElementById('asset-name').value.toUpperCase();
-        const qty = parseFloat(document.getElementById('asset-qty').value);
-        const price = parseFloat(document.getElementById('asset-price').value);
+    // Lógica para brokers manuales
+    let customBrokers = JSON.parse(localStorage.getItem('customBrokers')) || [];
 
-        if (name && qty && price) {
-            assets.push({ name, qty, price });
-            localStorage.setItem('assets', JSON.stringify(assets));
-            renderAssets();
-            // Limpiar campos
-            document.getElementById('asset-name').value = '';
-            document.getElementById('asset-qty').value = '';
-            document.getElementById('asset-price').value = '';
-        }
-    }
-
-    function removeAsset(index) {
-        assets.splice(index, 1);
-        localStorage.setItem('assets', JSON.stringify(assets));
-        renderAssets();
-    }
-
-    function renderAssets() {
-        const body = document.getElementById('asset-table-body');
-        body.innerHTML = '';
-        let totalVal = 0;
-
-        assets.forEach((a, i) => {
-            const subtotal = a.qty * a.price;
-            totalVal += subtotal;
-            body.innerHTML += `
-                <tr>
-                    <td><b>${a.name}</b></td>
-                    <td>${a.qty}</td>
-                    <td>$${a.price.toFixed(2)}</td>
-                    <td>$${subtotal.toLocaleString()}</td>
-                    <td><button class="btn-small" onclick="removeAsset(${i})">Eliminar</button></td>
-                </tr>
-            `;
-        });
-        document.getElementById('total-usd').innerText = `$${totalVal.toLocaleString()}`;
-    }
-
-    // --- LÓGICA DE BROKERS ---
-    function addBroker() {
-        const name = document.getElementById('broker-name').value;
-        const url = document.getElementById('broker-url').value;
+    function addCustomBroker() {
+        const name = document.getElementById('manual-broker-name').value;
+        const url = document.getElementById('manual-broker-url').value;
+        
         if (name && url) {
-            brokers.push({ name, url });
-            localStorage.setItem('brokers', JSON.stringify(brokers));
-            renderBrokers();
-            document.getElementById('broker-name').value = '';
-            document.getElementById('broker-url').value = '';
+            customBrokers.push({ name, url });
+            localStorage.setItem('customBrokers', JSON.stringify(customBrokers));
+            renderCustomBrokers();
+            document.getElementById('manual-broker-name').value = '';
+            document.getElementById('manual-broker-url').value = '';
         }
     }
 
-    function renderBrokers() {
-        const container = document.getElementById('broker-display');
+    function renderCustomBrokers() {
+        const container = document.getElementById('dynamic-brokers');
         container.innerHTML = '';
-        brokers.forEach(b => {
-            container.innerHTML += `<a href="${b.url}" target="_blank" class="broker-item">${b.name}</a>`;
+        customBrokers.forEach(b => {
+            container.innerHTML += `<a href="${b.url}" target="_blank" class="broker-btn"><span>🔗</span> ${b.name}</a>`;
         });
     }
 
-    // --- LÓGICA DE GRÁFICOS ---
-    function updateChart() {
-        const symbol = document.getElementById('chart-ticker').value || "NASDAQ:MSTR";
-        const container = document.getElementById('tv-container');
-        container.innerHTML = `
-            <iframe scrolling="no" allowtransparency="true" frameborder="0" 
-                src="https://s.tradingview.com/embed-widget/symbol-overview/?fontColor=white&symbols=${symbol}&gridLineColor=rgba(42,46,57,0)&backgroundColor=rgba(22,27,34,1)" 
-                style="width: 100%; height: 100%;"></iframe>`;
-    }
-
-    // Reloj
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleString();
-    }, 1000);
-
-    // Inicialización
-    renderAssets();
-    renderBrokers();
+    // Inicializar
+    renderCustomBrokers();
 </script>
 
 </body>
