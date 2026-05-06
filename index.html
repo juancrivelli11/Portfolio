@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Dashboard</title>
+    <title>Portfolio Manager Pro</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -18,168 +18,244 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, sans-serif;
             margin: 0; padding: 20px; display: flex; justify-content: center;
         }
 
-        .container { width: 100%; max-width: 900px; }
+        .container { width: 100%; max-width: 1000px; }
 
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .brand { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
-        .brand span { color: var(--accent-color); margin-right: 5px; }
-
-        /* RESUMEN SUPERIOR */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
-        .summary-card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .summary-card label { color: var(--text-secondary); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-        .summary-card h3 { margin: 8px 0 0; font-size: 1.4rem; font-weight: 600; }
-
-        /* TABS (Morfología Claude) */
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        /* HEADER & TABS */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         .tab-link { 
             background: transparent; border: none; color: var(--text-secondary); 
-            padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 500;
-            transition: all 0.2s ease;
+            padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
         }
-        .tab-link:hover { background: var(--hover-bg); color: var(--text-primary); }
-        .tab-link.active { background: var(--accent-color); color: #0d1117; font-weight: 700; }
+        .tab-link.active { background: var(--accent-color); color: #0d1117; }
 
-        /* CONTENIDO */
-        .content-section { display: none; }
-        .content-section.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* BROKERS DISPLAY */
-        .broker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 20px; }
-        .broker-btn { 
-            background: var(--card-bg); border: 1px solid var(--border-color); 
-            padding: 15px; border-radius: 10px; text-align: center; 
-            text-decoration: none; color: var(--text-primary); font-weight: 500;
-            transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px;
+        /* FORMULARIO DE OPERACIÓN */
+        .op-form { 
+            background: var(--card-bg); padding: 20px; border-radius: 12px; 
+            border: 1px solid var(--border-color); margin-bottom: 25px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;
         }
-        .broker-btn:hover { border-color: var(--accent-color); background: var(--hover-bg); transform: translateY(-2px); }
-        .broker-btn i { font-size: 1.2rem; color: var(--accent-color); }
-
-        /* FORMULARIOS */
-        .manual-box { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px dashed var(--border-color); margin-top: 30px; }
-        .input-group { display: flex; gap: 10px; margin-top: 15px; }
-        input { 
-            flex: 1; background: #0d1117; border: 1px solid var(--border-color); 
-            color: white; padding: 10px; border-radius: 6px; 
+        .op-form input, .op-form select {
+            background: #0d1117; border: 1px solid var(--border-color);
+            color: white; padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box;
         }
-        .btn-add { background: var(--accent-color); color: #0d1117; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* TABLA PORTFOLIO */
+        /* BROKER GRID */
+        .broker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+        .broker-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 20px; border-radius: 12px; text-align: center; cursor: pointer;
+            transition: 0.2s;
+        }
+        .broker-card:hover { border-color: var(--accent-color); transform: translateY(-3px); }
+        .broker-card h4 { margin: 0; color: var(--accent-color); }
+        .broker-card span { font-size: 0.8rem; color: var(--text-secondary); }
+
+        /* VISTA DETALLE BROKER */
+        #broker-detail-view { display: none; }
+        .back-btn { background: none; border: 1px solid var(--text-secondary); color: var(--text-secondary); padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
+
+        /* TABLAS */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { text-align: left; color: var(--text-secondary); font-size: 0.8rem; padding: 12px; border-bottom: 2px solid var(--border-color); }
+        th { text-align: left; color: var(--text-secondary); padding: 12px; border-bottom: 2px solid var(--border-color); font-size: 0.85rem; }
         td { padding: 12px; border-bottom: 1px solid var(--border-color); }
 
+        .btn-save { background: var(--accent-color); color: #000; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <div class="brand"><span>⬡</span> MyAssets</div>
-        <div id="mep-display" style="color: #f1c40f; font-size: 0.9rem; font-weight: bold;">MEP: $1.140</div>
-    </div>
-
-    <div class="summary-grid">
-        <div class="summary-card"><label>Total USD</label><h3 id="main-total">$0.00</h3></div>
-        <div class="summary-card"><label>Day Change</label><h3 style="color: var(--accent-color)">+0.00%</h3></div>
+        <div style="font-size: 1.5rem; font-weight: bold;"><span>⬡</span> Portfolio Tracker</div>
     </div>
 
     <div class="nav-tabs">
-        <button class="tab-link active" onclick="openTab(event, 'tab-portfolio')">Portfolio</button>
-        <button class="tab-link" onclick="openTab(event, 'tab-graficos')">Gráficos</button>
-        <button class="tab-link" onclick="openTab(event, 'tab-brokers')">Brokers 🏦</button>
+        <button class="tab-link active" onclick="showSection('portfolio')">Portfolio Total</button>
+        <button class="tab-link" onclick="showSection('brokers')">Mis Brokers</button>
+        <button class="tab-link" onclick="showSection('nueva-op')">+ Nueva Operación</button>
     </div>
 
-    <div id="tab-portfolio" class="content-section active">
+    <div id="nueva-op" class="content-section" style="display:none">
+        <h3>Cargar Operación</h3>
+        <div class="op-form">
+            <input type="text" id="in-ticker" placeholder="Activo (ej: BIOX)">
+            <input type="number" id="in-price" placeholder="Precio Compra">
+            <input type="number" id="in-qty" placeholder="Cantidad">
+            <input type="number" id="in-comm" placeholder="Comisión (USD)">
+            <select id="in-broker">
+                <option value="">Seleccionar Broker</option>
+                <option value="Bull Market">Bull Market</option>
+                <option value="IOL">IOL</option>
+                <option value="IOL Dólares">IOL Dólares</option>
+                <option value="Santander">Santander</option>
+                <option value="Galicia">Galicia</option>
+                <option value="Binance">Binance</option>
+                <option value="Gate.io">Gate.io</option>
+                <option value="Kucoin">Kucoin</option>
+            </select>
+            <button class="btn-save" onclick="saveOp()">Guardar</button>
+        </div>
+    </div>
+
+    <div id="portfolio" class="content-section">
+        <h3>Resumen General de Activos</h3>
         <table>
             <thead>
                 <tr>
                     <th>Activo</th>
-                    <th>Cantidad</th>
-                    <th>PPC</th>
-                    <th>Total USD</th>
+                    <th>Cant. Total</th>
+                    <th>PPC Promedio</th>
+                    <th>Inversión + Comis.</th>
                 </tr>
             </thead>
-            <tbody id="portfolio-body">
-                <tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 40px;">No hay activos cargados.</td></tr>
-            </tbody>
+            <tbody id="main-table-body"></tbody>
         </table>
     </div>
 
-    <div id="tab-graficos" class="content-section">
-        <div style="height: 400px; background: #161b22; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-            [ Área de Visualización TradingView ]
-        </div>
-    </div>
-
-    <div id="tab-brokers" class="content-section">
-        <div class="broker-grid">
-            <a href="https://www.bullmarketbrokers.com/" target="_blank" class="broker-btn"><span>📈</span> Bull Market</a>
-            <a href="https://www.invertironline.com/" target="_blank" class="broker-btn"><span>📊</span> IOL</a>
-            <a href="https://www.invertironline.com/" target="_blank" class="broker-btn"><span>💵</span> IOL Dólares</a>
-            <a href="https://www.santander.com.ar/" target="_blank" class="broker-btn"><span>🏛️</span> Santander</a>
-            <a href="https://www.galicia.ar/" target="_blank" class="broker-btn"><span>🏦</span> Galicia</a>
-            <a href="https://www.binance.com/" target="_blank" class="broker-btn"><span>₿</span> Binance</a>
-            <a href="https://www.gate.io/" target="_blank" class="broker-btn"><span>🌐</span> Gate.io</a>
-            <a href="https://www.kucoin.com/" target="_blank" class="broker-btn"><span>💎</span> Kucoin</a>
-            <div id="dynamic-brokers" style="display: contents;"></div>
-        </div>
-
-        <div class="manual-box">
-            <h4 style="margin:0">Agregar Broker Manual</h4>
-            <div class="input-group">
-                <input type="text" id="manual-broker-name" placeholder="Nombre">
-                <input type="text" id="manual-broker-url" placeholder="URL (https://...)">
-                <button class="btn-add" onclick="addCustomBroker()">Agregar</button>
+    <div id="brokers" class="content-section" style="display:none">
+        <div id="broker-grid-view">
+            <h3>Seleccioná un Broker para ver operaciones</h3>
+            <div class="broker-grid" id="broker-grid-container">
+                </div>
+            <div style="margin-top: 30px; border-top: 1px dashed var(--border-color); padding-top: 20px;">
+                <h4>Agregar Broker Personalizado</h4>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="new-broker-name" placeholder="Nombre del Broker" style="background:#161b22; border:1px solid var(--border-color); color:white; padding:10px; border-radius:6px; flex:1">
+                    <button class="btn-save" onclick="addCustomBroker()" style="padding: 0 20px;">Añadir</button>
+                </div>
             </div>
+        </div>
+
+        <div id="broker-detail-view">
+            <button class="back-btn" onclick="hideBrokerDetail()">← Volver a Brokers</button>
+            <h3 id="detail-title">Operaciones en [Broker]</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Activo</th>
+                        <th>Precio</th>
+                        <th>Cant.</th>
+                        <th>Comisión</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="detail-table-body"></tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
-    function openTab(evt, tabName) {
-        var i, content, tablinks;
-        content = document.getElementsByClassName("content-section");
-        for (i = 0; i < content.length; i++) { content[i].classList.remove("active"); }
-        tablinks = document.getElementsByClassName("tab-link");
-        for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
+    let ops = JSON.parse(localStorage.getItem('operations')) || [];
+    let customBrokers = JSON.parse(localStorage.getItem('customList')) || ["Bull Market", "IOL", "IOL Dólares", "Santander", "Galicia", "Binance", "Gate.io", "Kucoin"];
+
+    function showSection(id) {
+        document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).style.display = 'block';
+        event.currentTarget.classList.add('active');
+        if(id === 'portfolio') renderMainPortfolio();
+        if(id === 'brokers') renderBrokerGrid();
     }
 
-    // Lógica para brokers manuales
-    let customBrokers = JSON.parse(localStorage.getItem('customBrokers')) || [];
+    function saveOp() {
+        const op = {
+            ticker: document.getElementById('in-ticker').value.toUpperCase(),
+            price: parseFloat(document.getElementById('in-price').value),
+            qty: parseFloat(document.getElementById('in-qty').value),
+            comm: parseFloat(document.getElementById('in-comm').value) || 0,
+            broker: document.getElementById('in-broker').value
+        };
 
-    function addCustomBroker() {
-        const name = document.getElementById('manual-broker-name').value;
-        const url = document.getElementById('manual-broker-url').value;
-        
-        if (name && url) {
-            customBrokers.push({ name, url });
-            localStorage.setItem('customBrokers', JSON.stringify(customBrokers));
-            renderCustomBrokers();
-            document.getElementById('manual-broker-name').value = '';
-            document.getElementById('manual-broker-url').value = '';
+        if(!op.ticker || !op.price || !op.broker) return alert("Faltan datos");
+
+        ops.push(op);
+        localStorage.setItem('operations', JSON.stringify(ops));
+        alert("Operación guardada");
+        showSection('portfolio');
+    }
+
+    function renderMainPortfolio() {
+        const body = document.getElementById('main-table-body');
+        body.innerHTML = '';
+        const summary = {};
+
+        ops.forEach(o => {
+            if(!summary[o.ticker]) summary[o.ticker] = { qty: 0, cost: 0 };
+            summary[o.ticker].qty += o.qty;
+            summary[o.ticker].cost += (o.price * o.qty) + o.comm;
+        });
+
+        for(let t in summary) {
+            body.innerHTML += `<tr>
+                <td><b>${t}</b></td>
+                <td>${summary[t].qty}</td>
+                <td>$${(summary[t].cost / summary[t].qty).toFixed(2)}</td>
+                <td>$${summary[t].cost.toLocaleString()}</td>
+            </tr>`;
         }
     }
 
-    function renderCustomBrokers() {
-        const container = document.getElementById('dynamic-brokers');
+    function renderBrokerGrid() {
+        const container = document.getElementById('broker-grid-container');
+        const select = document.getElementById('in-broker');
         container.innerHTML = '';
+        select.innerHTML = '<option value="">Seleccionar Broker</option>';
+
         customBrokers.forEach(b => {
-            container.innerHTML += `<a href="${b.url}" target="_blank" class="broker-btn"><span>🔗</span> ${b.name}</a>`;
+            const count = ops.filter(o => o.broker === b).length;
+            container.innerHTML += `
+                <div class="broker-card" onclick="viewBrokerDetail('${b}')">
+                    <h4>${b}</h4>
+                    <span>${count} operaciones</span>
+                </div>`;
+            select.innerHTML += `<option value="${b}">${b}</option>`;
         });
     }
 
-    // Inicializar
-    renderCustomBrokers();
+    function viewBrokerDetail(name) {
+        document.getElementById('broker-grid-view').style.display = 'none';
+        document.getElementById('broker-detail-view').style.display = 'block';
+        document.getElementById('detail-title').innerText = `Operaciones en ${name}`;
+        
+        const body = document.getElementById('detail-table-body');
+        body.innerHTML = '';
+        const filtered = ops.filter(o => o.broker === name);
+
+        filtered.forEach(o => {
+            const total = (o.price * o.qty) + o.comm;
+            body.innerHTML += `<tr>
+                <td><b>${o.ticker}</b></td>
+                <td>$${o.price}</td>
+                <td>${o.qty}</td>
+                <td>$${o.comm}</td>
+                <td>$${total.toFixed(2)}</td>
+            </tr>`;
+        });
+    }
+
+    function hideBrokerDetail() {
+        document.getElementById('broker-grid-view').style.display = 'block';
+        document.getElementById('broker-detail-view').style.display = 'none';
+    }
+
+    function addCustomBroker() {
+        const name = document.getElementById('new-broker-name').value;
+        if(name && !customBrokers.includes(name)) {
+            customBrokers.push(name);
+            localStorage.setItem('customList', JSON.stringify(customBrokers));
+            renderBrokerGrid();
+            document.getElementById('new-broker-name').value = '';
+        }
+    }
+
+    // Inicio
+    renderMainPortfolio();
 </script>
 
 </body>
