@@ -2,174 +2,103 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Asset Tracker</title>
+    <title>Portfolio Manager Pro</title>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --accent-color: #00ffa3;
-            --text-primary: #ffffff;
-            --text-secondary: #8b949e;
-            --border-color: #30363d;
-            --danger: #ff4d4d;
+            --bg: #0d1117; --card: #161b22; --mint: #00ffa3; --text: #ffffff;
+            --sec: #8b949e; --border: #30363d;
         }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: -apple-system, system-ui, sans-serif;
-            margin: 0; padding: 20px; display: flex; justify-content: center;
-        }
-
-        .container { width: 100%; max-width: 1050px; }
-
-        /* DASHBOARD SUMMARY (Estilo Foto 1) */
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 25px; }
-        .summary-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .summary-card label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
-        .summary-card h3 { margin: 8px 0 0; font-size: 1.6rem; }
-        .summary-card p { margin: 5px 0 0; font-size: 0.85rem; color: var(--accent-color); }
-
-        /* NAV TABS */
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
-        .tab-btn { 
-            background: transparent; border: none; color: var(--text-secondary); 
-            padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; 
-        }
-        .tab-btn.active { background: var(--accent-color); color: #0d1117; }
-
-        /* CONTENIDO */
-        .content-section { display: none; }
-        .content-section.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* TABLA */
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
-        th { text-align: left; color: var(--text-secondary); padding: 15px; border-bottom: 2px solid var(--border-color); font-size: 0.8rem; }
-        td { padding: 15px; border-bottom: 1px solid var(--border-color); }
-
-        /* BROKERS GRID */
-        .broker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
-        .broker-card { 
-            background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; 
-            border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s;
-        }
-        .broker-card:hover { border-color: var(--accent-color); transform: translateY(-3px); }
-
-        /* FORMULARIO */
-        .form-container { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        input, select { background: #0d1117; border: 1px solid var(--border-color); color: white; padding: 12px; border-radius: 8px; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; }
         
-        .btn-main { 
-            background: var(--accent-color); color: #000; border: none; 
-            padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px;
-        }
+        /* Dashboard Header */
+        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        .card label { color: var(--sec); font-size: 0.7rem; text-transform: uppercase; }
+        .card h3 { margin: 10px 0 0; font-size: 1.5rem; }
 
-        .btn-update { background: #21262d; color: var(--accent-color); border: 1px solid var(--accent-color); padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
+        .tab-btn { background: none; border: none; color: var(--sec); padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 8px; }
+        .tab-btn.active { background: var(--mint); color: #000; }
+
+        /* Sections */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 10px; overflow: hidden; }
+        th { text-align: left; padding: 15px; color: var(--sec); border-bottom: 2px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); }
+
+        /* Forms */
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: var(--card); padding: 20px; border-radius: 10px; }
+        input, select { background: #0d1117; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 5px; }
+        .btn-add { background: var(--mint); color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        
+        /* Brokers Grid */
+        .broker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .broker-item { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 10px; text-align: center; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0"><span>⬡</span> Dashboard</h2>
-        <button class="btn-update" onclick="updatePrices()">↻ Actualizar APIs</button>
+    <div class="summary">
+        <div class="card"><label>Valor Total</label><h3 id="total-val">$0.00</h3></div>
+        <div class="card"><label>Dólar MEP</label><input type="number" id="mep-input" value="1145" onchange="renderAll()" style="width: 100px; font-size: 1.2rem; background: transparent; border: none; color: #f1c40f; font-weight: bold;"></div>
     </div>
 
-    <div class="summary-grid">
-        <div class="summary-card">
-            <label>Valor Portfolio</label>
-            <h3 id="stat-total">$0.00</h3>
-            <p id="stat-change">+0.00%</p>
-        </div>
-        <div class="summary-card">
-            <label>Costo Base</label>
-            <h3 id="stat-cost">$0.00</h3>
-        </div>
-        <div class="summary-card">
-            <label>Dólar MEP</label>
-            <h3 style="color: #f1c40f" id="stat-mep">$1.145</h3>
-        </div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('tab-portfolio')">Portfolio</button>
+        <button class="tab-btn" onclick="showTab('tab-graficas')">Gráficas</button>
+        <button class="tab-btn" onclick="showTab('tab-brokers')">Brokers</button>
+        <button class="tab-btn" onclick="showTab('tab-nueva')">+ Operación</button>
     </div>
 
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab(event, 'view-portfolio')">Portfolio</button>
-        <button class="tab-btn" onclick="switchTab(event, 'view-graficas')">Gráficas</button>
-        <button class="tab-btn" onclick="switchTab(event, 'view-brokers')">Brokers</button>
-        <button class="tab-btn" onclick="switchTab(event, 'view-add')">+ Nueva Op.</button>
-    </div>
-
-    <div id="view-portfolio" class="content-section active">
+    <div id="tab-portfolio" class="section active">
         <table>
-            <thead>
-                <tr>
-                    <th>Activo</th>
-                    <th>Cantidad</th>
-                    <th>PPC</th>
-                    <th>Precio Actual</th>
-                    <th>Subtotal</th>
-                    <th>P&L</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
+            <thead><tr><th>Activo</th><th>Cant.</th><th>PPC</th><th>Broker</th><th>Total USD</th></tr></thead>
+            <tbody id="portfolio-body"></tbody>
         </table>
     </div>
 
-    <div id="view-graficas" class="content-section">
-        <div id="tv-widget" style="height: 500px; border-radius: 12px; overflow: hidden;">
-            <div class="tradingview-widget-container" style="height:100%;width:100%">
-                <iframe scrolling="no" allowtransparency="true" frameborder="0" src="https://s.tradingview.com/embed-widget/symbol-overview/?fontColor=white&symbols=AMEX%3ABIOX%7C12%2CNASDAQ%3AMSTR%7C12%2CBITSTAMP%3ABTCUSD%7C12&gridLineColor=rgba(42,46,57,0)&backgroundColor=rgba(22,27,34,1)" style="width: 100%; height: 100%;"></iframe>
-            </div>
+    <div id="tab-graficas" class="section">
+        <div style="height: 450px; background: #000; border-radius: 10px; overflow: hidden;">
+            <iframe id="tv-frame" src="https://s.tradingview.com/embed-widget/symbol-overview/?fontColor=white&symbols=AMEX:BIOX,NASDAQ:MSTR,BITSTAMP:BTCUSD,BCBA:AL30&gridLineColor=rgba(42,46,57,0)&backgroundColor=rgba(22,27,34,1)" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
     </div>
 
-    <div id="view-brokers" class="content-section">
-        <div class="broker-grid" id="broker-grid"></div>
-        <div id="broker-detail" style="display:none; margin-top:30px;">
-            <button onclick="document.getElementById('broker-detail').style.display='none'; document.getElementById('broker-grid').style.display='grid'" style="background:none; border:1px solid var(--text-secondary); color:var(--text-secondary); padding:5px 10px; border-radius:5px; cursor:pointer; margin-bottom:15px;">← Volver</button>
-            <h4 id="broker-detail-title"></h4>
-            <table id="broker-detail-table">
-                <thead><tr><th>Activo</th><th>Cant.</th><th>Precio</th><th>Total</th></tr></thead>
-                <tbody id="broker-detail-body"></tbody>
-            </table>
-        </div>
+    <div id="tab-brokers" class="section">
+        <div class="broker-grid" id="broker-display"></div>
     </div>
 
-    <div id="view-add" class="content-section">
-        <div class="form-container">
-            <h3>Registrar Nueva Operación</h3>
-            <div class="grid-form">
-                <input type="text" id="f-ticker" placeholder="Ticker (BIOX, MSTR, AL30...)">
-                <select id="f-broker">
-                    <option value="Bull Market">Bull Market</option>
-                    <option value="IOL">IOL</option>
-                    <option value="Binance">Binance</option>
-                    <option value="Santander">Santander</option>
-                    <option value="Galicia">Galicia</option>
-                </select>
-                <input type="number" id="f-qty" placeholder="Cantidad">
-                <input type="number" id="f-price" placeholder="Precio Compra (USD)">
-                <input type="number" id="f-comm" placeholder="Comisión (USD)">
-            </div>
-            <button class="btn-main" onclick="addOperation()">Guardar en Portfolio</button>
+    <div id="tab-nueva" class="section">
+        <div class="form-row">
+            <input type="text" id="f-ticker" placeholder="Ticker (BIOX, AL30)">
+            <input type="number" id="f-qty" placeholder="Cantidad">
+            <input type="number" id="f-price" placeholder="Precio USD">
+            <select id="f-broker">
+                <option>Bull Market</option><option>IOL</option><option>Binance</option>
+                <option>Santander</option><option>Galicia</option>
+            </select>
+            <button class="btn-add" onclick="saveOp()">Guardar</button>
         </div>
     </div>
 </div>
 
 <script>
-    let operations = JSON.parse(localStorage.getItem('ops_v3')) || [];
-    let livePrices = {};
+    let operations = JSON.parse(localStorage.getItem('ops_final')) || [];
 
-    function switchTab(e, id) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    function showTab(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        e.currentTarget.classList.add('active');
-        if(id === 'view-brokers') renderBrokers();
-        if(id === 'view-portfolio') renderPortfolio();
+        // Marcar botón activo
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(btn => { if(btn.getAttribute('onclick').includes(id)) btn.classList.add('active'); });
     }
 
-    async function updatePrices() {
-        // Ejemplo de API
+    function saveOp() {
+        const op = {
+            ticker: document.getElementById('f-
