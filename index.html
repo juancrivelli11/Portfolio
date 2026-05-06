@@ -6,13 +6,15 @@
     <title>Dashboard Financiero</title>
     <style>
         :root {
-            --bg-main: #121236;
-            --bg-panel: #212163;
+            /* Paleta azul violáceo */
+            --bg-main: #0B0826;
+            --bg-panel: #151042;
+            --bg-card: #20185A;
             --text-main: #FFFFFF;
-            --text-muted: #B0B0E0;
+            --text-muted: #A39DE0;
             --accent: #00FFFF;
-            --accent-violet: #8A2BE2;
-            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-violet: #8B5CF6;
+            --border-color: #6D28D9;
         }
 
         * {
@@ -28,28 +30,22 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow: hidden;
         }
 
-        /* Cabecera del Dashboard */
+        /* Cabecera */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 2rem;
             background-color: var(--bg-panel);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
         }
 
         .header h1 {
             font-size: 1.3rem;
-            font-weight: 600;
             color: var(--text-main);
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
         }
 
         .header-controls select {
@@ -57,7 +53,7 @@
             color: var(--text-main);
             border: 1px solid var(--accent-violet);
             padding: 0.4rem 0.8rem;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
         }
 
@@ -70,26 +66,25 @@
             overflow: hidden;
         }
 
-        /* Ventana de Gráficas (70%) */
+        /* Ventana de Gráficas */
         .graph-section {
             flex: 7;
             background-color: var(--bg-panel);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
         }
 
         .graph-placeholder {
             color: var(--text-muted);
-            font-size: 1.2rem;
             text-align: center;
         }
 
-        /* Panel de Brokers y Operaciones (30%) */
+        /* Panel Lateral */
         .sidebar-section {
             flex: 3;
             display: flex;
@@ -99,10 +94,10 @@
         }
 
         .card {
-            background-color: var(--bg-panel);
-            border-radius: 8px;
-            padding: 1.2rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
         }
 
         .card h2 {
@@ -110,25 +105,50 @@
             color: var(--accent);
             margin-bottom: 1rem;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
         }
 
-        /* Lista de Brokers */
+        .broker-window-toggle {
+            background-color: var(--accent-violet);
+            color: var(--text-main);
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .broker-window-toggle:hover {
+            background-color: #6D28D9;
+        }
+
+        /* Ventana de Brokers */
+        .broker-window {
+            display: none;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--accent-violet);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
         .broker-list {
             list-style: none;
         }
 
         .broker-item {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
         }
 
         .broker-name {
-            font-weight: 600;
+            background-color: rgba(124, 58, 237, 0.2);
             color: var(--text-main);
-            padding: 0.4rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
+            padding: 0.5rem;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -136,13 +156,13 @@
         }
 
         .broker-name:hover {
-            background: rgba(138, 43, 226, 0.2);
+            background-color: rgba(124, 58, 237, 0.4);
         }
 
         .asset-list {
             list-style: none;
-            margin-top: 0.4rem;
             padding-left: 0.8rem;
+            margin-top: 0.3rem;
             display: none;
         }
 
@@ -152,7 +172,7 @@
 
         .asset-item {
             font-size: 0.85rem;
-            padding: 0.25rem 0;
+            padding: 0.3rem 0;
             color: var(--text-muted);
             cursor: pointer;
         }
@@ -162,7 +182,7 @@
             text-decoration: underline;
         }
 
-        /* Formulario de Nueva Operación */
+        /* Formulario */
         .form-group {
             margin-bottom: 1rem;
         }
@@ -171,16 +191,16 @@
             display: block;
             font-size: 0.85rem;
             color: var(--text-muted);
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.3rem;
         }
 
         .form-group input {
             width: 100%;
             background-color: var(--bg-main);
             color: var(--text-main);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.5rem;
-            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            padding: 0.6rem;
+            border-radius: 6px;
             font-size: 0.9rem;
         }
 
@@ -199,14 +219,13 @@
             top: 100%;
             left: 0;
             width: 100%;
-            background-color: var(--bg-main);
+            background-color: var(--bg-panel);
             border: 1px solid var(--accent-violet);
-            border-radius: 4px;
-            max-height: 140px;
+            border-radius: 6px;
+            max-height: 120px;
             overflow-y: auto;
-            z-index: 10;
+            z-index: 100;
             display: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
         }
 
         .autocomplete-item {
@@ -218,17 +237,18 @@
             align-items: center;
         }
 
-        .autocomplete-item:hover, .autocomplete-item.active {
-            background-color: rgba(138, 43, 226, 0.3);
+        .autocomplete-item:hover {
+            background-color: rgba(124, 58, 237, 0.4);
             color: var(--accent);
         }
 
         .badge {
             font-size: 0.65rem;
-            padding: 2px 6px;
+            padding: 2px 5px;
             border-radius: 4px;
-            background-color: rgba(255, 255, 255, 0.15);
-            color: var(--text-muted);
+            background-color: var(--bg-main);
+            color: var(--accent);
+            border: 1px solid var(--accent-violet);
         }
 
         .btn-action {
@@ -236,15 +256,15 @@
             background-color: var(--accent-violet);
             color: var(--text-main);
             border: none;
-            padding: 0.6rem;
-            border-radius: 4px;
+            padding: 0.7rem;
+            border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background 0.3s;
         }
 
         .btn-action:hover {
-            background-color: #9A3BE8;
+            background-color: #6D28D9;
         }
     </style>
 </head>
@@ -267,36 +287,43 @@
         <section class="graph-section">
             <div class="graph-placeholder">
                 <p>📊 Ventana de Gráficas</p>
-                <span style="font-size: 0.9rem; color: var(--text-muted);">Cargando visualización en tiempo real...</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Cargando visualización en tiempo real...</span>
             </div>
         </section>
 
         <section class="sidebar-section">
+            
             <div class="card">
-                <h2>🏦 Brokers y Activos</h2>
-                <ul class="broker-list">
-                    <li class="broker-item">
-                        <div class="broker-name" onclick="toggleBroker('broker1')">
-                            <span>Interactive Brokers</span>
-                            <span>▼</span>
-                        </div>
-                        <ul class="asset-list" id="broker1">
-                            <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Acciones USA (MSTR)</li>
-                            <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Bioceres (BIOX)</li>
-                            <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Criptomonedas (BTC/ETH)</li>
-                        </ul>
-                    </li>
-                    <li class="broker-item">
-                        <div class="broker-name" onclick="toggleBroker('broker2')">
-                            <span>PPI Global / Balanz</span>
-                            <span>▼</span>
-                        </div>
-                        <ul class="asset-list" id="broker2">
-                            <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Bonos AL30, GD35, GD41</li>
-                            <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Acciones (MSTR, BIOX)</li>
-                        </ul>
-                    </li>
-                </ul>
+                <h2>
+                    <span>🏦 Gestión de Brokers</span>
+                    <button class="broker-window-toggle" onclick="toggleBrokerWindow()">Mostrar</button>
+                </h2>
+                
+                <div id="broker-window" class="broker-window">
+                    <ul class="broker-list">
+                        <li class="broker-item">
+                            <div class="broker-name" onclick="toggleBrokerList('broker1')">
+                                <span>Interactive Brokers</span>
+                                <span>▼</span>
+                            </div>
+                            <ul class="asset-list" id="broker1">
+                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Acciones USA (MSTR)</li>
+                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Bioceres (BIOX)</li>
+                                <li class="asset-item" onclick="window.open('https://www.interactivebrokers.com', '_blank')">Criptomonedas (BTC/ETH)</li>
+                            </ul>
+                        </li>
+                        <li class="broker-item">
+                            <div class="broker-name" onclick="toggleBrokerList('broker2')">
+                                <span>PPI Global / Balanz</span>
+                                <span>▼</span>
+                            </div>
+                            <ul class="asset-list" id="broker2">
+                                <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Bonos AL30, GD35, GD41</li>
+                                <li class="asset-item" onclick="window.open('https://www.ppi.com.ar', '_blank')">Acciones (MSTR, BIOX)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <div class="card">
@@ -316,7 +343,7 @@
 
                 <div class="form-group">
                     <label for="price-input">Precio estimado:</label>
-                    <input type="number" id="price-input" placeholder="Precio...">
+                    <input type="number" id="price-input" placeholder="Precio..." step="any">
                 </div>
 
                 <button class="btn-action" onclick="saveOperation()">Guardar Operación</button>
@@ -326,7 +353,7 @@
     </main>
 
     <script>
-        // Lista de activos predefinidos
+        // Activos para autocompletado
         const assets = [
             { name: "AL30", category: "Bono", broker: "PPI" },
             { name: "GD35", category: "Bono", broker: "PPI" },
@@ -337,18 +364,31 @@
             { name: "ETH", category: "Cripto", broker: "Binance" }
         ];
 
-        // Función para mostrar/ocultar las listas de brokers
-        function toggleBroker(id) {
+        // Alternar visibilidad de la ventana de brokers
+        function toggleBrokerWindow() {
+            const window = document.getElementById('broker-window');
+            const button = document.querySelector('.broker-window-toggle');
+            if (window.style.display === 'block') {
+                window.style.display = 'none';
+                button.textContent = 'Mostrar';
+            } else {
+                window.style.display = 'block';
+                button.textContent = 'Ocultar';
+            }
+        }
+
+        // Mostrar u ocultar la lista interna de un broker
+        function toggleBrokerList(id) {
             const list = document.getElementById(id);
             list.classList.toggle('show');
         }
 
-        // Autocompletado del buscador
+        // Autocompletar activos al teclear
         function filterAssets() {
             const input = document.getElementById('asset-input').value.toLowerCase();
             const dropdown = document.getElementById('dropdown');
 
-            dropdown.innerHTML = ''; // Limpiar opciones anteriores
+            dropdown.innerHTML = '';
 
             if (input.length === 0) {
                 dropdown.style.display = 'none';
@@ -378,7 +418,6 @@
             }
         }
 
-        // Selección de activo desde el dropdown
         function selectAsset(name) {
             document.getElementById('asset-input').value = name;
             document.getElementById('dropdown').style.display = 'none';
@@ -390,8 +429,8 @@
             const price = document.getElementById('price-input').value;
 
             if (asset && volume && price) {
-                alert(`Operación guardada: ${volume} unidades de ${asset} a un precio de ${price}.`);
-                // Reset de inputs
+                alert(`Operación guardada exitosamente:\nActivo: ${asset} | Cantidad: ${volume} | Precio: ${price}`);
+                // Limpiar campos
                 document.getElementById('asset-input').value = '';
                 document.getElementById('volume-input').value = '';
                 document.getElementById('price-input').value = '';
@@ -400,6 +439,5 @@
             }
         }
     </script>
-
 </body>
 </html>
