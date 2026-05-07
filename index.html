@@ -184,10 +184,16 @@ td{padding:10px 8px;border-bottom:1px solid var(--b)}
   <div class="modal">
     <div class="modal-hdr"><span class="modal-title">Nueva orden</span><button class="modal-x" onclick="closeModal('order')">×</button></div>
     <div class="fld"><label>Acción</label>
-      <select id="o-action"><option>Compra</option><option>Venta</option></select>
+      <select id="o-action" onchange="toggleOrderType(this.value)"><option>Compra</option><option>Venta</option></select>
     </div>
-    <div class="fld"><label>Ticker (ej: AAPL, VIST, BTC)</label>
+    <div class="fld" id="fld-ticker-input"><label>Ticker (ej: AAPL, VIST, BTC)</label>
       <input id="o-ticker" placeholder="AAPL" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div class="fld hidden" id="fld-ticker-select"><label>Activo a vender</label>
+      <select id="o-ticker-sel" onchange="document.getElementById('o-ticker').value=this.value;updateMaxQty()">
+        <option value="">— Seleccionar activo —</option>
+      </select>
+      <div id="max-qty-info" style="font-size:11px;color:var(--m);margin-top:5px"></div>
     </div>
     <div class="fld"><label>Tipo de activo</label>
       <select id="o-type">
@@ -445,7 +451,7 @@ function render(){
           <div><span>P.M. </span>${fU(a.avgPrice)}</div>
         </div>
         <div class="ac-foot">
-          <button class="btn-tv" onclick="openTV('${a.ticker}','${a.type}')">📈 Ver gráfico</button>
+          <button class="btn-tv" onclick="goTV('${a.ticker}','${a.type}')">📈 Ver gráfico</button>
           <button class="btn-del" onclick="delByTicker('${a.ticker}')">Eliminar</button>
         </div>
       </div>`).join('');
@@ -557,6 +563,13 @@ function addOrder(){
   const qty=parseFloat(document.getElementById('o-qty').value);
   const price=parseFloat(document.getElementById('o-price').value);
   if(!ticker||!qty||!price){alert('Faltan datos obligatorios');return;}
+  const action=document.getElementById('o-action').value;
+  if(action==='Venta'){
+    const pf=getPortfolio();
+    const held=pf.find(a=>a.ticker===ticker);
+    if(!held){alert(`No tenés ${ticker} en cartera`);return;}
+    if(qty>held.qty){alert(`Solo tenés ${fmt(held.qty,4)} unidades de ${ticker}`);return;}
+  }
   const order={
     id:Date.now(),ticker,
     type:document.getElementById('o-type').value,
@@ -586,16 +599,37 @@ function delByTicker(ticker){
   }
 }
 
-function openTV(ticker,type){
+function goTV(ticker,type){
   const sym=type==='Acción Argentina'?`BCBA:${ticker}`:type==='Cripto'?`BINANCE:${ticker}USDT`:ticker;
-  document.getElementById('tv-ticker').textContent=ticker;
-  document.getElementById('tv-title').textContent=`Gráfico de ${ticker}`;
-  document.getElementById('tv-sym').textContent=`Symbol: ${sym}`;
-  document.getElementById('tv-link').href=`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`;
-  const logo=getLogoUrl(ticker,type);
-  const lEl=document.getElementById('tv-logo');
-  if(logo){lEl.src=logo;lEl.style.display='block';}else{lEl.style.display='none';}
-  document.getElementById('modal-tv').classList.add('open');
+  window.open(`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`,'_blank');
+}
+
+function toggleOrderType(action){
+  const isVenta = action === 'Venta';
+  document.getElementById('fld-ticker-input').classList.toggle('hidden', isVenta);
+  document.getElementById('fld-ticker-select').classList.toggle('hidden', !isVenta);
+  if(isVenta){
+    const pf = getPortfolio();
+    const sel = document.getElementById('o-ticker-sel');
+    sel.innerHTML = '<option value="">— Seleccionar activo —</option>';
+    pf.forEach(a => {
+      sel.innerHTML += `<option value="${a.ticker}">${a.ticker} (${fmt(a.qty,4)} disponibles)</option>`;
+    });
+    document.getElementById('o-ticker').value = '';
+    document.getElementById('max-qty-info').textContent = '';
+  }
+}
+
+function updateMaxQty(){
+  const ticker = document.getElementById('o-ticker-sel').value;
+  if(!ticker) return;
+  const pf = getPortfolio();
+  const asset = pf.find(a => a.ticker === ticker);
+  if(asset){
+    document.getElementById('max-qty-info').textContent = `Máximo disponible: ${fmt(asset.qty,4)}`;
+    document.getElementById('o-qty').max = asset.qty;
+    document.getElementById('o-qty').placeholder = `Máx. ${fmt(asset.qty,4)}`;
+  }
 }
 
 // ── UI ────────────────────────────────────────────────────────────────────────
@@ -607,7 +641,15 @@ function showTab(name,btn){
   if(name==='brokers'){renderBrokers();hideBrokerDetail();}
 }
 function openModal(name){document.getElementById('modal-'+name).classList.add('open');}
-function closeModal(name){document.getElementById('modal-'+name).classList.remove('open');}
+function closeModal(name){
+  document.getElementById('modal-'+name).classList.remove('open');
+  if(name==='order'){
+    document.getElementById('o-action').value='Compra';
+    toggleOrderType('Compra');
+    document.getElementById('o-qty').max='';
+    document.getElementById('o-qty').placeholder='10';
+  }
+}
 function toggleCur(){currency=currency==='USD'?'ARS':'USD';document.getElementById('btnCur').textContent=currency;render();}
 function setStatus(msg,loading){const el=document.getElementById('status');el.textContent=msg;el.style.color=loading?'var(--a)':'var(--m)';}
 
