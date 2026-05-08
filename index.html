@@ -227,6 +227,23 @@ td{padding:9px 7px;border-bottom:1px solid #eef2f9;color:var(--txt)}
   </div>
 </div>
 
+
+</div><!-- /main-col -->
+
+<!-- SIDE PANEL -->
+<div class="side-panel" id="sidePanel">
+  <div class="side-box">
+    <div class="side-box-hdr">📊 Mercados</div>
+    <div id="quotesContainer"><div class="side-loading">Cargando cotizaciones...</div></div>
+  </div>
+  <div class="side-box">
+    <div class="side-box-hdr">📰 Noticias</div>
+    <div id="newsContainer"><div class="side-loading">Cargando noticias...</div></div>
+  </div>
+</div>
+</div><!-- /app-body -->
+
+
 <!-- Add Order Modal -->
 <div class="modal-bg" id="modal-order">
   <div class="modal">
@@ -289,18 +306,7 @@ td{padding:9px 7px;border-bottom:1px solid #eef2f9;color:var(--txt)}
 
 </div><!-- /main-col -->
 
-<!-- SIDE PANEL -->
-<div class="side-panel" id="sidePanel">
-  <div class="side-box">
-    <div class="side-box-hdr">📊 Mercados</div>
-    <div id="quotesContainer"><div class="side-loading">Cargando cotizaciones...</div></div>
-  </div>
-  <div class="side-box">
-    <div class="side-box-hdr">📰 Noticias</div>
-    <div id="newsContainer"><div class="side-loading">Cargando noticias...</div></div>
-  </div>
-</div>
-</div><!-- /app-body -->
+<!-- SIDE PANEL --
 
 <!-- TradingView Modal -->
 <div class="tv-modal" id="modal-tv">
@@ -373,13 +379,14 @@ function getLogoUrl(ticker,type){
   const domain=DOMAINS[ticker?.toUpperCase()]||`${ticker?.toLowerCase()}.com`;
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 }
+// Store fallback data globally to avoid escaping issues
 function logoHTML(ticker,type,size=32){
   const src=getLogoUrl(ticker,type);
   const c=COLS[(ticker||'?').charCodeAt(0)%COLS.length];
   const init=(ticker||'?').slice(0,2).toUpperCase();
-  const fb=`<div class="logo-fb" style="width:${size}px;height:${size}px;font-size:${Math.round(size*0.34)}px;background:${c}33;color:${c};border:1px solid ${c}55">${init}</div>`;
-  if(!src) return fb;
-  return `<img class="logo" src="${src}" style="width:${size}px;height:${size}px" onerror="this.outerHTML=\`${fb.replace(/`/g,"'")}\`" alt="${ticker}">`;
+  const id='logo_'+ticker+'_'+size;
+  if(!src) return `<div class="logo-fb" style="width:${size}px;height:${size}px;font-size:${Math.round(size*0.34)}px;background:${c}33;color:${c};border:1px solid ${c}55">${init}</div>`;
+  return `<img class="logo" id="${id}" src="${src}" style="width:${size}px;height:${size}px" onload="this.style.opacity=1" onerror="this.style.display='none';var f=document.createElement('div');f.className='logo-fb';f.style.cssText='width:${size}px;height:${size}px;font-size:${Math.round(size*0.34)}px;background:${c}33;color:${c};border:1px solid ${c}55;display:flex;align-items:center;justify-content:center;font-weight:800;border-radius:7px';f.textContent='${init}';this.parentNode.insertBefore(f,this);this.remove();" alt="${ticker}">`;
 }
 
 // ── PORTFOLIO CALC ────────────────────────────────────────────────────────────
