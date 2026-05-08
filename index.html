@@ -214,7 +214,14 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
   <div class="sc"><label>Valor Total</label><div class="val" id="sVal">$0,00</div><div class="sub" id="sSub">—</div></div>
   <div class="sc"><label>P&L Total</label><div class="val" id="sPnl">$0,00</div><div class="sub" id="sPct">—</div></div>
   <div class="sc"><label>Costo Base</label><div class="val" id="sCost">$0,00</div></div>
-  <div class="sc"><label>USD/ARS Blue</label><div class="val" id="sArs" style="color:var(--gold)">$1.000</div></div>
+  <div class="sc" style="min-width:160px">
+    <label>Dólares</label>
+    <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap">
+      <div><div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Blue</div><div class="val" id="sBlue" style="color:var(--gold);font-size:14px">$—</div></div>
+      <div><div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">MEP</div><div class="val" id="sMep" style="color:var(--gold);font-size:14px">$—</div></div>
+      <div><div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">CCL</div><div class="val" id="sCcl" style="color:var(--gold);font-size:14px">$—</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- TABS -->
@@ -288,6 +295,13 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 
   <!-- SIDEBAR -->
   <div class="sidebar">
+    <div class="side-box">
+      <div class="side-hdr">🥧 Composición</div>
+      <div style="padding:12px;display:flex;gap:10px;align-items:center">
+        <canvas id="sidebarPie" width="110" height="110" style="flex-shrink:0"></canvas>
+        <div id="sidebarPieLegend" style="flex:1;font-size:11px"></div>
+      </div>
+    </div>
     <div class="side-box">
       <div class="side-hdr">📊 Mercados</div>
       <div id="quotesPanel"><div class="side-msg">Cargando...</div></div>
@@ -490,7 +504,7 @@ function n2(n, d=2){
 const $u = n => `$${n2(n)}`;
 const $a = n => `$${n2(n,0)}`;
 const pc = n => `${n>=0?'+':''}${n2(n)}%`;
-const ars = () => prices['USD_ARS'] || 1000;
+const ars = () => mkt.dblue?.price || prices['USD_ARS'] || 1000;
 const dv  = v => currency==='USD' ? $u(v) : $a(v * ars());
 
 // ═══════════════════════════════════════════════════════
@@ -699,9 +713,14 @@ async function loadMarketQuotes(){
     if(!prices['USD_ARS'] && d.venta > 100) prices['USD_ARS'] = d.venta;
   }catch(e){}
   try{
+    const r = await fetch('https://dolarapi.com/v1/dolares/bolsa');
+    const d = await r.json();
+    mkt.dmep = {price: d.venta, buy: d.compra};
+  }catch(e){}
+  try{
     const r = await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');
     const d = await r.json();
-    mkt.eblue = {price: d.venta, buy: d.compra};
+    mkt.dccl = {price: d.venta, buy: d.compra};
   }catch(e){}
 
   // Stocks/ETFs via AV — only 4 to save rate limit
@@ -724,9 +743,13 @@ async function loadMarketQuotes(){
     {label:'WTI (USO)',  d:mkt.uso,   fmt:'$', dp:2},
     {label:'Bitcoin',    d:mkt.btc,   fmt:'$', dp:0},
     {label:'Merval*',    d:mkt.ggal,  fmt:'$', dp:2},
-    {label:'Dólar Blue', d:mkt.dblue, fmt:'$', dp:0, ars:true},
-    {label:'Euro (CCL)', d:mkt.eblue, fmt:'$', dp:0, ars:true},
+    // Blue/MEP/CCL shown in summary header, not here
   ];
+
+  // Update header cards
+  document.getElementById('sBlue').textContent = mkt.dblue ? `$${n2(mkt.dblue.price,0)}` : '$—';
+  document.getElementById('sMep').textContent  = mkt.dmep  ? `$${n2(mkt.dmep.price,0)}`  : '$—';
+  document.getElementById('sCcl').textContent  = mkt.dccl  ? `$${n2(mkt.dccl.price,0)}`  : '$—';
 
   panel.innerHTML = rows.map(r => {
     if(!r.d) return `<div class="quote-row"><span class="quote-name">${r.label}</span><span class="quote-price" style="color:var(--muted)">—</span></div>`;
@@ -782,7 +805,10 @@ function render(){
   pnlEl.style.color = totPnL >= 0 ? 'var(--green)' : 'var(--red)';
   document.getElementById('sPct').textContent  = pc(totPct);
   document.getElementById('sCost').textContent = dv(totCost);
-  document.getElementById('sArs').textContent  = `$${n2(ars(),0)}`;
+  // Update Blue/MEP/CCL in header
+  document.getElementById('sBlue').textContent = mkt.dblue ? `$${n2(mkt.dblue.price,0)}` : '$—';
+  document.getElementById('sMep').textContent  = mkt.dmep  ? `$${n2(mkt.dmep.price,0)}`  : '$—';
+  document.getElementById('sCcl').textContent  = mkt.dccl  ? `$${n2(mkt.dccl.price,0)}`  : '$—';
 
   // Asset table
   renderAssetTable(pf, 'assetTable', totUSD, totPnL);
@@ -795,6 +821,7 @@ function render(){
 
   // Charts
   renderCharts(pf, totUSD);
+  renderSidebarPie(pf);
 }
 
 function renderAssetTable(pf, containerId, totUSD, totPnL){
@@ -944,9 +971,11 @@ function showBrokerDetail(name){
     const dayPct = prev && price ? (price-prev)/prev*100 : null;
     return {...a,price,hasPx,value,pnl,pnlPct,dayPct};
   });
-  renderAssetTable(pf, 'brokerDetailTable', 
-    pf.reduce((s,a)=>s+a.value,0), 
-    pf.reduce((s,a)=>s+(a.pnl||0),0));
+  const totVal = pf.reduce((s,a)=>s+a.value,0);
+  const totPnlV = pf.reduce((s,a)=>s+(a.pnl||0),0);
+  renderAssetTable(pf, 'brokerDetailTable', totVal, totPnlV);
+  const detailEl = document.getElementById('brokerDetailTable');
+  renderBrokerPie(pf, detailEl);
 }
 
 function hideBrokerDetail(){
@@ -960,6 +989,74 @@ function addCustomBroker(){
     brokers.push(name); save(); renderBrokerGrid();
     document.getElementById('newBrokerInput').value = '';
   }
+}
+
+let sidebarPieChart = null;
+let brokerPieChart = null;
+
+function renderSidebarPie(pf){
+  const el = document.getElementById('sidebarPie');
+  const leg = document.getElementById('sidebarPieLegend');
+  const pd = pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  const totUSD = pd.reduce((s,d)=>s+d.value,0);
+  if(sidebarPieChart) sidebarPieChart.destroy();
+  if(!pd.length){ leg.innerHTML='<span style="color:var(--muted)">Sin activos</span>'; return; }
+  sidebarPieChart = new Chart(el,{
+    type:'doughnut',
+    data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),
+      backgroundColor:PIE_COLS,borderWidth:2,borderColor:'#f5f7fa'}]},
+    options:{responsive:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${$u(ctx.raw)}`}}}}
+  });
+  leg.innerHTML = pd.slice(0,5).map((d,i)=>
+    `<div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <div><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PIE_COLS[i%PIE_COLS.length]};margin-right:5px"></span><strong>${d.name}</strong></div>
+      <span style="color:var(--muted)">${n2(totUSD>0?d.value/totUSD*100:0)}%</span>
+    </div>`).join('') + (pd.length>5?`<div style="color:var(--muted);font-size:10px">+${pd.length-5} más</div>`:'');
+}
+
+function renderBrokerPie(pf, containerEl){
+  // Remove old pie if exists
+  const existing = containerEl.querySelector('.broker-pie-wrap');
+  if(existing) existing.remove();
+
+  const pd = pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  const totUSD = pd.reduce((s,d)=>s+d.value,0);
+  if(!pd.length) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'broker-pie-wrap';
+  wrap.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;gap:12px;align-items:center';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px';
+  title.textContent = 'Composición';
+
+  const canvasWrap = document.createElement('div');
+  const canvas = document.createElement('canvas');
+  canvas.width = 110; canvas.height = 110;
+  canvasWrap.appendChild(canvas);
+
+  const leg = document.createElement('div');
+  leg.style.cssText = 'flex:1;font-size:11px';
+  leg.innerHTML = pd.slice(0,5).map((d,i)=>
+    `<div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <div><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PIE_COLS[i%PIE_COLS.length]};margin-right:5px"></span><strong>${d.name}</strong></div>
+      <span style="color:var(--muted)">${n2(totUSD>0?d.value/totUSD*100:0)}%</span>
+    </div>`).join('') + (pd.length>5?`<div style="color:var(--muted);font-size:10px">+${pd.length-5} más</div>`:'');
+
+  wrap.appendChild(canvasWrap);
+  wrap.appendChild(leg);
+  containerEl.insertBefore(wrap, containerEl.firstChild);
+
+  if(brokerPieChart) brokerPieChart.destroy();
+  brokerPieChart = new Chart(canvas,{
+    type:'doughnut',
+    data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),
+      backgroundColor:PIE_COLS,borderWidth:2,borderColor:'#f5f7fa'}]},
+    options:{responsive:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${$u(ctx.raw)}`}}}}
+  });
 }
 
 function renderCharts(pf, totUSD){
