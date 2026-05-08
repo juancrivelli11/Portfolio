@@ -205,21 +205,40 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
   </div>
   <div class="hdr-right">
     <button class="btn btn-blue" onclick="toggleCur()" id="btnCur">USD</button>
+    <button class="btn btn-blue" onclick="exportData()" title="Exportar datos">⬇ Export</button>
+    <button class="btn btn-blue" onclick="document.getElementById('importFile').click()" title="Importar datos">⬆ Import</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <button class="btn btn-green" onclick="doRefresh()" id="btnRef">↻ Actualizar</button>
   </div>
 </div>
 
 <!-- SUMMARY -->
 <div class="summary">
-  <div class="sc"><label>Valor Total</label><div class="val" id="sVal">$0,00</div><div class="sub" id="sSub">—</div></div>
-  <div class="sc"><label>P&L Total</label><div class="val" id="sPnl">$0,00</div><div class="sub" id="sPct">—</div></div>
-  <div class="sc"><label>Costo Base</label><div class="val" id="sCost">$0,00</div></div>
+  <!-- Posicion USD -->
+  <div class="sc" style="border-left:3px solid var(--blue)">
+    <label>💵 Posición USD</label>
+    <div class="val" id="sValUSD">$0,00</div>
+    <div class="sub" id="sPnlUSD" style="margin-top:3px">P&L: —</div>
+  </div>
+  <!-- Posicion ARS -->
+  <div class="sc" style="border-left:3px solid var(--gold)">
+    <label>🪙 Posición ARS</label>
+    <div class="val" id="sValARS" style="color:var(--gold)">$0,00</div>
+    <div class="sub" id="sPnlARS" style="margin-top:3px">P&L: —</div>
+  </div>
+  <!-- Global -->
+  <div class="sc" style="border-left:3px solid var(--green)">
+    <label>🌐 Global (en USD)</label>
+    <div class="val" id="sValGlobal" style="color:var(--green)">$0,00</div>
+    <div class="sub" id="sPnlGlobal" style="margin-top:3px">P&L: —</div>
+  </div>
+  <!-- Dolares -->
   <div class="sc" style="min-width:160px">
-    <label>Dólares</label>
-    <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap">
-      <div><div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Blue</div><div class="val" id="sBlue" style="color:var(--gold);font-size:14px">$—</div></div>
-      <div><div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">MEP</div><div class="val" id="sMep" style="color:var(--gold);font-size:14px">$—</div></div>
-      <div><div style="font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">CCL</div><div class="val" id="sCcl" style="color:var(--gold);font-size:14px">$—</div></div>
+    <label>Tipo de cambio</label>
+    <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">
+      <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Blue</div><div class="val" id="sBlue" style="color:var(--gold);font-size:13px">$—</div></div>
+      <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">MEP</div><div class="val" id="sMep" style="color:var(--gold);font-size:13px">$—</div></div>
+      <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">CCL</div><div class="val" id="sCcl" style="color:var(--gold);font-size:13px">$—</div></div>
     </div>
   </div>
 </div>
@@ -363,8 +382,12 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
     <input id="o-qty" type="number" inputmode="decimal" placeholder="10" min="0">
   </div>
   <div class="field">
-    <label>Precio (USD)</label>
-    <input id="o-price" type="number" inputmode="decimal" placeholder="150.00" min="0">
+    <label id="o-price-label">Precio (USD)</label>
+    <div style="position:relative">
+      <input id="o-price" type="number" inputmode="decimal" placeholder="150.00" min="0" style="padding-right:50px">
+      <span id="o-price-currency" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--muted)">USD</span>
+    </div>
+    <div id="o-price-hint" style="font-size:10px;color:var(--muted);margin-top:3px"></div>
   </div>
   <div class="field">
     <label>Comisión (USD)</label>
@@ -797,14 +820,39 @@ function render(){
   const totPnL  = totUSD - totCost;
   const totPct  = totCost > 0 ? totPnL / totCost * 100 : 0;
 
-  // Summary
-  document.getElementById('sVal').textContent  = dv(totUSD);
-  document.getElementById('sSub').textContent  = currency==='USD' ? `≈ ${$a(totUSD*ars())} ARS` : `≈ ${$u(totUSD)} USD`;
-  const pnlEl = document.getElementById('sPnl');
-  pnlEl.textContent = dv(totPnL);
-  pnlEl.style.color = totPnL >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('sPct').textContent  = pc(totPct);
-  document.getElementById('sCost').textContent = dv(totCost);
+  // Split USD vs ARS positions
+  const pfUSD = pf.filter(a => a.type !== 'CEDEAR' && a.type !== 'Acción Argentina' && a.type !== 'Bono/Renta Fija');
+  const pfARS = pf.filter(a => a.type === 'CEDEAR' || a.type === 'Acción Argentina' || a.type === 'Bono/Renta Fija');
+  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
+
+  const totUSD_usd  = pfUSD.reduce((s,a)=>s+a.value,0);
+  const costUSD_usd = pfUSD.reduce((s,a)=>s+a.cost,0);
+  const pnlUSD_usd  = totUSD_usd - costUSD_usd;
+
+  const totARS_usd  = pfARS.reduce((s,a)=>s+a.value,0);  // stored in USD
+  const costARS_usd = pfARS.reduce((s,a)=>s+a.cost,0);
+  const pnlARS_usd  = totARS_usd - costARS_usd;
+  const totARS_ars  = totARS_usd * ccl;
+  const pnlARS_ars  = pnlARS_usd * ccl;
+
+  const totGlobal   = totUSD_usd + totARS_usd;
+  const pnlGlobal   = pnlUSD_usd + pnlARS_usd;
+
+  // Summary cards
+  document.getElementById('sValUSD').textContent = $u(totUSD_usd);
+  const pnlUSDel = document.getElementById('sPnlUSD');
+  pnlUSDel.textContent = `P&L: ${pnlUSD_usd>=0?'+':''}${$u(pnlUSD_usd)}`;
+  pnlUSDel.style.color = pnlUSD_usd >= 0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('sValARS').textContent = $a(totARS_ars);
+  const pnlARSel = document.getElementById('sPnlARS');
+  pnlARSel.textContent = `P&L: ${pnlARS_ars>=0?'+':''}${$a(pnlARS_ars)}`;
+  pnlARSel.style.color = pnlARS_ars >= 0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('sValGlobal').textContent = $u(totGlobal);
+  const pnlGlobEl = document.getElementById('sPnlGlobal');
+  pnlGlobEl.textContent = `P&L: ${pnlGlobal>=0?'+':''}${$u(pnlGlobal)}`;
+  pnlGlobEl.style.color = pnlGlobal >= 0 ? 'var(--green)' : 'var(--red)';
   // Update Blue/MEP/CCL in header
   document.getElementById('sBlue').textContent = mkt.dblue ? `$${n2(mkt.dblue.price,0)}` : '$—';
   document.getElementById('sMep').textContent  = mkt.dmep  ? `$${n2(mkt.dmep.price,0)}`  : '$—';
@@ -836,6 +884,8 @@ function renderAssetTable(pf, containerId, totUSD, totPnL){
   const tbl = document.createElement('table');
   tbl.className = 'tbl';
 
+  const ccl2 = mkt.dccl?.price || mkt.dblue?.price || 1200;
+  const isARStype = t => t==='CEDEAR'||t==='Acción Argentina'||t==='Bono/Renta Fija';
   tbl.innerHTML = `<thead><tr>
     <th>Activo</th><th>Cant.</th><th>Últ. Precio</th>
     <th>Var% Diaria</th><th>Var$ Diaria</th>
@@ -874,10 +924,10 @@ function renderAssetTable(pf, containerId, totUSD, totPnL){
     tr.appendChild(tdAsset);
     tr.innerHTML += `
       <td>${n2(a.qty,2)}</td>
-      <td>${a.price > 0 ? $u(a.price) : '—'}</td>
+      <td>${a.price > 0 ? (isARStype(a.type) ? $a(a.price * ccl2) : $u(a.price)) : '—'}</td>
       <td class="${dc}">${a.dayPct != null ? pc(a.dayPct) : '—'}</td>
       <td class="${dc}">${a.dayDol != null ? (a.dayDol>=0?'+':'')+$u(a.dayDol) : '—'}</td>
-      <td>${$u(a.avgPrice)}</td>
+      <td>${isARStype(a.type) ? $a(a.avgPrice*ccl2) : $u(a.avgPrice)}</td>
       <td class="${gc}">${a.hasPx ? pc(a.pnlPct) : '—'}</td>
       <td class="${gc}">${a.hasPx ? (a.pnl>=0?'+':'')+$u(a.pnl) : '—'}</td>
       <td style="font-weight:700">${a.hasPx ? dv(a.value) : '—'}</td>
@@ -1125,9 +1175,30 @@ function onSellTickerChange(){
   document.getElementById('o-price').value = a && prices[a.ticker] ? prices[a.ticker].toFixed(2) : '';
 }
 
-function onMarketChange(){ 
-  document.getElementById('o-ticker').value = ''; 
-  hideAC(); 
+function onMarketChange(){
+  document.getElementById('o-ticker').value = '';
+  hideAC();
+  updatePriceCurrency();
+}
+
+function updatePriceCurrency(){
+  const mktVal = document.getElementById('o-market').value;
+  const isARS = (mktVal === 'cedear' || mktVal === 'arg' || mktVal === 'bono');
+  const label = document.getElementById('o-price-label');
+  const cur = document.getElementById('o-price-currency');
+  const hint = document.getElementById('o-price-hint');
+  const ccl = mkt.dccl?.price || 1200;
+  if(isARS){
+    label.textContent = 'Precio (ARS)';
+    cur.textContent = 'ARS';
+    cur.style.color = 'var(--gold)';
+    hint.textContent = `CCL: $${n2(ccl,0)} → la app convierte a USD automáticamente`;
+  } else {
+    label.textContent = 'Precio (USD)';
+    cur.textContent = 'USD';
+    cur.style.color = 'var(--muted)';
+    hint.textContent = '';
+  }
 }
 
 function onTickerInput(val){
@@ -1175,12 +1246,23 @@ function saveOrder(){
     ? (getPortfolio().find(a=>a.ticker===ticker)?.type || 'Acción USA')
     : (typeMap[mktVal] || 'Acción USA');
 
+  // Determine currency and convert to USD if ARS
+  const isARS = (mktVal === 'cedear' || mktVal === 'arg' || mktVal === 'bono') && !isVenta;
+  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
+  const priceUSD = isARS ? price / ccl : price;
+  const commUSD  = isARS ? (parseFloat(document.getElementById('o-comm').value)||0) / ccl
+                          : (parseFloat(document.getElementById('o-comm').value)||0);
+
   orders.push({
     id: Date.now(),
     ticker, type,
     action: document.getElementById('o-action').value,
-    qty, price,
-    comm:   parseFloat(document.getElementById('o-comm').value) || 0,
+    qty,
+    price: priceUSD,        // always stored in USD
+    priceOrig: price,       // original price in native currency
+    currency: isARS ? 'ARS' : 'USD',
+    cclAtOrder: isARS ? ccl : null,
+    comm: commUSD,
     broker: document.getElementById('o-broker').value,
     date:   document.getElementById('o-date').value || new Date().toISOString().slice(0,10),
     notes:  document.getElementById('o-notes').value,
@@ -1247,9 +1329,69 @@ function goTab(name, btn){
 
 function openOverlay(name){
   document.getElementById('overlay-'+name).classList.add('open');
+  if(name === 'order') updatePriceCurrency();
 }
 function closeOverlay(name){
   document.getElementById('overlay-'+name).classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// IMPORT / EXPORT
+// ═══════════════════════════════════════════════════════
+function exportData(){
+  const data = {
+    orders,
+    snapshots,
+    brokers,
+    exportedAt: new Date().toISOString(),
+    version: 1
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `portfolio_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      // Support both formats: array of orders directly, or full backup object
+      if(Array.isArray(data)){
+        // Raw orders array
+        if(confirm(`Importar ${data.length} órdenes? Esto REEMPLAZA los datos actuales.`)){
+          orders = data;
+          save(); render();
+          alert(`✓ ${data.length} órdenes importadas correctamente`);
+        }
+      } else if(data.orders){
+        // Full backup object
+        const msg = `Importar backup de ${data.exportedAt?.slice(0,10)||'fecha desconocida'}?
+${data.orders.length} órdenes · ${data.brokers?.length||0} brokers
+
+Esto REEMPLAZA los datos actuales.`;
+        if(confirm(msg)){
+          orders    = data.orders    || [];
+          snapshots = data.snapshots || [];
+          brokers   = data.brokers   || DEFAULT_BROKERS;
+          save(); render();
+          alert(`✓ Importación exitosa: ${orders.length} órdenes`);
+        }
+      } else {
+        alert('Formato de archivo no reconocido');
+      }
+    } catch(err){
+      alert('Error al leer el archivo: ' + err.message);
+    }
+    event.target.value = ''; // Reset input
+  };
+  reader.readAsText(file);
 }
 
 // ═══════════════════════════════════════════════════════
