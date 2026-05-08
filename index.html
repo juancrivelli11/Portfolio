@@ -127,8 +127,8 @@ td{padding:9px 7px;border-bottom:1px solid #eef2f9;color:var(--txt)}
 /* TWO COLUMN LAYOUT */
 .app-body{display:flex;gap:0;align-items:flex-start}
 .main-col{flex:1;min-width:0}
-.side-panel{width:300px;flex-shrink:0;padding:11px 14px 60px 0;position:sticky;top:57px;max-height:calc(100vh - 57px);overflow-y:auto}
-@media(max-width:800px){.app-body{flex-direction:column}.side-panel{width:100%;position:static;max-height:none;padding:0 14px 40px}}
+.side-panel{width:260px;flex-shrink:0;padding:11px 10px 60px 0;position:sticky;top:57px;max-height:calc(100vh - 57px);overflow-y:auto}
+@media(max-width:600px){.app-body{flex-direction:column}.side-panel{width:100%;position:static;max-height:none;padding:0 14px 40px}}
 
 /* SIDE PANEL */
 .side-box{background:#fff;border:1px solid var(--border);border-radius:11px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px #42a5f510}
@@ -234,8 +234,24 @@ td{padding:9px 7px;border-bottom:1px solid #eef2f9;color:var(--txt)}
     <div class="fld"><label>Acción</label>
       <select id="o-action" onchange="toggleOrderType(this.value)"><option>Compra</option><option>Venta</option></select>
     </div>
-    <div class="fld" id="fld-ticker-input"><label>Ticker (ej: AAPL, VIST, BTC)</label>
-      <input id="o-ticker" placeholder="AAPL" oninput="this.value=this.value.toUpperCase()">
+    <div class="fld" id="fld-ticker-input">
+      <label>Ticker</label>
+      <div style="position:relative">
+        <input id="o-ticker" placeholder="Ej: AAPL, VIST, BTC..." autocomplete="off"
+          oninput="onTickerInput(this.value)"
+          onblur="setTimeout(()=>document.getElementById('ticker-dropdown').style.display='none',200)">
+        <div id="ticker-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px #0002;margin-top:2px"></div>
+      </div>
+    </div>
+    <div class="fld" id="fld-market-type"><label>Mercado</label>
+      <select id="o-market-type" onchange="updateTypeFromMarket(this.value);onTypeChange()">
+        <option value="usa">Acción USA / ETF</option>
+        <option value="cedear">CEDEAR</option>
+        <option value="arg">Acción Argentina</option>
+        <option value="cripto">Cripto</option>
+        <option value="bono">Bono / Renta Fija</option>
+      </select>
+    </div>
     </div>
     <div class="fld hidden" id="fld-ticker-select"><label>Activo a vender</label>
       <select id="o-ticker-sel" onchange="document.getElementById('o-ticker').value=this.value;updateMaxQty()">
@@ -243,15 +259,7 @@ td{padding:9px 7px;border-bottom:1px solid #eef2f9;color:var(--txt)}
       </select>
       <div id="max-qty-info" style="font-size:11px;color:#1565c0;margin-top:5px"></div>
     </div>
-    <div class="fld"><label>Tipo de activo</label>
-      <select id="o-type">
-        <option value="Acción USA">Acción USA</option>
-        <option value="ETF">ETF</option>
-        <option value="Cripto">Cripto</option>
-        <option value="Bono/Renta Fija">Bono/Renta Fija</option>
-        <option value="Acción Argentina">Acción Argentina</option>
-      </select>
-    </div>
+    <input type="hidden" id="o-type" value="Acción USA">
     <div class="fld"><label>Cantidad</label>
       <input id="o-qty" type="number" inputmode="decimal" placeholder="10">
     </div>
@@ -512,6 +520,7 @@ function render(){
     al.innerHTML=`<div class="pf-table-wrap"><table class="pf-table">
       <thead><tr>
         <th>Activo</th>
+        <th>Broker</th>
         <th>Cant.</th>
         <th>Últ. Precio</th>
         <th>Var% Diaria</th>
@@ -528,10 +537,15 @@ function render(){
         const dailyDol = a.prevClose&&a.price>0 ? (a.price-a.prevClose)*a.qty : null;
         const dc = dailyPct!=null?(dailyPct>=0?'tag-up':'tag-dn'):'tag-neu';
         const gc = a.hasPx?(a.pnl>=0?'tag-up':'tag-dn'):'tag-neu';
+        const brokerTags = [...new Set(orders.filter(o=>o.ticker===a.ticker&&o.broker).map(o=>o.broker))];
         return `<tr>
           <td><div class="pf-asset-cell">
             ${logoHTML(a.ticker,a.type,26)}
-            <div><div class="pf-ticker">${a.ticker}</div><div class="pf-name">${a.type}</div></div>
+            <div>
+              <div class="pf-ticker">${a.ticker}</div>
+              <div class="pf-name">${a.type}</div>
+              ${brokerTags.length?`<div style="margin-top:2px">${brokerTags.map(b=>`<span style="font-size:9px;background:#e8f0fe;color:var(--blueDark);padding:1px 5px;border-radius:3px;margin-right:2px;font-weight:600">${b}</span>`).join('')}</div>`:''}
+            </div>
           </div></td>
           <td>${fmt(a.qty,2)}</td>
           <td>${a.price>0?fU(a.price):'—'}</td>
@@ -548,7 +562,7 @@ function render(){
         </tr>`;
       }).join('')}
       <tr class="pf-total-row">
-        <td colspan="7">TOTAL PORTFOLIO</td>
+        <td colspan="8">TOTAL PORTFOLIO</td>
         <td class="${totPnlDol>=0?'tag-up':'tag-dn'}">${totPnlDol>=0?'+':''}${fU(totPnlDol)}</td>
         <td style="font-weight:800">${dv(totVal)}</td>
         <td></td>
@@ -738,6 +752,37 @@ function delByTicker(ticker){
   }
 }
 
+// Popular tickers for autocomplete
+const TICKERS_USA = ['AAPL','MSFT','GOOGL','AMZN','META','NVDA','TSLA','JPM','V','MA','WMT','JNJ','PG','XOM','BAC','VIST','SUPV','GLOB','MELI','LRCX','PDYN','VSEE','CYCU','SPY','QQQ','GLD','TLT','IWM','EEM','USO'];
+const TICKERS_CEDEAR = ['ACN','AMGN','AMZN','AAPL','BABA','BA','CAT','CL','COIN','CVX','DIS','GOOGL','IBM','JD','JPM','KO','MELI','META','MSFT','NFLX','NVDA','PFE','PG','PYPL','SBUX','SPOT','TSLA','UNH','V','WMT','XOM'];
+const TICKERS_CRIPTO = ['BTC','ETH','SOL','BNB','XRP','ADA','DOGE','MATIC','AVAX','LINK','DOT','UNI','USDT','USDC'];
+
+function tickerAutocomplete(val){
+  const dd = document.getElementById('ticker-dropdown');
+  if(!val || val.length < 1){dd.style.display='none';return;}
+  const market = document.getElementById('o-market-type')?.value || 'usa';
+  let pool = market==='cedear' ? TICKERS_CEDEAR : market==='cripto' ? TICKERS_CRIPTO : TICKERS_USA;
+  const matches = pool.filter(t=>t.startsWith(val)).slice(0,8);
+  if(!matches.length){dd.style.display='none';return;}
+  dd.style.display='block';
+  dd.innerHTML = matches.map(t=>`
+    <div onclick="selectTicker('${t}')" style="padding:9px 12px;cursor:pointer;font-size:13px;font-weight:600;color:var(--blueDark);border-bottom:1px solid #f0f4f9"
+      onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">${t}</div>`).join('');
+}
+
+function selectTicker(t){
+  document.getElementById('o-ticker').value = t;
+  document.getElementById('ticker-dropdown').style.display='none';
+}
+
+function updateTypeFromMarket(market){
+  const typeMap = {usa:'Acción USA', cedear:'Acción Argentina', cripto:'Cripto', bono:'Bono/Renta Fija'};
+  document.getElementById('o-type').value = typeMap[market]||'Acción USA';
+  // Refresh autocomplete pool
+  const ticker = document.getElementById('o-ticker').value;
+  if(ticker) tickerAutocomplete(ticker);
+}
+
 function goTV(ticker,type){
   const sym=type==='Acción Argentina'?`BCBA:${ticker}`:type==='Cripto'?`BINANCE:${ticker}USDT`:ticker;
   window.open(`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`,'_blank');
@@ -793,67 +838,96 @@ function toggleCur(){currency=currency==='USD'?'ARS':'USD';document.getElementBy
 function setStatus(msg,loading){const el=document.getElementById('status');el.textContent=msg;el.style.color=loading?'var(--a)':'var(--m)';}
 
 // ── SIDE PANEL ───────────────────────────────────────────────────────────────
-const MARKET_QUOTES = [
-  {name:'S&P 500',  sym:'SPY',  type:'etf'},
-  {name:'Nasdaq',   sym:'QQQ',  type:'etf'},
-  {name:'Merval',   sym:'GGAL', type:'arg'},
-  {name:'Bitcoin',  sym:'BTC',  type:'crypto'},
-  {name:'Oro',      sym:'GLD',  type:'etf'},
-  {name:'WTI',      sym:'USO',  type:'etf'},
-  {name:'Dólar Blue', sym:'USD_ARS', type:'ars'},
-];
+const mktData = {};
 
 async function loadMarketQuotes(){
   const container = document.getElementById('quotesContainer');
-  // Fetch crypto for BTC
-  let btcPrice = 0;
+  container.innerHTML = '<div class="side-loading">Cargando...</div>';
+
+  // 1. Crypto: BTC via CoinGecko (free, CORS open)
   try{
     const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
     const d = await r.json();
-    btcPrice = d?.bitcoin?.usd || 0;
-    const btcChg = d?.bitcoin?.usd_24h_change || 0;
-    // store for rendering
-    window._btc = {price: btcPrice, chg: btcChg};
+    mktData.BTC = {price: d?.bitcoin?.usd||0, chg: d?.bitcoin?.usd_24h_change||0};
   }catch(e){}
 
-  // Fetch ETFs/stocks via AV
-  const etfSyms = MARKET_QUOTES.filter(q=>q.type==='etf').map(q=>q.sym);
-  const etfPrices = {};
-  for(const sym of etfSyms){
-    try{
-      const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${AV_KEY}`);
-      const d = await r.json();
-      const gq = d?.['Global Quote'];
-      if(gq){
-        etfPrices[sym] = {
-          price: parseFloat(gq['05. price'])||0,
-          chg: parseFloat(gq['10. change percent']?.replace('%',''))||0
-        };
-      }
-    }catch(e){}
-  }
+  // 2. S&P500 via AV (^GSPC not available free, use SPY)
+  try{
+    const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=SPY&apikey=${AV_KEY}`);
+    const d = await r.json();
+    const gq = d?.['Global Quote'];
+    if(gq?.['05. price']) mktData.SPY = {price:parseFloat(gq['05. price']),chg:parseFloat(gq['10. change percent']?.replace('%','')||0)};
+  }catch(e){}
 
-  container.innerHTML = MARKET_QUOTES.map(q=>{
-    let price = '—', chgVal = 0, hasChg = false;
-    if(q.type==='crypto'&&window._btc){
-      price = '$'+fmt(window._btc.price,0);
-      chgVal = window._btc.chg;
-      hasChg = true;
-    } else if(q.type==='ars'){
-      price = '$'+fmt(prices['USD_ARS']||1000,0);
-      hasChg = false;
-    } else if(etfPrices[q.sym]){
-      price = '$'+fmt(etfPrices[q.sym].price,2);
-      chgVal = etfPrices[q.sym].chg;
-      hasChg = true;
-    }
-    const chgClass = chgVal>=0?'up':'dn';
-    const chgStr = hasChg ? `<span class="quote-chg ${chgClass}">${chgVal>=0?'+':''}${fmt(chgVal,2)}%</span>` : '';
+  // 3. Nasdaq via AV (QQQ)
+  try{
+    const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=QQQ&apikey=${AV_KEY}`);
+    const d = await r.json();
+    const gq = d?.['Global Quote'];
+    if(gq?.['05. price']) mktData.QQQ = {price:parseFloat(gq['05. price']),chg:parseFloat(gq['10. change percent']?.replace('%','')||0)};
+  }catch(e){}
+
+  // 4. Gold via AV (GLD ETF)
+  try{
+    const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=GLD&apikey=${AV_KEY}`);
+    const d = await r.json();
+    const gq = d?.['Global Quote'];
+    if(gq?.['05. price']) mktData.GLD = {price:parseFloat(gq['05. price']),chg:parseFloat(gq['10. change percent']?.replace('%','')||0)};
+  }catch(e){}
+
+  // 5. WTI Oil via AV (USO ETF)
+  try{
+    const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=USO&apikey=${AV_KEY}`);
+    const d = await r.json();
+    const gq = d?.['Global Quote'];
+    if(gq?.['05. price']) mktData.WTI = {price:parseFloat(gq['05. price']),chg:parseFloat(gq['10. change percent']?.replace('%','')||0)};
+  }catch(e){}
+
+  // 6. Merval via Bluelytics (already fetched) — use GGAL as proxy if not available
+  try{
+    const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=GGAL&apikey=${AV_KEY}`);
+    const d = await r.json();
+    const gq = d?.['Global Quote'];
+    if(gq?.['05. price']) mktData.MERVAL = {price:parseFloat(gq['05. price']),chg:parseFloat(gq['10. change percent']?.replace('%','')||0),isMervalProxy:true};
+  }catch(e){}
+
+  // 7. Dolar Blue + Euro Blue via dolarapi.com
+  try{
+    const r = await fetch('https://dolarapi.com/v1/dolares/blue');
+    const d = await r.json();
+    if(d.venta) mktData.DOLAR_BLUE = {price:d.venta, buy:d.compra};
+  }catch(e){
+    mktData.DOLAR_BLUE = {price: prices['USD_ARS']||1000};
+  }
+  try{
+    const r = await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');
+    const d = await r.json();
+    if(d.venta) mktData.EURO_BLUE = {price:d.venta, buy:d.compra};
+  }catch(e){}
+
+  // Render
+  const rows = [
+    {label:'S&P 500', key:'SPY', unit:'$', decimals:2},
+    {label:'Nasdaq 100', key:'QQQ', unit:'$', decimals:2},
+    {label:'Merval (GGAL)', key:'MERVAL', unit:'$', decimals:2},
+    {label:'Bitcoin', key:'BTC', unit:'$', decimals:0},
+    {label:'Oro (GLD)', key:'GLD', unit:'$', decimals:2},
+    {label:'WTI (USO)', key:'WTI', unit:'$', decimals:2},
+    {label:'Dólar Blue', key:'DOLAR_BLUE', unit:'$', decimals:0, ars:true},
+    {label:'Euro (CCL)', key:'EURO_BLUE', unit:'$', decimals:0, ars:true},
+  ];
+
+  container.innerHTML = rows.map(r=>{
+    const d = mktData[r.key];
+    const priceStr = d ? `${r.unit}${fmt(d.price, r.decimals)}` : '—';
+    const hasChg = d && d.chg != null && !r.ars;
+    const chgClass = hasChg ? (d.chg>=0?'up':'dn') : '';
+    const chgStr = hasChg ? `<span class="quote-chg ${chgClass}">${d.chg>=0?'+':''}${fmt(d.chg,2)}%</span>` : 
+                   (d?.buy ? `<span style="font-size:10px;color:var(--m)">C: $${fmt(d.buy,0)}</span>` : '');
     return `<div class="quote-row">
-      <span class="quote-name">${q.name}</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span class="quote-price">${price}</span>
-        ${chgStr}
+      <span class="quote-name">${r.label}</span>
+      <div style="display:flex;align-items:center;gap:5px">
+        <span class="quote-price">${priceStr}</span>${chgStr}
       </div>
     </div>`;
   }).join('');
@@ -874,12 +948,145 @@ async function loadNews(){
       <a href="${n.url}" target="_blank" rel="noreferrer" style="text-decoration:none">
         <div class="news-item">
           <div class="news-title">${n.title}</div>
-          <div class="news-meta">${n.source} · ${n.time_published?.slice(4,6)}/${n.time_published?.slice(6,8)} ${n.time_published?.slice(9,11)}:${n.time_published?.slice(11,13)}</div>
+          <div class="news-meta">${n.source} · ${n.time_published?.slice(4,6)}/${n.time_published?.slice(6,8)}</div>
         </div>
       </a>`).join('');
   }catch(e){
     container.innerHTML = '<div class="side-loading">Error al cargar noticias</div>';
   }
+}
+
+// ── PREDICTIVE TICKER SEARCH ─────────────────────────────────────────────────
+const CEDEARS = [
+  {t:'AAPL',n:'Apple'},
+  {t:'MSFT',n:'Microsoft'},
+  {t:'GOOGL',n:'Alphabet'},
+  {t:'AMZN',n:'Amazon'},
+  {t:'NVDA',n:'Nvidia'},
+  {t:'META',n:'Meta'},
+  {t:'TSLA',n:'Tesla'},
+  {t:'JPM',n:'JPMorgan'},
+  {t:'V',n:'Visa'},
+  {t:'MA',n:'Mastercard'},
+  {t:'WMT',n:'Walmart'},
+  {t:'XOM',n:'ExxonMobil'},
+  {t:'JNJ',n:'Johnson & Johnson'},
+  {t:'UNH',n:'UnitedHealth'},
+  {t:'PG',n:'Procter & Gamble'},
+  {t:'HD',n:'Home Depot'},
+  {t:'CVX',n:'Chevron'},
+  {t:'MRK',n:'Merck'},
+  {t:'ABBV',n:'AbbVie'},
+  {t:'KO',n:'Coca-Cola'},
+  {t:'PEP',n:'PepsiCo'},
+  {t:'LLY',n:'Eli Lilly'},
+  {t:'BAC',n:'Bank of America'},
+  {t:'COST',n:'Costco'},
+  {t:'AVGO',n:'Broadcom'},
+  {t:'MCD',n:'McDonald\'s'},
+  {t:'ACN',n:'Accenture'},
+  {t:'DIS',n:'Disney'},
+  {t:'NFLX',n:'Netflix'},
+  {t:'ADBE',n:'Adobe'},
+  {t:'CRM',n:'Salesforce'},
+  {t:'CSCO',n:'Cisco'},
+  {t:'INTC',n:'Intel'},
+  {t:'AMD',n:'AMD'},
+  {t:'QCOM',n:'Qualcomm'},
+  {t:'TXN',n:'Texas Instruments'},
+  {t:'SBUX',n:'Starbucks'},
+  {t:'PYPL',n:'PayPal'},
+  {t:'SPOT',n:'Spotify'},
+  {t:'COIN',n:'Coinbase'},
+  {t:'MELI',n:'MercadoLibre'},
+  {t:'BIOX',n:'Bioceres'},
+  {t:'GLOB',n:'Globant'},
+  {t:'LRCX',n:'Lam Research'},
+  {t:'BABA',n:'Alibaba'},
+  {t:'JD',n:'JD.com'},
+  {t:'FXI',n:'iShares China'},
+  {t:'GS',n:'Goldman Sachs'},
+  {t:'MS',n:'Morgan Stanley'},
+  {t:'C',n:'Citigroup'},
+  {t:'WFC',n:'Wells Fargo'},
+  {t:'BRK.B',n:'Berkshire Hathaway'},
+  {t:'CL',n:'Colgate'},
+  {t:'NKE',n:'Nike'},
+  {t:'UNH',n:'UnitedHealth'},
+  {t:'PFE',n:'Pfizer'},
+  {t:'MRNA',n:'Moderna'},
+];
+
+const USA_STOCKS = [
+  {t:'AAPL',n:'Apple'},{t:'MSFT',n:'Microsoft'},{t:'GOOGL',n:'Alphabet'},
+  {t:'AMZN',n:'Amazon'},{t:'NVDA',n:'Nvidia'},{t:'META',n:'Meta'},
+  {t:'TSLA',n:'Tesla'},{t:'VIST',n:'Vista Energy'},{t:'PDYN',n:'Palladyne AI'},
+  {t:'SUPV',n:'Grupo Supervielle'},{t:'MELI',n:'MercadoLibre'},
+  {t:'GLOB',n:'Globant'},{t:'BIOX',n:'Bioceres'},{t:'LOMA',n:'Loma Negra'},
+  {t:'BMA',n:'Banco Macro'},{t:'BBAR',n:'BBVA Argentina'},
+  {t:'CEPU',n:'Central Puerto'},{t:'GGAL',n:'Galicia'},
+  {t:'PAMP',n:'Pampa Energía'},{t:'YPF',n:'YPF'},
+  {t:'VSEE',n:'VSee Health'},{t:'CYCU',n:'Cycurion'},
+  {t:'SPY',n:'S&P 500 ETF'},{t:'QQQ',n:'Nasdaq ETF'},
+  {t:'GLD',n:'Gold ETF'},{t:'TLT',n:'Bond ETF'},
+];
+
+const ARG_STOCKS = [
+  {t:'GGAL',n:'Galicia'},{t:'BMA',n:'Macro'},
+  {t:'BBAR',n:'BBVA'},{t:'SUPV',n:'Supervielle'},
+  {t:'YPF',n:'YPF'},{t:'PAMP',n:'Pampa'},
+  {t:'CEPU',n:'Central Puerto'},{t:'TECO2',n:'Telecom'},
+  {t:'ALUA',n:'Aluar'},{t:'LOMA',n:'Loma Negra'},
+  {t:'TXAR',n:'Ternium Arg.'},{t:'EDN',n:'Edenor'},
+  {t:'CRES',n:'Cresud'},{t:'IRSA',n:'IRSA'},
+];
+
+const CRYPTOS = [
+  {t:'BTC',n:'Bitcoin'},{t:'ETH',n:'Ethereum'},
+  {t:'SOL',n:'Solana'},{t:'BNB',n:'BNB'},
+  {t:'XRP',n:'Ripple'},{t:'ADA',n:'Cardano'},
+  {t:'DOGE',n:'Dogecoin'},{t:'USDT',n:'Tether'},
+];
+
+function getListForType(type){
+  if(type==='CEDEAR') return CEDEARS;
+  if(type==='Cripto') return CRYPTOS;
+  if(type==='Acción Argentina') return ARG_STOCKS;
+  return USA_STOCKS;
+}
+
+function onTypeChange(){
+  document.getElementById('o-ticker').value='';
+  document.getElementById('ticker-dropdown').style.display='none';
+}
+
+function getListForType(type){
+  if(type==='cedear') return CEDEARS;
+  if(type==='cripto') return CRYPTOS;
+  if(type==='arg') return ARG_STOCKS;
+  return USA_STOCKS;
+}
+
+function onTickerInput(val){
+  const market = document.getElementById('o-market-type').value;
+  const list = getListForType(market);
+  const q = val.toUpperCase();
+  if(!q){ document.getElementById('ticker-dropdown').style.display='none'; return; }
+  const matches = list.filter(s=>s.t.startsWith(q)||s.n.toUpperCase().includes(q)).slice(0,8);
+  const box = document.getElementById('ticker-dropdown');
+  if(!matches.length){ box.style.display='none'; return; }
+  box.style.display='block';
+  box.innerHTML = matches.map(s=>`
+    <div onclick="selectTicker('${s.t}')" style="padding:9px 12px;cursor:pointer;display:flex;justify-content:space-between;border-bottom:1px solid #f0f4f9;font-size:13px"
+      onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">
+      <strong style="color:var(--blueDark)">${s.t}</strong>
+      <span style="color:var(--m);font-size:12px">${s.n}</span>
+    </div>`).join('');
+}
+
+function selectTicker(ticker){
+  document.getElementById('o-ticker').value=ticker;
+  document.getElementById('ticker-dropdown').style.display='none';
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -907,9 +1114,7 @@ document.getElementById('o-date').value=new Date().toISOString().split('T')[0];
 render();
 const pf=getPortfolio();
 if(pf.length) refresh();
-loadNews();
-// Load market quotes after a short delay to not block prices
-setTimeout(loadMarketQuotes, 2000);
+// TradingView widgets load automatically via script tags
 </script>
 </body>
 </html>
