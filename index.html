@@ -208,6 +208,8 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
     <button class="btn btn-blue" onclick="exportData()" title="Exportar datos">⬇ Export</button>
     <button class="btn btn-blue" onclick="document.getElementById('importFile').click()" title="Importar datos">⬆ Import</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="btn btn-blue" onclick="configAPIKey()" title="Configurar API Key FMP" id="btnApi" style="color:var(--gold)">⚙ FMP</button>
+    <button class="btn btn-blue" onclick="configIOL()" title="Conectar IOL" id="btnIOL" style="color:var(--gold)">⚙ IOL</button>
     <button class="btn btn-green" onclick="doRefresh()" id="btnRef">↻ Actualizar</button>
   </div>
 </div>
@@ -418,7 +420,8 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 // ═══════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
-const AV = '8X9MWKFC0MU3LNSY';
+const AV  = '8X9MWKFC0MU3LNSY';  // Alpha Vantage (25/día)
+const FMP = '';  // Financial Modeling Prep — ponés tu key acá (250/día gratis)
 const COLS = ['#1565c0','#42a5f5','#00a876','#f59f00','#e53935','#7c3aed','#0891b2'];
 const PIE_COLS = ['#42a5f5','#f59f00','#e53935','#7c3aed','#00a876','#0891b2','#f97316'];
 
@@ -611,9 +614,15 @@ function getPortfolio(filterBroker){
 }
 
 function getPortfolioFull(){
+  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
   return getPortfolio(null).map(a => {
-    const price    = prices[a.ticker] || 0;
-    const prev     = prices[a.ticker + '_prev'] || 0;
+    const isARS = prices[a.ticker+'_ars'] === true;
+    const rawPrice = prices[a.ticker] || 0;
+    const rawPrev  = prices[a.ticker + '_prev'] || 0;
+    // Convert to USD if price is in ARS
+    const price    = rawPrice > 0 ? (isARS ? rawPrice / ccl : rawPrice) : 0;
+    const prev     = rawPrev  > 0 ? (isARS ? rawPrev  / ccl : rawPrev)  : 0;
+    const priceARS = isARS ? rawPrice : price * ccl;  // for display
     const hasPx    = price > 0;
     const value    = a.qty * price;
     const pnl      = hasPx ? value - a.cost : null;
@@ -621,26 +630,102 @@ function getPortfolioFull(){
     const dayPct   = prev && price ? (price - prev) / prev * 100 : null;
     const dayDol   = prev && price ? (price - prev) * a.qty : null;
     const brokerList = [...new Set(orders.filter(o=>o.ticker===a.ticker&&o.broker).map(o=>o.broker))];
-    return { ...a, price, prev, hasPx, value, pnl, pnlPct, dayPct, dayDol, brokerList };
+    return { ...a, price, priceARS, prev, hasPx, value, pnl, pnlPct, dayPct, dayDol, brokerList, isARS };
   });
 }
 
 // ═══════════════════════════════════════════════════════
 // PRICE FETCH
 // ═══════════════════════════════════════════════════════
-async function fetchAV(sym){
+// ── IOL AUTH ─────────────────────────────────────────────────────────────────
+let iolToken = null;
+let iolTokenExpiry = 0;
+
+async function getIOLToken(){
+  const usr = localStorage.getItem('pf6_iol_user') || '';
+  const pwd = localStorage.getItem('pf6_iol_pass') || '';
+  if(!usr || !pwd) return null;
+  if(iolToken && Date.now() < iolTokenExpiry) return iolToken;
+  try{
+    const r = await fetch('https://api.invertironline.com/token', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: `username=${encodeURIComponent(usr)}&password=${encodeURIComponent(pwd)}&grant_type=password`
+    });
+    const d = await r.json();
+    if(d.access_token){
+      iolToken = d.access_token;
+      iolTokenExpiry = Date.now() + (d.expires_in - 60) * 1000;
+      console.log('IOL token OK');
+      return iolToken;
+    }
+  }catch(e){ console.log('IOL auth error:', e); }
+  return null;
+}
+
+async function fetchIOLPrice(ticker, market){
+  // market: 'bCBA' for arg stocks, 'nYSE' for CEDEARs on IOL
+  const token = await getIOLToken();
+  if(!token) return null;
+  const mkts = market === 'arg' ? ['bCBA'] : ['bCBA','nYSE'];
+  for(const m of mkts){
+    try{
+      const r = await fetch(`https://api.invertironline.com/api/v2/${m}/Titulos/${ticker}/Cotizacion`, {
+        headers: {'Authorization': `Bearer ${token}`}
+      });
+      if(!r.ok) continue;
+      const d = await r.json();
+      if(d?.ultimoPrecio > 0) return {
+        price:  d.ultimoPrecio,
+        prev:   d.cierreAnterior || d.ultimoPrecio,
+        chgPct: d.variacionPorcentual || 0,
+        currency: 'ARS'
+      };
+    }catch(e){}
+  }
+  return null;
+}
+
+async function fetchPrice(sym, assetType){
+  const isArgAsset = assetType === 'CEDEAR' || assetType === 'Acción Argentina' || assetType === 'Bono/Renta Fija';
+
+  // For Argentine assets: try IOL first (returns ARS)
+  if(isArgAsset){
+    const mkt = assetType === 'Acción Argentina' ? 'arg' : 'cedear';
+    const iol = await fetchIOLPrice(sym, mkt);
+    if(iol) return iol;
+  }
+
+  // For US assets: FMP first
+  if(!isArgAsset && window._FMP_KEY){
+    try{
+      const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${sym}?apikey=${window._FMP_KEY}`);
+      const d = await r.json();
+      if(d?.[0]?.price > 0) return {
+        price:  d[0].price,
+        prev:   d[0].previousClose || d[0].price,
+        chgPct: d[0].changesPercentage || 0,
+        currency: 'USD'
+      };
+    }catch(e){}
+  }
+
+  // Alpha Vantage fallback
   try{
     const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${AV}`);
     const d = await r.json();
     const gq = d?.['Global Quote'];
-    if(!gq || !gq['05. price']) return null;
-    return {
-      price: parseFloat(gq['05. price']),
-      prev:  parseFloat(gq['08. previous close']),
-      chgPct:parseFloat((gq['10. change percent']||'0').replace('%',''))
+    if(gq?.['05. price'] && parseFloat(gq['05. price']) > 0) return {
+      price:  parseFloat(gq['05. price']),
+      prev:   parseFloat(gq['08. previous close']),
+      chgPct: parseFloat((gq['10. change percent']||'0').replace('%','')),
+      currency: isArgAsset ? 'ARS' : 'USD'
     };
-  }catch(e){ return null; }
+  }catch(e){}
+  return null;
 }
+
+const fetchAV = (sym) => fetchPrice(sym, 'Acción USA');
 
 async function doRefresh(){
   const pf = getPortfolio();
@@ -677,10 +762,18 @@ async function doRefresh(){
   // Stocks via Alpha Vantage (respect 25/day limit — fetch sequentially)
   for(const a of stocks){
     const sym = a.type === 'Acción Argentina' ? a.ticker + '.BA' : a.ticker;
-    const data = await fetchAV(sym);
+    const data = await fetchPrice(sym, a.type);
     if(data && data.price > 0){
-      prices[a.ticker] = data.price;
-      prices[a.ticker+'_prev'] = data.prev;
+      const isArgAsset = a.type==='CEDEAR'||a.type==='Acción Argentina'||a.type==='Bono/Renta Fija';
+      if(isArgAsset && data.currency === 'ARS'){
+        // Store ARS price — render will convert to USD using CCL
+        prices[a.ticker] = data.price;           // in ARS
+        prices[a.ticker+'_prev'] = data.prev;    // in ARS
+        prices[a.ticker+'_ars'] = true;          // flag: price is in ARS
+      } else {
+        prices[a.ticker] = data.price;           // in USD
+        prices[a.ticker+'_prev'] = data.prev;    // in USD
+      }
     }
   }
 
@@ -749,7 +842,7 @@ async function loadMarketQuotes(){
   // Stocks/ETFs via AV — only 4 to save rate limit
   const avSyms = ['SPY','QQQ','GLD','USO'];
   for(const sym of avSyms){
-    const data = await fetchAV(sym);
+    const data = await fetchPrice(sym, a.type);
     if(data) mkt[sym.toLowerCase()] = data;
   }
   // GGAL as Merval proxy
@@ -924,7 +1017,7 @@ function renderAssetTable(pf, containerId, totUSD, totPnL){
     tr.appendChild(tdAsset);
     tr.innerHTML += `
       <td>${n2(a.qty,2)}</td>
-      <td>${a.price > 0 ? (isARStype(a.type) ? $a(a.price * ccl2) : $u(a.price)) : '—'}</td>
+      <td>${a.hasPx ? (isARStype(a.type) ? $a(a.priceARS||a.price*ccl2) : $u(a.price)) : '—'}</td>
       <td class="${dc}">${a.dayPct != null ? pc(a.dayPct) : '—'}</td>
       <td class="${dc}">${a.dayDol != null ? (a.dayDol>=0?'+':'')+$u(a.dayDol) : '—'}</td>
       <td>${isARStype(a.type) ? $a(a.avgPrice*ccl2) : $u(a.avgPrice)}</td>
@@ -1338,6 +1431,61 @@ function closeOverlay(name){
 // ═══════════════════════════════════════════════════════
 // IMPORT / EXPORT
 // ═══════════════════════════════════════════════════════
+function configIOL(){
+  const currentUser = localStorage.getItem('pf6_iol_user') || '';
+  const isConnected = !!currentUser;
+  const action = isConnected
+    ? prompt(`IOL conectado como: ${currentUser}\n\n¿Qué querés hacer?\n1 - Actualizar credenciales\n2 - Desconectar\n(dejá vacío para cancelar)`, '')
+    : null;
+
+  if(isConnected && action === '2'){
+    localStorage.removeItem('pf6_iol_user');
+    localStorage.removeItem('pf6_iol_pass');
+    iolToken = null;
+    document.getElementById('btnIOL').style.color = 'var(--gold)';
+    document.getElementById('btnIOL').textContent = '⚙ IOL';
+    alert('IOL desconectado');
+    return;
+  }
+
+  if(isConnected && !action) return;
+
+  const user = prompt('Usuario IOL (tu email o usuario):');
+  if(!user) return;
+  const pass = prompt('Contraseña IOL:\n\n⚠️ Se guarda solo en tu browser (localStorage).\nNadie más tiene acceso.');
+  if(!pass) return;
+
+  localStorage.setItem('pf6_iol_user', user.trim());
+  localStorage.setItem('pf6_iol_pass', pass.trim());
+  iolToken = null;
+
+  // Test connection
+  getIOLToken().then(token => {
+    if(token){
+      document.getElementById('btnIOL').style.color = 'var(--green)';
+      document.getElementById('btnIOL').textContent = '⚙ IOL ✓';
+      alert('✓ IOL conectado. Tocá Actualizar para obtener precios en tiempo real de CEDEARs y acciones argentinas.');
+    } else {
+      alert('✗ No se pudo conectar. Verificá usuario y contraseña.');
+      localStorage.removeItem('pf6_iol_user');
+      localStorage.removeItem('pf6_iol_pass');
+    }
+  });
+}
+
+function configAPIKey(){
+  const current = localStorage.getItem('pf6_fmp_key') || '';
+  const key = prompt('Pegá tu API key de Financial Modeling Prep (financialmodelingprep.com):\n\nPlan gratis: 250 requests/día — suficiente para tu portfolio.\n\nAPI Key actual: ' + (current ? current.slice(0,6)+'...' : 'ninguna'), current);
+  if(key === null) return;
+  localStorage.setItem('pf6_fmp_key', key.trim());
+  // Update FMP constant
+  window._FMP_KEY = key.trim();
+  const btn = document.getElementById('btnApi');
+  btn.style.color = key.trim() ? 'var(--green)' : 'var(--gold)';
+  btn.textContent = key.trim() ? '⚙ API ✓' : '⚙ API';
+  if(key.trim()) { alert('✓ API Key guardada. Tocá Actualizar para obtener precios.'); }
+}
+
 function exportData(){
   const data = {
     orders,
@@ -1398,6 +1546,20 @@ Esto REEMPLAZA los datos actuales.`;
 // INIT
 // ═══════════════════════════════════════════════════════
 document.getElementById('o-date').value = new Date().toISOString().slice(0,10);
+// Load saved API key
+const _savedFMP = localStorage.getItem('pf6_fmp_key') || '';
+if(_savedFMP){ 
+  window._FMP_KEY = _savedFMP;
+  const btn = document.getElementById('btnApi');
+  if(btn){ btn.style.color='var(--green)'; btn.textContent='⚙ FMP ✓'; }
+}
+const _savedIOLUser = localStorage.getItem('pf6_iol_user') || '';
+if(_savedIOLUser){
+  const btnI = document.getElementById('btnIOL');
+  if(btnI){ btnI.style.color='var(--green)'; btnI.textContent='⚙ IOL ✓'; }
+}
+// Override FMP constant with saved key
+Object.defineProperty(window, 'FMP', { get: () => window._FMP_KEY || '' });
 renderBrokerGrid();
 render();
 if(getPortfolio().length) doRefresh();
