@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CriFund</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px}
@@ -345,6 +346,33 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 
 </div><!-- /body-wrap -->
 
+<!-- LOGIN OVERLAY -->
+<div class="overlay" id="overlay-login">
+<div class="modal" style="max-width:400px">
+  <div class="modal-hdr">
+    <h2>Acceder a CriFund</h2>
+    <button class="modal-x" onclick="closeOverlay('login')">×</button>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
+    Tus datos se sincronizan en todos tus dispositivos.
+  </p>
+  <div class="field"><label>Email</label>
+    <input id="auth-email" type="email" placeholder="tu@email.com">
+  </div>
+  <div class="field"><label>Contraseña</label>
+    <input id="auth-pass" type="password" placeholder="Mínimo 6 caracteres">
+  </div>
+  <div id="auth-msg" style="font-size:12px;color:var(--red);margin-bottom:8px;min-height:16px"></div>
+  <div class="modal-btns">
+    <button class="btn btn-green" onclick="signIn()" style="flex:1">Ingresar</button>
+    <button class="btn btn-blue" onclick="signUp()" style="flex:1;background:var(--blueL);color:var(--blue);border:1px solid var(--border)">Registrarme</button>
+  </div>
+  <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px">
+    Sin cuenta los datos se guardan solo en este browser.
+  </p>
+</div>
+</div>
+
 <!-- ORDER MODAL -->
 <div class="overlay" id="overlay-order">
 <div class="modal">
@@ -439,6 +467,12 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 // ═══════════════════════════════════════════════════════
 const AV = '8X9MWKFC0MU3LNSY';  // Alpha Vantage fallback
 window._FMP_KEY = localStorage.getItem('pf6_fmp_key') || '';
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://ypplfrqwspgdjwboikdz.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlwcGxmcnF3c3BnZGp3Ym9pa2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MzUzOTQsImV4cCI6MjA5NDExMTM5NH0.2ixCpb8i8ZIexCCM-RJwH-rvV3fOwaMasN6V1Fx-bKw';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let currentUser = null;
 const COLS = ['#1565c0','#42a5f5','#00a876','#f59f00','#e53935','#7c3aed','#0891b2'];
 const PIE_COLS = ['#42a5f5','#f59f00','#e53935','#7c3aed','#00a876','#0891b2','#f97316'];
 
@@ -1579,6 +1613,15 @@ function resetOrderModal(){
 // Load portfolio name
 const _savedName = localStorage.getItem('pf6_name');
 if(_savedName) document.getElementById('portfolioName').textContent = _savedName;
+
+// Check if already logged in
+supa.auth.getSession().then(({ data: { session } }) => {
+  if(session?.user) onLogin(session.user);
+});
+// Listen for auth changes
+supa.auth.onAuthStateChange((event, session) => {
+  if(event === 'SIGNED_IN' && session?.user) onLogin(session.user);
+});
   document.getElementById('o-market').value = 'usa';
   onActionChange();
 }
@@ -1719,6 +1762,134 @@ function updateOrderTotal(){
     totalARSEl.textContent = total > 0 ? `≈ ARS ${n2(total*ccl,0)}` : '';
   }
   totalEl.style.color = total > 0 ? 'var(--blue)' : 'var(--muted)';
+}
+
+// ═══════════════════════════════════════════════════════
+// SUPABASE AUTH & SYNC
+// ═══════════════════════════════════════════════════════
+async function signIn(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const msg   = document.getElementById('auth-msg');
+  msg.textContent = 'Ingresando...';
+  const { data, error } = await supa.auth.signInWithPassword({email, password:pass});
+  if(error){ msg.textContent = error.message; return; }
+  closeOverlay('login');
+  await onLogin(data.user);
+}
+
+async function signUp(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const msg   = document.getElementById('auth-msg');
+  if(pass.length < 6){ msg.textContent = 'La contraseña debe tener al menos 6 caracteres'; return; }
+  msg.textContent = 'Creando cuenta...';
+  const { data, error } = await supa.auth.signUp({email, password:pass});
+  if(error){ msg.textContent = error.message; return; }
+  msg.style.color = 'var(--green)';
+  msg.textContent = '✓ Cuenta creada. Revisá tu email para confirmar.';
+}
+
+async function signOut(){
+  await supa.auth.signOut();
+  currentUser = null;
+  document.getElementById('btnAuth').textContent = 'Iniciar sesión';
+  document.getElementById('btnAuth').style.background = 'var(--blueL)';
+  // Fall back to localStorage
+  orders    = JSON.parse(localStorage.getItem('pf6_orders')  || '[]');
+  snapshots = JSON.parse(localStorage.getItem('pf6_snaps')   || '[]');
+  brokers   = JSON.parse(localStorage.getItem('pf6_brokers') || JSON.stringify(DEFAULT_BROKERS));
+  render();
+}
+
+async function onLogin(user){
+  currentUser = user;
+  const btn = document.getElementById('btnAuth');
+  btn.textContent = user.email.split('@')[0];
+  btn.style.background = 'var(--green)';
+  btn.style.color = '#fff';
+  btn.onclick = () => { if(confirm('Cerrar sesión?')) signOut(); };
+  await loadFromSupabase();
+}
+
+async function loadFromSupabase(){
+  if(!currentUser) return;
+  try{
+    // Load orders
+    const { data: ords } = await supa
+      .from('orders')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('date', {ascending:true});
+    if(ords && ords.length > 0){
+      orders = ords.map(o => ({...o.data, id: o.id}));
+    }
+    // Load snapshots
+    const { data: snaps } = await supa
+      .from('snapshots')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('date', {ascending:true});
+    if(snaps) snapshots = snaps.map(s => ({date:s.date, usd:s.usd}));
+    // Load settings
+    const { data: settings } = await supa
+      .from('settings')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .single();
+    if(settings){
+      if(settings.brokers) brokers = settings.brokers;
+      if(settings.portfolio_name){
+        localStorage.setItem('pf6_name', settings.portfolio_name);
+        document.getElementById('portfolioName').textContent = settings.portfolio_name;
+      }
+    }
+    render();
+    setStatus('Datos cargados desde la nube ☁', false);
+  }catch(e){ console.log('Supabase load error:', e); }
+}
+
+async function saveToSupabase(){
+  if(!currentUser) return;
+  try{
+    // Upsert orders
+    const orderRows = orders.map(o => ({
+      id: typeof o.id === 'number' ? undefined : o.id,
+      user_id: currentUser.id,
+      data: o
+    }));
+    // Delete all and re-insert (simpler for now)
+    await supa.from('orders').delete().eq('user_id', currentUser.id);
+    if(orders.length > 0){
+      const insertRows = orders.map(o => ({user_id: currentUser.id, data: o}));
+      await supa.from('orders').insert(insertRows);
+    }
+    // Upsert settings
+    await supa.from('settings').upsert({
+      user_id: currentUser.id,
+      brokers,
+      portfolio_name: localStorage.getItem('pf6_name') || 'Mi Portfolio',
+      updated_at: new Date().toISOString()
+    }, {onConflict:'user_id'});
+    console.log('Saved to Supabase');
+  }catch(e){ console.log('Supabase save error:', e); }
+}
+
+function handleAuth(){
+  if(currentUser) return;
+  openOverlay('login');
+}
+
+// Override save() to also sync to Supabase
+const _localSave = () => {
+  localStorage.setItem('pf6_orders',   JSON.stringify(orders));
+  localStorage.setItem('pf6_snaps',    JSON.stringify(snapshots));
+  localStorage.setItem('pf6_brokers',  JSON.stringify(brokers));
+};
+
+function save(){
+  _localSave();
+  if(currentUser) saveToSupabase();
 }
 
 // ═══════════════════════════════════════════════════════
