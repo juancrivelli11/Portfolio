@@ -91,8 +91,9 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 .brk-tag{font-size:9px;background:var(--blueL);color:var(--blue);
   padding:1px 5px;border-radius:3px;margin-right:2px;font-weight:600}
 
-.up{color:var(--green);font-weight:600}
-.dn{color:var(--red);font-weight:600}
+.up{color:var(--green)!important;font-weight:600!important}
+.dn{color:var(--red)!important;font-weight:600!important}
+.tbl td.up,.tbl td.dn{font-weight:700!important}
 .neu{color:var(--muted)}
 
 /* ── ORDERS ── */
@@ -1011,7 +1012,7 @@ function render(){
   renderSidebarPie(pf);
 }
 
-function renderAssetTable(pf, containerId, totUSD, totPnL){
+function renderAssetTable(pf, containerId, totUSD, totPnL, skipPie=false){
   const el = document.getElementById(containerId);
   if(!pf.length){
     el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div>Cargá una orden para empezar.</div></div>';
@@ -1164,21 +1165,34 @@ function showBrokerDetail(name){
   document.getElementById('brokerGrid-view').style.display = 'none';
   document.getElementById('brokerDetail-view').style.display = 'block';
   document.getElementById('brokerDetailTitle').textContent = 'ACTIVOS EN ' + name.toUpperCase();
+
+  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
+  const isARSt = t => t==='CEDEAR'||t==='Acción Argentina'||t==='Bono/Renta Fija';
+
   const pf = getPortfolio(name).map(a => {
-    const price  = prices[a.ticker] || 0;
-    const prev   = prices[a.ticker+'_prev'] || 0;
+    const isARS  = prices[a.ticker+'_ars'] === true;
+    const rawPx  = prices[a.ticker] || 0;
+    const rawPrev= prices[a.ticker+'_prev'] || 0;
+    const price  = rawPx  > 0 ? (isARS ? rawPx/ccl  : rawPx)  : 0;
+    const prev   = rawPrev> 0 ? (isARS ? rawPrev/ccl : rawPrev): 0;
+    const priceARS = isARS ? rawPx : price*ccl;
     const hasPx  = price > 0;
     const value  = a.qty * price;
     const pnl    = hasPx ? value - a.cost : null;
     const pnlPct = hasPx && a.cost > 0 ? pnl/a.cost*100 : null;
     const dayPct = prev && price ? (price-prev)/prev*100 : null;
-    return {...a,price,hasPx,value,pnl,pnlPct,dayPct};
+    const brokerList = [name];
+    return {...a,price,priceARS,prev,hasPx,value,pnl,pnlPct,dayPct,brokerList,isARS};
   });
-  const totVal = pf.reduce((s,a)=>s+a.value,0);
+
+  const totVal  = pf.reduce((s,a)=>s+a.value,0);
   const totPnlV = pf.reduce((s,a)=>s+(a.pnl||0),0);
-  renderAssetTable(pf, 'brokerDetailTable', totVal, totPnlV);
+
+  // Render broker charts ABOVE the table
   const detailEl = document.getElementById('brokerDetailTable');
-  renderBrokerPie(pf, detailEl);
+  detailEl.innerHTML = '';
+  renderBrokerCharts(pf, name, totVal, detailEl);
+  renderAssetTable(pf, 'brokerDetailTable', totVal, totPnlV, true);
 }
 
 function hideBrokerDetail(){
@@ -1196,6 +1210,136 @@ function addCustomBroker(){
 
 let sidebarPieChart = null;
 let brokerPieChart = null;
+let brokerLineChart = null;
+let brokerBarChart = null;
+
+function renderBrokerCharts(pf, brokerName, totVal, containerEl){
+  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
+  const isARSt = t => t==='CEDEAR'||t==='Acción Argentina'||t==='Bono/Renta Fija';
+
+  // Compute stats
+  const totCost  = pf.reduce((s,a)=>s+a.cost,0);
+  const totPnL   = pf.reduce((s,a)=>s+(a.pnl||0),0);
+  const roe      = totCost>0 ? (totPnL/totCost*100) : 0;
+  const arsAssets= pf.filter(a=>isARSt(a.type));
+  const usdAssets= pf.filter(a=>!isARSt(a.type));
+  const arsVal   = arsAssets.reduce((s,a)=>s+a.value,0);
+  const usdVal   = usdAssets.reduce((s,a)=>s+a.value,0);
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'margin-bottom:14px';
+
+  // Row 1: KPI cards
+  const kpiRow = document.createElement('div');
+  kpiRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px';
+  const kpis = [
+    {label:'Valor Total', val:`$${n2(totVal,2)}`, color:'var(--blue)'},
+    {label:'Costo Base',  val:`$${n2(totCost,2)}`, color:'var(--txt)'},
+    {label:'P&L',         val:`${totPnL>=0?'+':''}$${n2(totPnL,2)}`, color:totPnL>=0?'var(--green)':'var(--red)'},
+    {label:'ROE',         val:`${roe>=0?'+':''}${n2(roe,2)}%`, color:roe>=0?'var(--green)':'var(--red)'},
+  ];
+  kpis.forEach(k=>{
+    kpiRow.innerHTML += `<div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px 14px;flex:1;min-width:100px">
+      <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">${k.label}</div>
+      <div style="font-size:15px;font-weight:800;color:${k.color}">${k.val}</div>
+    </div>`;
+  });
+  wrap.appendChild(kpiRow);
+
+  // Row 2: Charts grid
+  const chartsRow = document.createElement('div');
+  chartsRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px';
+
+  // Chart 1: Composición torta
+  const pieBox = document.createElement('div');
+  pieBox.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px';
+  pieBox.innerHTML = '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">Composición</div>';
+  const pieWrap = document.createElement('div');
+  pieWrap.style.cssText = 'display:flex;gap:10px;align-items:center';
+  const pieCanvas = document.createElement('canvas');
+  pieCanvas.width = 100; pieCanvas.height = 100;
+  const pieLeg = document.createElement('div');
+  pieLeg.style.cssText = 'flex:1;font-size:10px';
+  const pd = pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  pd.forEach((d,i)=>{
+    pieLeg.innerHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:4px">
+      <div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:${PIE_COLS[i%PIE_COLS.length]};margin-right:4px"></span>${d.name}</div>
+      <span style="color:var(--muted)">${n2(totVal>0?d.value/totVal*100:0)}%</span>
+    </div>`;
+  });
+  pieWrap.appendChild(pieCanvas);
+  pieWrap.appendChild(pieLeg);
+  pieBox.appendChild(pieWrap);
+  chartsRow.appendChild(pieBox);
+  if(pd.length){
+    if(brokerPieChart) brokerPieChart.destroy();
+    brokerPieChart = new Chart(pieCanvas,{
+      type:'doughnut',
+      data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:PIE_COLS,borderWidth:2,borderColor:'#f5f7fa'}]},
+      options:{responsive:false,plugins:{legend:{display:false}}}
+    });
+  }
+
+  // Chart 2: ARS vs USD composición
+  const arsBox = document.createElement('div');
+  arsBox.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px';
+  arsBox.innerHTML = '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">ARS vs USD</div>';
+  const arsCanvas = document.createElement('canvas');
+  arsCanvas.width = 100; arsCanvas.height = 100;
+  const arsLeg = document.createElement('div');
+  arsLeg.style.cssText = 'flex:1;font-size:10px;margin-top:8px';
+  const arsTotal = arsVal+usdVal;
+  arsLeg.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#f59f00;margin-right:4px"></span>ARS (CEDEARs)</div><span style="color:var(--muted)">${n2(arsTotal>0?arsVal/arsTotal*100:0)}%</span></div>
+    <div style="display:flex;justify-content:space-between"><div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#1565c0;margin-right:4px"></span>USD</div><span style="color:var(--muted)">${n2(arsTotal>0?usdVal/arsTotal*100:0)}%</span></div>`;
+  const arsWrap = document.createElement('div');
+  arsWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center';
+  arsWrap.appendChild(arsCanvas);
+  arsWrap.appendChild(arsLeg);
+  arsBox.appendChild(arsWrap);
+  chartsRow.appendChild(arsBox);
+  new Chart(arsCanvas,{
+    type:'doughnut',
+    data:{labels:['ARS','USD'],datasets:[{data:[arsVal,usdVal],backgroundColor:['#f59f00','#1565c0'],borderWidth:2,borderColor:'#f5f7fa'}]},
+    options:{responsive:false,plugins:{legend:{display:false}}}
+  });
+
+  // Chart 3: Rendimiento % por activo (bar)
+  const barBox = document.createElement('div');
+  barBox.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;grid-column:1/-1';
+  barBox.innerHTML = '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">Rendimiento % por activo</div>';
+  const barCanvas = document.createElement('canvas');
+  barCanvas.height = 120;
+  barBox.appendChild(barCanvas);
+  chartsRow.appendChild(barBox);
+  const pfWithPnl = pf.filter(a=>a.pnlPct!=null);
+  if(pfWithPnl.length){
+    if(brokerBarChart) brokerBarChart.destroy();
+    brokerBarChart = new Chart(barCanvas,{
+      type:'bar',
+      data:{
+        labels: pfWithPnl.map(a=>a.ticker),
+        datasets:[{
+          data: pfWithPnl.map(a=>a.pnlPct),
+          backgroundColor: pfWithPnl.map(a=>a.pnlPct>=0?'#00a87666':'#e5393566'),
+          borderColor: pfWithPnl.map(a=>a.pnlPct>=0?'#00a876':'#e53935'),
+          borderWidth:1
+        }]
+      },
+      options:{
+        responsive:true,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${n2(ctx.raw,2)}%`}}},
+        scales:{
+          x:{ticks:{color:'#6b8cba',font:{size:10}},grid:{display:false}},
+          y:{ticks:{color:'#6b8cba',callback:v=>`${v}%`},grid:{color:'#eef2f9'}}
+        }
+      }
+    });
+  }
+
+  wrap.appendChild(chartsRow);
+  containerEl.insertBefore(wrap, containerEl.firstChild);
+}
 
 function renderSidebarPie(pf){
   const el = document.getElementById('sidebarPie');
