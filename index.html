@@ -728,9 +728,9 @@ async function fetchPrice(sym, assetType){
 
   // For US assets: multiple sources
   if(!isArgAsset){
-    // Source 1: FMP (250/día gratis, CORS abierto)
+    // Source 1: FMP (250/día gratis - configurar con ⚙ FMP)
     const fmpKey = window._FMP_KEY;
-    if(fmpKey){
+    if(fmpKey && fmpKey !== 'YOUR_API_KEY'){
       try{
         const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${sym}?apikey=${fmpKey}`);
         const d = await r.json();
@@ -893,15 +893,15 @@ async function loadMarketQuotes(){
     mkt.dccl = {price: d.venta, buy: d.compra};
   }catch(e){}
 
-  // Stocks/ETFs via AV — only 4 to save rate limit
+  // Stocks/ETFs - always USA type
   const avSyms = ['SPY','QQQ','GLD','USO'];
   for(const sym of avSyms){
-    const data = await fetchPrice(sym, a.type);
+    const data = await fetchPrice(sym, 'Acción USA');
     if(data) mkt[sym.toLowerCase()] = data;
   }
   // GGAL as Merval proxy
   if(!mkt.ggal){
-    const data = await fetchAV('GGAL');
+    const data = await fetchPrice('GGAL', 'Acción USA');
     if(data) mkt.ggal = data;
   }
 
