@@ -420,8 +420,8 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 // ═══════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
-const AV  = '8X9MWKFC0MU3LNSY';  // Alpha Vantage (25/día)
-const FMP = '';  // Financial Modeling Prep — ponés tu key acá (250/día gratis)
+const AV = '8X9MWKFC0MU3LNSY';  // Alpha Vantage fallback
+window._FMP_KEY = localStorage.getItem('pf6_fmp_key') || '';
 const COLS = ['#1565c0','#42a5f5','#00a876','#f59f00','#e53935','#7c3aed','#0891b2'];
 const PIE_COLS = ['#42a5f5','#f59f00','#e53935','#7c3aed','#00a876','#0891b2','#f97316'];
 
@@ -675,32 +675,56 @@ async function fetchPrice(sym, assetType){
     if(yba) return yba;
   }
 
-  // For US assets: FMP first
-  if(!isArgAsset && window._FMP_KEY){
-    try{
-      const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${sym}?apikey=${window._FMP_KEY}`);
-      const d = await r.json();
-      if(d?.[0]?.price > 0) return {
-        price:  d[0].price,
-        prev:   d[0].previousClose || d[0].price,
-        chgPct: d[0].changesPercentage || 0,
-        currency: 'USD'
-      };
-    }catch(e){}
-  }
+  // For US assets: multiple sources
+  if(!isArgAsset){
+    // Source 1: FMP (250/día gratis, CORS abierto)
+    const fmpKey = window._FMP_KEY;
+    if(fmpKey){
+      try{
+        const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${sym}?apikey=${fmpKey}`);
+        const d = await r.json();
+        if(Array.isArray(d) && d[0]?.price > 0){
+          console.log(`FMP OK: ${sym} = ${d[0].price}`);
+          return {price:d[0].price, prev:d[0].previousClose||d[0].price, chgPct:d[0].changesPercentage||0, currency:'USD'};
+        }
+      }catch(e){ console.log(`FMP error ${sym}:`, e.message); }
+    }
 
-  // Alpha Vantage fallback
-  try{
-    const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${AV}`);
-    const d = await r.json();
-    const gq = d?.['Global Quote'];
-    if(gq?.['05. price'] && parseFloat(gq['05. price']) > 0) return {
-      price:  parseFloat(gq['05. price']),
-      prev:   parseFloat(gq['08. previous close']),
-      chgPct: parseFloat((gq['10. change percent']||'0').replace('%','')),
-      currency: isArgAsset ? 'ARS' : 'USD'
-    };
-  }catch(e){}
+    // Source 2: Yahoo Finance via corsproxy (free, no key)
+    try{
+      const yhUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
+      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yhUrl)}`);
+      const d = await r.json();
+      const meta = d?.chart?.result?.[0]?.meta;
+      if(meta?.regularMarketPrice > 0){
+        console.log(`Yahoo OK: ${sym} = ${meta.regularMarketPrice}`);
+        return {
+          price:  meta.regularMarketPrice,
+          prev:   meta.chartPreviousClose || meta.regularMarketPrice,
+          chgPct: meta.chartPreviousClose ? (meta.regularMarketPrice - meta.chartPreviousClose)/meta.chartPreviousClose*100 : 0,
+          currency: 'USD'
+        };
+      }
+    }catch(e){ console.log(`Yahoo error ${sym}:`, e.message); }
+
+    // Source 3: Alpha Vantage fallback (25/día)
+    try{
+      const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${AV}`);
+      const d = await r.json();
+      const gq = d?.['Global Quote'];
+      if(gq?.['05. price'] && parseFloat(gq['05. price']) > 0){
+        console.log(`AV OK: ${sym} = ${gq['05. price']}`);
+        return {
+          price:  parseFloat(gq['05. price']),
+          prev:   parseFloat(gq['08. previous close']),
+          chgPct: parseFloat((gq['10. change percent']||'0').replace('%','')),
+          currency: 'USD'
+        };
+      }
+    }catch(e){ console.log(`AV error ${sym}:`, e.message); }
+
+    console.log(`No price found for ${sym}`);
+  }
   return null;
 }
 
@@ -1489,15 +1513,11 @@ Esto REEMPLAZA los datos actuales.`;
 // ═══════════════════════════════════════════════════════
 document.getElementById('o-date').value = new Date().toISOString().slice(0,10);
 // Load saved API key
-const _savedFMP = localStorage.getItem('pf6_fmp_key') || '';
-if(_savedFMP){ 
-  window._FMP_KEY = _savedFMP;
-  const btn = document.getElementById('btnApi');
-  if(btn){ btn.style.color='var(--green)'; btn.textContent='⚙ FMP ✓'; }
-}
+// FMP key already loaded at top via localStorage.getItem
+const btn = document.getElementById('btnApi');
+if(window._FMP_KEY && btn){ btn.style.color='var(--green)'; btn.textContent='⚙ FMP ✓'; }
 
-// Override FMP constant with saved key
-Object.defineProperty(window, 'FMP', { get: () => window._FMP_KEY || '' });
+
 renderBrokerGrid();
 render();
 if(getPortfolio().length) doRefresh();
