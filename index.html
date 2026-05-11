@@ -889,21 +889,48 @@ async function loadMarketQuotes(){
 
 async function loadNews(){
   const panel = document.getElementById('newsPanel');
+  // Argentine financial news sources via RSS2JSON (free)
+  const feeds = [
+    {name:'Ámbito', url:'https://www.ambito.com/rss/pages/finanzas.xml'},
+    {name:'Infobae', url:'https://www.infobae.com/feeds/rss/economia.xml'},
+    {name:'El Cronista', url:'https://www.cronista.com/files/rss/home.xml'},
+  ];
+  const rss2json = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+  for(const feed of feeds){
+    try{
+      const r = await fetch(rss2json + encodeURIComponent(feed.url));
+      const d = await r.json();
+      if(d.status === 'ok' && d.items?.length){
+        panel.innerHTML = d.items.slice(0,10).map(n => {
+          const date = n.pubDate ? n.pubDate.slice(5,10) : '';
+          const title = n.title?.replace(/<[^>]*>/g,'') || '';
+          return `<a class="news-item" href="${n.link}" target="_blank" rel="noreferrer">
+            <div class="ntitle">${title}</div>
+            <div class="nmeta">${feed.name}${date?' · '+date:''}</div>
+          </a>`;
+        }).join('');
+        return;
+      }
+    }catch(e){}
+  }
+  // Fallback: Alpha Vantage with Argentina topic
   try{
-    const r = await fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=financial_markets&limit=8&apikey=${AV}`);
+    const r = await fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=economy_fiscal&tickers=YPF,MELI,GGAL&limit=8&apikey=${AV}`);
     const d = await r.json();
     const items = d?.feed || [];
-    if(!items.length){ panel.innerHTML='<div class="side-msg">Sin noticias disponibles</div>'; return; }
-    panel.innerHTML = items.slice(0,8).map(n => {
-      const date = n.time_published ? n.time_published.slice(4,6)+'/'+n.time_published.slice(6,8) : '';
-      return `<a class="news-item" href="${n.url}" target="_blank" rel="noreferrer">
-        <div class="ntitle">${n.title}</div>
-        <div class="nmeta">${n.source}${date?' · '+date:''}</div>
-      </a>`;
-    }).join('');
-  }catch(e){
-    panel.innerHTML = '<div class="side-msg">Error al cargar noticias</div>';
-  }
+    if(items.length){
+      panel.innerHTML = items.slice(0,8).map(n => {
+        const date = n.time_published ? n.time_published.slice(4,6)+'/'+n.time_published.slice(6,8) : '';
+        return `<a class="news-item" href="${n.url}" target="_blank" rel="noreferrer">
+          <div class="ntitle">${n.title}</div>
+          <div class="nmeta">${n.source}${date?' · '+date:''}</div>
+        </a>`;
+      }).join('');
+      return;
+    }
+  }catch(e){}
+  panel.innerHTML = '<div class="side-msg">Sin noticias disponibles</div>';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1018,15 +1045,16 @@ function renderAssetTable(pf, containerId, totUSD, totPnL){
     const gc = a.hasPx ? (a.pnl >= 0 ? 'up' : 'dn') : 'neu';
 
     tr.appendChild(tdAsset);
+    const priceColor = a.hasPx ? (a.price > a.avgPrice ? 'up' : a.price < a.avgPrice ? 'dn' : '') : '';
     tr.innerHTML += `
       <td>${n2(a.qty,2)}</td>
-      <td>${a.hasPx ? (isARStype(a.type) ? $a(a.priceARS||a.price*ccl2) : $u(a.price)) : '—'}</td>
+      <td class="${priceColor}">${a.hasPx ? (isARStype(a.type) ? $a(a.priceARS||a.price*ccl2) : $u(a.price)) : '—'}</td>
       <td class="${dc}">${a.dayPct != null ? pc(a.dayPct) : '—'}</td>
       <td class="${dc}">${a.dayDol != null ? (a.dayDol>=0?'+':'')+$u(a.dayDol) : '—'}</td>
-      <td>${isARStype(a.type) ? $a(a.avgPrice*ccl2) : $u(a.avgPrice)}</td>
-      <td class="${gc}">${a.hasPx ? pc(a.pnlPct) : '—'}</td>
-      <td class="${gc}">${a.hasPx ? (a.pnl>=0?'+':'')+$u(a.pnl) : '—'}</td>
-      <td style="font-weight:700">${a.hasPx ? dv(a.value) : '—'}</td>
+      <td style="font-weight:600;color:inherit">${isARStype(a.type) ? $a(a.avgPrice*ccl2) : $u(a.avgPrice)}</td>
+      <td class="${gc}" style="font-weight:700">${a.hasPx ? pc(a.pnlPct) : '—'}</td>
+      <td class="${gc}" style="font-weight:700">${a.hasPx ? (a.pnl>=0?'+':'')+$u(a.pnl) : '—'}</td>
+      <td class="${gc}" style="font-weight:800">${a.hasPx ? dv(a.value) : '—'}</td>
       <td>
         <button class="btn-icon" onclick="goTV('${a.ticker}','${a.type}')" title="Ver gráfico">📈</button>
         <button class="btn-icon" onclick="delTicker('${a.ticker}')" title="Eliminar">✕</button>
