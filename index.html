@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfolio</title>
+<title>CriFund</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -199,9 +199,18 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 
 <!-- HEADER -->
 <div class="hdr">
-  <div class="hdr-left">
-    <h1>⬡ Portfolio</h1>
-    <p id="statusBar">Tocá Actualizar para obtener precios</p>
+  <div class="hdr-left" style="display:flex;align-items:center;gap:12px">
+    <div style="font-size:22px;font-weight:900;color:var(--blue);letter-spacing:-1px;cursor:default">
+      <span style="color:var(--blue)">CRI</span><span style="color:var(--green)">FUND</span>
+    </div>
+    <div style="border-left:1px solid var(--border);padding-left:12px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <h1 id="portfolioName" style="font-size:15px;font-weight:700;color:var(--txt);cursor:pointer" 
+          onclick="editPortfolioName()" title="Click para editar">Mi Portfolio</h1>
+        <span onclick="editPortfolioName()" style="font-size:11px;color:var(--muted);cursor:pointer">✎</span>
+      </div>
+      <p id="statusBar" style="font-size:11px;color:var(--muted)">Tocá Actualizar para obtener precios</p>
+    </div>
   </div>
   <div class="hdr-right">
     <button class="btn btn-blue" onclick="toggleCur()" id="btnCur">USD</button>
@@ -381,19 +390,26 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
   </div>
   <div class="field">
     <label>Cantidad</label>
-    <input id="o-qty" type="number" inputmode="decimal" placeholder="10" min="0">
+    <input id="o-qty" type="number" inputmode="decimal" placeholder="10" min="0" oninput="updateOrderTotal()">
   </div>
   <div class="field">
     <label id="o-price-label">Precio (USD)</label>
     <div style="position:relative">
-      <input id="o-price" type="number" inputmode="decimal" placeholder="150.00" min="0" style="padding-right:50px">
+      <input id="o-price" type="number" inputmode="decimal" placeholder="150.00" min="0" style="padding-right:50px" oninput="updateOrderTotal()">
       <span id="o-price-currency" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--muted)">USD</span>
     </div>
     <div id="o-price-hint" style="font-size:10px;color:var(--muted);margin-top:3px"></div>
   </div>
   <div class="field">
     <label>Comisión (USD)</label>
-    <input id="o-comm" type="number" inputmode="decimal" placeholder="0.00" min="0">
+    <input id="o-comm" type="number" inputmode="decimal" placeholder="0.00" min="0" oninput="updateOrderTotal()">
+  </div>
+  <div style="background:var(--blueL);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--muted);font-weight:600">TOTAL DE LA OPERACIÓN</span>
+      <span id="orderTotal" style="font-size:16px;font-weight:800;color:var(--blue)">$0,00</span>
+    </div>
+    <div id="orderTotalARS" style="font-size:10px;color:var(--muted);text-align:right;margin-top:2px"></div>
   </div>
   <div class="field">
     <label>Broker</label>
@@ -1055,9 +1071,22 @@ function renderAssetTable(pf, containerId, totUSD, totPnL){
       <td class="${gc}" style="font-weight:700">${a.hasPx ? pc(a.pnlPct) : '—'}</td>
       <td class="${gc}" style="font-weight:700">${a.hasPx ? (a.pnl>=0?'+':'')+$u(a.pnl) : '—'}</td>
       <td class="${gc}" style="font-weight:800">${a.hasPx ? dv(a.value) : '—'}</td>
-      <td>
-        <button class="btn-icon" onclick="goTV('${a.ticker}','${a.type}')" title="Ver gráfico">📈</button>
-        <button class="btn-icon" onclick="delTicker('${a.ticker}')" title="Eliminar">✕</button>
+      <td style="position:relative">
+        <button class="btn-icon" onclick="toggleAssetMenu('${a.ticker}')" title="Opciones" style="font-size:16px;padding:2px 6px">⋯</button>
+        <div id="menu_${a.ticker}" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px #1565c018;z-index:200;min-width:160px;overflow:hidden">
+          <div onclick="quickOrder('${a.ticker}','${a.type}','Compra');toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f4f9;color:var(--green);font-weight:600" onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">
+            📈 Comprar
+          </div>
+          <div onclick="quickOrder('${a.ticker}','${a.type}','Venta');toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f4f9;color:var(--red);font-weight:600" onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">
+            📉 Vender
+          </div>
+          <div onclick="goTV('${a.ticker}','${a.type}');toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f4f9" onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">
+            📊 Ver gráfico
+          </div>
+          <div onclick="if(confirm('Eliminar ${a.ticker}?')){delTicker('${a.ticker}')};toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--muted)" onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background=''">
+            ✕ Eliminar
+          </div>
+        </div>
       </td>`;
 
     // Re-insert the asset cell (was overwritten by innerHTML +=)
@@ -1403,6 +1432,9 @@ function resetOrderModal(){
   document.getElementById('o-action').value = 'Compra';
   document.getElementById('o-broker').value = '';
   document.getElementById('o-date').value = new Date().toISOString().slice(0,10);
+// Load portfolio name
+const _savedName = localStorage.getItem('pf6_name');
+if(_savedName) document.getElementById('portfolioName').textContent = _savedName;
   document.getElementById('o-market').value = 'usa';
   onActionChange();
 }
@@ -1457,6 +1489,92 @@ function openOverlay(name){
 }
 function closeOverlay(name){
   document.getElementById('overlay-'+name).classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// PORTFOLIO NAME
+// ═══════════════════════════════════════════════════════
+function editPortfolioName(){
+  const current = localStorage.getItem('pf6_name') || 'Mi Portfolio';
+  const name = prompt('Nombre del portfolio:', current);
+  if(name && name.trim()){
+    localStorage.setItem('pf6_name', name.trim());
+    document.getElementById('portfolioName').textContent = name.trim();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ASSET MENU
+// ═══════════════════════════════════════════════════════
+function toggleAssetMenu(ticker){
+  const menu = document.getElementById('menu_' + ticker);
+  if(!menu) return;
+  // Close all other menus
+  document.querySelectorAll('[id^="menu_"]').forEach(m => {
+    if(m.id !== 'menu_' + ticker) m.style.display = 'none';
+  });
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+// Close menus on click outside
+document.addEventListener('click', e => {
+  if(!e.target.closest('[id^="menu_"]') && !e.target.closest('.btn-icon')){
+    document.querySelectorAll('[id^="menu_"]').forEach(m => m.style.display = 'none');
+  }
+});
+
+function quickOrder(ticker, type, action){
+  // Pre-fill order modal with ticker and action
+  document.getElementById('o-action').value = action;
+  onActionChange();
+  if(action === 'Venta'){
+    const sel = document.getElementById('o-sell-ticker');
+    // Wait for options to render then select
+    setTimeout(() => {
+      sel.value = ticker;
+      onSellTickerChange();
+    }, 50);
+  } else {
+    document.getElementById('o-ticker').value = ticker;
+    // Set market based on type
+    const mktMap = {'Acción USA':'usa','ETF':'usa','CEDEAR':'cedear','Acción Argentina':'arg','Cripto':'cripto','Bono/Renta Fija':'bono'};
+    document.getElementById('o-market').value = mktMap[type] || 'usa';
+    updatePriceCurrency();
+  }
+  // Pre-fill current price if available
+  const px = prices[ticker];
+  if(px && px > 0){
+    const isARS = prices[ticker+'_ars'];
+    const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
+    document.getElementById('o-price').value = isARS ? (px).toFixed(2) : px.toFixed(2);
+  }
+  updateOrderTotal();
+  openOverlay('order');
+}
+
+// ═══════════════════════════════════════════════════════
+// ORDER TOTAL CALCULATOR
+// ═══════════════════════════════════════════════════════
+function updateOrderTotal(){
+  const qty   = parseFloat(document.getElementById('o-qty').value) || 0;
+  const price = parseFloat(document.getElementById('o-price').value) || 0;
+  const comm  = parseFloat(document.getElementById('o-comm').value) || 0;
+  const total = qty * price + comm;
+  const mktVal = document.getElementById('o-market').value;
+  const isARS = (mktVal === 'cedear' || mktVal === 'arg' || mktVal === 'bono');
+  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
+
+  const totalEl = document.getElementById('orderTotal');
+  const totalARSEl = document.getElementById('orderTotalARS');
+  if(!totalEl) return;
+
+  if(isARS){
+    totalEl.textContent = total > 0 ? `$${n2(total,0)} ARS` : '$0,00';
+    totalARSEl.textContent = total > 0 ? `≈ USD ${n2(total/ccl,2)}` : '';
+  } else {
+    totalEl.textContent = total > 0 ? `$${n2(total,2)} USD` : '$0,00';
+    totalARSEl.textContent = total > 0 ? `≈ ARS ${n2(total*ccl,0)}` : '';
+  }
+  totalEl.style.color = total > 0 ? 'var(--blue)' : 'var(--muted)';
 }
 
 // ═══════════════════════════════════════════════════════
