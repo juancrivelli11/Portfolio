@@ -57,6 +57,22 @@ body.dark .add-broker input{background:#111827;border-color:#1e2d45;color:#e8f0f
 body.dark .asset-menu{background:#0d1520;border-color:#1e2d45}
 body.dark .asset-menu div{border-color:#1a2236;color:#e8f0fe}
 body.dark .pie-row{color:#e8f0fe}
+body.dark .overlay .modal{background:#0d1520;color:#e8f0fe}
+body.dark .body-wrap{background:#070d18}
+body.dark{background:#070d18!important}
+body.dark .tabs-bar{background:#070d18}
+body.dark .summary{background:#070d18}
+body.dark .hdr-name h1{color:#e8f0fe}
+body.dark .sec-title{color:#7a95c0}
+body.dark .empty{color:#7a95c0}
+body.dark .back-btn{border-color:#1e2d45;color:#7a95c0}
+body.dark .brk-tag{background:#1a2236;color:#90caf9}
+body.dark .ainfo .tkr{color:#90caf9}
+body.dark .ainfo .typ{color:#7a95c0}
+body.dark .ord-meta{color:#7a95c0}
+body.dark .kpi-row .kpi-card{background:#111827}
+body.dark .chart-full{background:#0d1520}
+body.dark canvas{filter:brightness(0.9)}
 
 /* HEADER */
 .hdr{background:#fff;border-bottom:1px solid var(--border);padding:10px 16px;
@@ -656,7 +672,15 @@ async function supaLoad(){
   try{
     const { data: ords } = await supa.from('orders').select('*')
       .eq('user_id', currentUser.id).order('created_at');
-    if(ords?.length) orders = ords.map(o => o.data);
+    if(ords?.length){
+      // Merge: keep any local orders not yet in Supabase
+      const supaOrders = ords.map(o => o.data);
+      const supaIds = new Set(supaOrders.map(o => String(o.id)));
+      const localOnly = orders.filter(o => !supaIds.has(String(o.id)));
+      orders = [...supaOrders, ...localOnly];
+      // If there were local-only orders, sync them up
+      if(localOnly.length) setTimeout(supaSync, 1000);
+    }
 
     const { data: snaps } = await supa.from('snapshots').select('*')
       .eq('user_id', currentUser.id).order('date');
