@@ -896,13 +896,20 @@ async function doRefresh(){
   // Argentine assets
   const argAssets=pf.filter(a=>isARS(a.type));
   for(const a of argAssets){
+    if(a.ticker.toUpperCase()==='ARS'){
+      prices['ARS']=1; prices['ARS_prev']=1; prices['ARS_ars']=true; continue;
+    }
     const data=await fetchArgPrice(a.ticker);
     if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;prices[a.ticker+'_ars']=true;}
   }
 
   // US assets
+  const STABLE = ['USD','USDC','BUSD','DAI']; // cash/stable = always $1
   const usAssets=pf.filter(a=>!isARS(a.type)&&a.type!=='Cripto');
   for(const a of usAssets){
+    if(STABLE.includes(a.ticker.toUpperCase())){
+      prices[a.ticker]=1; prices[a.ticker+'_prev']=1; continue;
+    }
     const data=await fetchUSPrice(a.ticker);
     if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;}
   }
