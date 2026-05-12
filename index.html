@@ -21,6 +21,42 @@ body.dark{
 }
 body.dark .brand-cri{color:#42a5f5!important}
 body.dark .brand-fund{color:#00c48c!important}
+body.dark .hdr{background:#0d1520;border-color:#1e2d45}
+body.dark .sc{background:#0d1520;border-color:#1e2d45}
+body.dark .tbl-wrap{background:#0d1520;border-color:#1e2d45}
+body.dark .tbl thead tr{background:#111827}
+body.dark .tbl td{border-color:#1a2236;color:#e8f0fe}
+body.dark .tbl tr:hover td{background:#111827}
+body.dark .tbl .tot-row td{background:#111827}
+body.dark .chart-box{background:#0d1520;border-color:#1e2d45}
+body.dark .chart-box h3{color:#7a95c0}
+body.dark .side-box{background:#0d1520;border-color:#1e2d45}
+body.dark .side-hdr{background:#111827;border-color:#1e2d45;color:#90caf9}
+body.dark .quote-row{border-color:#1a2236}
+body.dark .quote-name{color:#e8f0fe}
+body.dark .quote-price{color:#90caf9}
+body.dark .news-item{border-color:#1a2236;color:#e8f0fe}
+body.dark .news-item:hover{background:#111827}
+body.dark .ntitle{color:#e8f0fe}
+body.dark .broker-card{background:#0d1520;border-color:#1e2d45}
+body.dark .broker-card h4{color:#90caf9}
+body.dark .tabs{background:#111827;border-color:#1e2d45}
+body.dark .tab{color:#7a95c0}
+body.dark .modal{background:#0d1520}
+body.dark .modal-hdr h2{color:#90caf9}
+body.dark .field input,.dark .field select{background:#111827;border-color:#1e2d45;color:#e8f0fe}
+body.dark .field label{color:#7a95c0}
+body.dark .total-preview{background:#111827;border-color:#1e2d45}
+body.dark .kpi-card{background:#0d1520;border-color:#1e2d45}
+body.dark .kpi-card label{color:#7a95c0}
+body.dark .ac-list{background:#0d1520;border-color:#1e2d45}
+body.dark .ac-item{border-color:#1a2236;color:#e8f0fe}
+body.dark .ac-item:hover{background:#111827}
+body.dark .ord-card{background:#0d1520;border-color:#1e2d45}
+body.dark .add-broker input{background:#111827;border-color:#1e2d45;color:#e8f0fe}
+body.dark .asset-menu{background:#0d1520;border-color:#1e2d45}
+body.dark .asset-menu div{border-color:#1a2236;color:#e8f0fe}
+body.dark .pie-row{color:#e8f0fe}
 
 /* HEADER */
 .hdr{background:#fff;border-bottom:1px solid var(--border);padding:10px 16px;
@@ -1061,7 +1097,7 @@ function showBrokerDetail(name){
   const pieC=document.createElement('canvas');pieC.width=110;pieC.height=110;
   const pieLeg=document.createElement('div');pieLeg.style.cssText='flex:1;font-size:10px';
   // pd already defined above
-  pd.forEach((d,i)=>{pieLeg.innerHTML+=`<div class="pie-row"><div><span class="pie-dot" style="background:${COLS[i%COLS.length]}"></span>${d.name}</div><span>${n2(totVal>0?d.value/totVal*100:0)}%</span></div>`;});
+  pd.forEach((d,i)=>{pieLeg.innerHTML+=`<div class="pie-row" style="display:flex;justify-content:space-between;margin-bottom:4px"><div><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${COLS[i%COLS.length]};margin-right:5px"></span><strong style="color:var(--blue)">${d.name}</strong></div><span style="color:var(--muted)">${n2(totVal>0?d.value/totVal*100:0)}%</span></div>`;});
   pieWrap.appendChild(pieC);pieWrap.appendChild(pieLeg);pieBox.appendChild(pieWrap);
   if(_brokerPie) _brokerPie.destroy();
   if(pd.length) _brokerPie=new Chart(pieC,{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
@@ -1087,11 +1123,12 @@ function showBrokerDetail(name){
   barBox.innerHTML='<h3>Rendimiento % por activo</h3>';
   const barC=document.createElement('canvas');barC.height=100;
   barBox.appendChild(barC);grid.appendChild(barBox);
-  const pfPnl=pf.filter(a=>a.pnlPct!=null);
+  // For bar chart use pnlPct if available, else show 0
+  const pfPnl=pf.length>0?pf:[];
   if(_brokerBar) _brokerBar.destroy();
   if(pfPnl.length) _brokerBar=new Chart(barC,{
     type:'bar',
-    data:{labels:pfPnl.map(a=>a.ticker),datasets:[{data:pfPnl.map(a=>a.pnlPct),backgroundColor:pfPnl.map(a=>a.pnlPct>=0?'#00a87666':'#e5393566'),borderColor:pfPnl.map(a=>a.pnlPct>=0?'#00a876':'#e53935'),borderWidth:1}]},
+    data:{labels:pfPnl.map(a=>a.ticker),datasets:[{data:pfPnl.map(a=>a.pnlPct||0),backgroundColor:pfPnl.map(a=>(a.pnlPct||0)>=0?'#00a87666':'#e5393566'),borderColor:pfPnl.map(a=>(a.pnlPct||0)>=0?'#00a876':'#e53935'),borderWidth:1}]},
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b8cba',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#6b8cba',callback:v=>`${v}%`},grid:{color:'#eef2f9'}}}}
   });
 
