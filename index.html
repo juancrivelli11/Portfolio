@@ -14,6 +14,11 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
   --green:#00a876;--red:#e53935;--gold:#f59f00;
   --border:#c5d8f5;--muted:#6b8cba;--txt:#1a2740;--card:#fff;--bg:#f5f7fa;
 }
+body.dark{
+  --blue:#42a5f5;--blue2:#90caf9;--blueL:#1a2744;--blueLL:#1e2d50;
+  --border:#2a3a5c;--muted:#7a95c0;--txt:#e8f0fe;--card:#131c2e;--bg:#0d1420;
+  --green:#00c48c;--red:#ff5252;--gold:#ffc107;
+}
 
 /* HEADER */
 .hdr{background:#fff;border-bottom:1px solid var(--border);padding:10px 16px;
@@ -235,6 +240,7 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
     <button class="btn btn-gold" onclick="configFMP()" id="btnFMP">⚙ FMP</button>
     <button class="btn btn-green" onclick="doRefresh()" id="btnRef">↻ Actualizar</button>
     <button class="btn btn-blue" onclick="handleAuth()" id="btnAuth">Iniciar sesión</button>
+    <button class="btn btn-blue" onclick="toggleDark()" id="btnDark" title="Modo oscuro/claro" style="font-size:16px;padding:6px 10px">🌙</button>
   </div>
 </div>
 
@@ -1087,6 +1093,32 @@ function showBrokerDetail(name){
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b8cba',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#6b8cba',callback:v=>`${v}%`},grid:{color:'#eef2f9'}}}}
   });
 
+  // Line chart: capital evolution from snapshots filtered by broker
+  const lineBox=document.createElement('div');lineBox.className='chart-box';
+  lineBox.style.marginBottom='12px';
+  lineBox.innerHTML='<h3>Evolución del capital (90 días)</h3>';
+  const lineC=document.createElement('canvas');lineC.height=120;
+  lineBox.appendChild(lineC);
+
+  // Filter snapshots — approximate broker share by proportion of total cost
+  const brokerCostRatio = totCost > 0 ? totCost / Math.max(getPortfolio().reduce((s,a)=>s+a.cost,0),1) : 0;
+  const s90=snapshots.slice(-90);
+  if(s90.length>=2){
+    const labels=s90.map(s=>s.date.slice(5));
+    const vals=s90.map(s=>s.usd*brokerCostRatio);
+    new Chart(lineC,{
+      type:'line',
+      data:{labels,datasets:[{data:vals,borderColor:'var(--blue2)',backgroundColor:'#42a5f514',fill:true,tension:0.4,pointRadius:2,label:name}]},
+      options:{responsive:true,plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:'#6b8cba',maxTicksLimit:6},grid:{color:'#eef2f9'}},
+                y:{ticks:{color:'#6b8cba',callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#eef2f9'}}}}
+    });
+  } else {
+    lineC.style.display='none';
+    lineBox.innerHTML+='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">Actualizá precios cada día para ver la evolución.</div>';
+  }
+  chartsEl.insertBefore(lineBox, grid);
+
   chartsEl.appendChild(grid);
   renderTable(pf,'brokerDetailTable',totVal,totPnL);
 }
@@ -1337,6 +1369,12 @@ document.addEventListener('click',closeMenu);
 
 function toggleCur(){currency=currency==='USD'?'ARS':'USD';el('btnCur').textContent=currency;render();}
 
+function toggleDark(){
+  const isDark=document.body.classList.toggle('dark');
+  localStorage.setItem('pf6_dark', isDark?'1':'0');
+  el('btnDark').textContent=isDark?'☀️':'🌙';
+}
+
 function setStatus(msg,loading){
   const e=el('statusBar');
   e.textContent=msg;
@@ -1418,6 +1456,11 @@ function closeOverlay(name){el('overlay-'+name).classList.remove('open');}
 el('oDate').value=new Date().toISOString().slice(0,10);
 
 // Restore name
+// Restore dark mode
+if(localStorage.getItem('pf6_dark')==='1'){
+  document.body.classList.add('dark');
+  document.getElementById('btnDark').textContent='☀️';
+}
 const savedName=localStorage.getItem('pf6_name');
 if(savedName) el('pfName').textContent=savedName+' ✎';
 
