@@ -753,7 +753,15 @@ const DOMAINS = {
   ACN:'accenture.com',CL:'colgate.com',SHOP:'shopify.com',UBER:'uber.com',
   SONY:'sony.com',MSTR:'microstrategy.com',EDN:'edenor.com.ar',
 };
-const CG = {BTC:'1/bitcoin',ETH:'279/ethereum',SOL:'4128/solana',BNB:'825/bnb-icon2_2x',XRP:'44/xrp-symbol-white-128',DOGE:'5/dogecoin',ADA:'975/cardano'};
+const CG = {
+  BTC:'1/bitcoin',ETH:'279/ethereum',SOL:'4128/solana',
+  BNB:'825/bnb-icon2_2x',XRP:'44/xrp-symbol-white-128',
+  DOGE:'5/dogecoin',ADA:'975/cardano',MATIC:'8925/matic-token',
+  AVAX:'12559/avalanche-avax-logo',USDT:'325/tether',
+  USDC:'6319/usd-coin',DOT:'12171/polkadot',LINK:'877/chainlink',
+  UNI:'7083/uniswap',ATOM:'1481/cosmos',LTC:'2/litecoin',
+};
+const CG_URL = 'https://assets.coingecko.com/coins/images/';
 
 function makeLogo(ticker, type, size=26){
   const c = COLS[(ticker||'?').charCodeAt(0)%COLS.length];
@@ -765,7 +773,7 @@ function makeLogo(ticker, type, size=26){
 
   let src = null;
   if(type==='Cripto' && CG[ticker?.toUpperCase()]){
-    src=`https://assets.coingecko.com/coins/images/${CG[ticker.toUpperCase()]}.png`;
+    src=CG[ticker?.toUpperCase()]?`${CG_URL}${CG[ticker.toUpperCase()]}.png`:null;
   } else {
     const dom = DOMAINS[ticker?.toUpperCase()] || `${ticker?.toLowerCase()}.com`;
     src=`https://www.google.com/s2/favicons?domain=${dom}&sz=64`;
@@ -782,7 +790,7 @@ function makeLogo(ticker, type, size=26){
 // ═══════════════════════════════════════════════════════════════════════════
 function getPortfolio(broker=null){
   const map={};
-  const ords = broker ? orders.filter(o=>o.broker===broker) : orders;
+  const ords = broker ? orders.filter(o=>(o.broker||'').toLowerCase()===(broker||'').toLowerCase()) : orders;
   ords.forEach(o=>{
     if(!map[o.ticker]) map[o.ticker]={ticker:o.ticker,type:o.type||'Acción USA',qty:0,cost:0,comm:0};
     const m=map[o.ticker];
@@ -1070,7 +1078,14 @@ function renderBrokerGrid(){
   brokers.forEach(b=>{
     const count=orders.filter(o=>o.broker===b).length;
     const card=document.createElement('div');card.className='broker-card';
-    card.innerHTML=`<h4>${b}</h4><span>${count} operaciones</span>`;
+    card.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <h4 style="flex:1">${b}</h4>
+        <button onclick="event.stopPropagation();deleteBroker('${b}')" 
+          style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;line-height:1;padding:0 0 0 6px"
+          title="Eliminar broker">✕</button>
+      </div>
+      <span>${count} operaciones</span>`;
     card.onclick=()=>showBrokerDetail(b);
     grid.appendChild(card);
     sel.innerHTML+=`<option value="${b}">${b}</option>`;
@@ -1195,6 +1210,16 @@ function addBroker(){
   if(name&&!brokers.includes(name)){brokers.push(name);save();renderBrokerGrid();el('newBrokerInput').value='';}
 }
 
+function deleteBroker(name){
+  const count=orders.filter(o=>o.broker===name).length;
+  const msg=count>0
+    ? `"${name}" tiene ${count} operaciones. Si lo eliminás, las operaciones quedan sin broker asignado. ¿Continuar?`
+    : `Eliminar broker "${name}"?`;
+  if(!confirm(msg)) return;
+  brokers=brokers.filter(b=>b!==name);
+  save();renderBrokerGrid();
+}
+
 function renderMainCharts(pf, totGlobal, totARS, totUSD, c){
   // Line chart
   const s90=snapshots.slice(-90);
@@ -1228,7 +1253,7 @@ function renderMainCharts(pf, totGlobal, totARS, totUSD, c){
 }
 
 function renderSidebarPie(pf, totGlobal){
-  // pd already defined above
+  const pd=pf.filter(a=>a.value>0||a.cost>0).map(a=>({name:a.ticker,value:a.hasPx?a.value:a.cost})).filter(a=>a.value>0);
   if(_sidebarPie) _sidebarPie.destroy();
   if(!pd.length){el('sidebarLegend').innerHTML='<span style="color:var(--muted)">Sin activos</span>';return;}
   _sidebarPie=new Chart(el('sidebarPie'),{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
@@ -1250,7 +1275,7 @@ async function loadSidebar(){
   }
 
   const rows=[
-    {label:'S&P 500',d:mkt.spy},{label:'Nasdaq 100',d:mkt.qqq},
+    {label:'S&P 500 (SPY)',d:mkt.spy},{label:'Nasdaq (QQQ)',d:mkt.qqq},
     {label:'Oro (GLD)',d:mkt.gld},{label:'WTI (USO)',d:mkt.uso},
     {label:'Bitcoin',d:mkt.btc},{label:'Merval*',d:mkt.ggal},
   ];
@@ -1536,8 +1561,9 @@ if(localStorage.getItem('pf6_fmp')){
 // Supabase auth
 supa.auth.getSession().then(({data:{session}})=>{
   if(session?.user) onLogin(session.user);
-  else {render();if(getPortfolio().length)doRefresh();setTimeout(loadSidebar,1000);}
+  else {render();if(getPortfolio().length)doRefresh();}
 });
+setTimeout(loadSidebar,500);
 supa.auth.onAuthStateChange((event,session)=>{
   if(event==='SIGNED_IN'&&session?.user&&!currentUser) onLogin(session.user);
 });
