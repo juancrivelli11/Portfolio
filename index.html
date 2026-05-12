@@ -346,6 +346,10 @@ body.dark canvas{filter:brightness(0.9)}
         <button class="btn btn-green" onclick="openOverlay('order')">+ Nueva orden</button>
       </div>
       <div id="assetTable"></div>
+      <div id="cashSection" style="display:none;margin-top:12px">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:8px">💰 LIQUIDEZ</div>
+        <div id="cashCards" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
     </div>
 
     <!-- ORDERS -->
@@ -950,18 +954,24 @@ async function doRefresh(){
 // ═══════════════════════════════════════════════════════════════════════════
 function render(){
   const pf=enrich(getPortfolio());
+  // Exclude cash from investment positions
+  const pfInv = pf.filter(a=>!isCash(a.ticker));
+  const pfCash = pf.filter(a=>isCash(a.ticker));
   const c=ccl();
   const isARSt=isARS;
 
-  const pfUSD=pf.filter(a=>!isARSt(a.type));
-  const pfARS=pf.filter(a=>isARSt(a.type));
+  const pfUSD=pfInv.filter(a=>!isARSt(a.type));
+  const pfARS=pfInv.filter(a=>isARSt(a.type));
+  const c2=ccl();
+  const cashUSD=pfCash.filter(a=>a.ticker.toUpperCase()!=='ARS').reduce((s,a)=>s+a.qty*(prices[a.ticker]||1),0);
+  const cashARSusd=pfCash.filter(a=>a.ticker.toUpperCase()==='ARS').reduce((s,a)=>s+a.qty,0)/c2;
   const totUSD_usd=pfUSD.reduce((s,a)=>s+a.value,0);
   const costUSD_usd=pfUSD.reduce((s,a)=>s+a.cost,0);
   const pnlUSD=totUSD_usd-costUSD_usd;
   const totARS_usd=pfARS.reduce((s,a)=>s+a.value,0);
   const costARS_usd=pfARS.reduce((s,a)=>s+a.cost,0);
   const pnlARS=totARS_usd-costARS_usd;
-  const totGlobal=totUSD_usd+totARS_usd;
+  const totGlobal=totUSD_usd+totARS_usd+cashUSD+cashARSusd;
   const pnlGlobal=pnlUSD+pnlARS;
 
   // Summary
@@ -978,14 +988,41 @@ function render(){
   el('sMep').textContent=mkt.dmep?`$${n2(mkt.dmep.price,0)}`:'$—';
   el('sCcl').textContent=mkt.dccl?`$${n2(mkt.dccl.price,0)}`:'$—';
 
-  renderTable(pf, 'assetTable', totUSD_usd+totARS_usd, pnlGlobal);
+  renderTable(pfInv, 'assetTable', totUSD_usd+totARS_usd, pnlGlobal);
   renderOrders();
   renderBrokerGrid();
   renderMainCharts(pf, totGlobal, totARS_usd, totUSD_usd, c);
   renderSidebarPie(pf, totGlobal);
 }
 
+const CASH_LIST = ['USD','ARS','USDT','USDC','DAI','BUSD','PESOS','CASH'];
+function isCash(ticker){ return CASH_LIST.includes((ticker||'').toUpperCase()); }
+
+function renderCash(pf){
+  const cashAssets = pf.filter(a=>isCash(a.ticker));
+  const cashSection = document.getElementById('cashSection');
+  const cashCards = document.getElementById('cashCards');
+  if(!cashSection || !cashCards) return;
+  if(!cashAssets.length){ cashSection.style.display='none'; return; }
+  cashSection.style.display='block';
+  const c=ccl();
+  cashCards.innerHTML = cashAssets.map(a=>{
+    const isArsT = a.ticker.toUpperCase()==='ARS';
+    const valueUSD = isArsT ? a.qty/c : a.qty*( prices[a.ticker]||1 );
+    const valueARS = isArsT ? a.qty : valueUSD*c;
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;flex:1;min-width:130px;box-shadow:0 1px 3px #1565c008">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${a.ticker}${a.brkList?.length?' · '+a.brkList.join(', '):''}</div>
+      <div style="font-size:18px;font-weight:800;color:var(--blue);font-family:monospace">${isArsT?$a(a.qty):$u(a.qty)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${isArsT?'≈ '+$u(valueUSD):'≈ '+$a(valueARS)+' ARS'}</div>
+      ${a.brkList?.length?`<div style="margin-top:5px">${a.brkList.map(b=>`<span class="brk-tag">${b}</span>`).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
 function renderTable(pf, containerId, totVal, totPnL){
+  // Separate cash from investments
+  if(containerId==='assetTable') renderCash(enrich(getPortfolio()));
+  pf = pf.filter(a=>!isCash(a.ticker));
   const el2=el(containerId);
   if(!pf.length){el2.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div>Cargá una orden para empezar.</div></div>';return;}
   const c=ccl();
@@ -1270,28 +1307,54 @@ function renderSidebarPie(pf, totGlobal){
 // ═══════════════════════════════════════════════════════════════════════════
 // SIDEBAR MARKET DATA
 // ═══════════════════════════════════════════════════════════════════════════
+async function fetchYahooQuote(sym){
+  for(const base of ['https://query1','https://query2']){
+    try{
+      const url=`${base}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
+      const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+      const d=await r.json();
+      const meta=d?.chart?.result?.[0]?.meta;
+      if(meta?.regularMarketPrice>0) return{
+        price:meta.regularMarketPrice,
+        prev:meta.chartPreviousClose||meta.regularMarketPrice,
+        chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0
+      };
+    }catch(e){}
+  }
+  return null;
+}
+
 async function loadSidebar(){
-  // Quotes
-  if(!mkt.spy){const d=await fetchUSPrice('SPY');if(d)mkt.spy=d;}
-  if(!mkt.qqq){const d=await fetchUSPrice('QQQ');if(d)mkt.qqq=d;}
-  if(!mkt.gld){const d=await fetchUSPrice('GLD');if(d)mkt.gld=d;}
-  if(!mkt.uso){const d=await fetchUSPrice('USO');if(d)mkt.uso=d;}
-  if(!mkt.ggal){const d=await fetchUSPrice('GGAL');if(d)mkt.ggal=d;}
+  // Real indices via Yahoo Finance
+  if(!mkt.sp500){const d=await fetchYahooQuote('^GSPC');if(d)mkt.sp500=d;}
+  if(!mkt.ndx){const d=await fetchYahooQuote('^NDX');if(d)mkt.ndx=d;}
+  if(!mkt.gold){const d=await fetchYahooQuote('GC=F');if(d)mkt.gold=d;}
+  if(!mkt.wti){const d=await fetchYahooQuote('CL=F');if(d)mkt.wti=d;}
+  if(!mkt.merval){const d=await fetchYahooQuote('^MERV');if(d)mkt.merval=d;}
   if(!mkt.btc){
     try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');const d=await r.json();mkt.btc={price:d.bitcoin.usd,chgPct:d.bitcoin.usd_24h_change};}catch(e){}
   }
+  if(!mkt.dblue){
+    try{const r=await fetch('https://dolarapi.com/v1/dolares/blue');const d=await r.json();if(d.venta>100)mkt.dblue={price:d.venta,buy:d.compra};}catch(e){}
+  }
 
   const rows=[
-    {label:'S&P 500 (SPY)',d:mkt.spy},{label:'Nasdaq (QQQ)',d:mkt.qqq},
-    {label:'Oro (GLD)',d:mkt.gld},{label:'WTI (USO)',d:mkt.uso},
-    {label:'Bitcoin',d:mkt.btc},{label:'Merval*',d:mkt.ggal},
+    {label:'S&P 500',d:mkt.sp500,dp:0},
+    {label:'Nasdaq 100',d:mkt.ndx,dp:0},
+    {label:'Oro (USD/oz)',d:mkt.gold,dp:0},
+    {label:'WTI (USD/bbl)',d:mkt.wti,dp:2},
+    {label:'Bitcoin',d:mkt.btc,dp:0},
+    {label:'Merval',d:mkt.merval,dp:0,ars:true},
   ];
   el('quotesPanel').innerHTML=rows.map(r=>{
     if(!r.d) return `<div class="quote-row"><span class="quote-name">${r.label}</span><span class="quote-price" style="color:var(--muted)">—</span></div>`;
-    const cls=r.d.chgPct>=0?'up':'dn';
+    const dp=r.dp!=null?r.dp:2;
+    const priceStr=r.ars?`$${n2(r.d.price,0)} ARS`:`$${n2(r.d.price,dp)}`;
+    const chgPct=r.d.chgPct!=null?r.d.chgPct:null;
+    const cls=chgPct>=0?'up':'dn';
     return `<div class="quote-row"><span class="quote-name">${r.label}</span>
-      <div class="quote-right"><span class="quote-price">$${n2(r.d.price,r.label==='Bitcoin'?0:2)}</span>
-      ${r.d.chgPct!=null?`<span class="chg ${cls}">${r.d.chgPct>=0?'+':''}${n2(r.d.chgPct,2)}%</span>`:''}</div></div>`;
+      <div class="quote-right"><span class="quote-price">${priceStr}</span>
+      ${chgPct!=null?`<span class="chg ${cls}">${chgPct>=0?'+':''}${n2(chgPct,2)}%</span>`:''}</div></div>`;
   }).join('');
 
   // News
