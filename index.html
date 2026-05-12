@@ -231,7 +231,7 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
     <button class="btn btn-blue" onclick="toggleCur()" id="btnCur">USD</button>
     <button class="btn btn-blue" onclick="exportData()">⬇ Export</button>
     <button class="btn btn-blue" onclick="document.getElementById('impFile').click()">⬆ Import</button>
-    <input type="file" id="impFile" accept=".json" style="display:none" onchange="importData(event)">
+    <input type="file" id="impFile" accept=".json,application/json,text/plain,*/*" style="display:none" onchange="importData(event)">
     <button class="btn btn-gold" onclick="configFMP()" id="btnFMP">⚙ FMP</button>
     <button class="btn btn-green" onclick="doRefresh()" id="btnRef">↻ Actualizar</button>
     <button class="btn btn-blue" onclick="handleAuth()" id="btnAuth">Iniciar sesión</button>
@@ -1016,12 +1016,15 @@ function showBrokerDetail(name){
 
   const pf=enrich(getPortfolio(name));
   const c=ccl();
-  const totVal=pf.reduce((s,a)=>s+a.value,0);
+  // Use cost as fallback when price not available
+  const totVal=pf.reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
   const totCost=pf.reduce((s,a)=>s+a.cost,0);
-  const totPnL=totVal-totCost;
+  const totPnL=pf.reduce((s,a)=>s+(a.pnl||0),0);
   const roe=totCost>0?totPnL/totCost*100:0;
-  const arsVal=pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+a.value,0);
-  const usdVal=pf.filter(a=>!isARS(a.type)).reduce((s,a)=>s+a.value,0);
+  const arsVal=pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
+  const usdVal=pf.filter(a=>!isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
+  // Use value or cost for pie chart
+  const pd=pf.map(a=>({name:a.ticker,value:a.hasPx?a.value:a.cost})).filter(a=>a.value>0);
 
   const chartsEl=el('brokerDetailCharts');
   chartsEl.innerHTML='';
@@ -1049,7 +1052,7 @@ function showBrokerDetail(name){
   const pieWrap=document.createElement('div');pieWrap.style.cssText='display:flex;gap:10px;align-items:center';
   const pieC=document.createElement('canvas');pieC.width=110;pieC.height=110;
   const pieLeg=document.createElement('div');pieLeg.style.cssText='flex:1;font-size:10px';
-  const pd=pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  // pd already defined above
   pd.forEach((d,i)=>{pieLeg.innerHTML+=`<div class="pie-row"><div><span class="pie-dot" style="background:${COLS[i%COLS.length]}"></span>${d.name}</div><span>${n2(totVal>0?d.value/totVal*100:0)}%</span></div>`;});
   pieWrap.appendChild(pieC);pieWrap.appendChild(pieLeg);pieBox.appendChild(pieWrap);
   if(_brokerPie) _brokerPie.destroy();
@@ -1113,7 +1116,7 @@ function renderMainCharts(pf, totGlobal, totARS, totUSD, c){
   }else{nc.style.display='block';lc.style.display='none';}
 
   // Pie por activo
-  const pd=pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  // pd already defined above
   if(_pieChart) _pieChart.destroy();
   if(pd.length){
     _pieChart=new Chart(el('pieChart'),{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
@@ -1130,7 +1133,7 @@ function renderMainCharts(pf, totGlobal, totARS, totUSD, c){
 }
 
 function renderSidebarPie(pf, totGlobal){
-  const pd=pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  // pd already defined above
   if(_sidebarPie) _sidebarPie.destroy();
   if(!pd.length){el('sidebarLegend').innerHTML='<span style="color:var(--muted)">Sin activos</span>';return;}
   _sidebarPie=new Chart(el('sidebarPie'),{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
