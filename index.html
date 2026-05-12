@@ -9,96 +9,96 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-serif;font-size:14px}
-
-/* ── VARIABLES ── */
 :root{
   --blue:#1565c0;--blue2:#42a5f5;--blueL:#e8f0fe;--blueLL:#f0f6ff;
   --green:#00a876;--red:#e53935;--gold:#f59f00;
-  --border:#c5d8f5;--muted:#6b8cba;--txt:#1a2740;
-  --card:#fff;--bg:#f5f7fa;
+  --border:#c5d8f5;--muted:#6b8cba;--txt:#1a2740;--card:#fff;--bg:#f5f7fa;
 }
 
-/* ── LAYOUT ── */
-.hdr{background:#fff;border-bottom:1px solid var(--border);padding:11px 18px;
+/* HEADER */
+.hdr{background:#fff;border-bottom:1px solid var(--border);padding:10px 16px;
   display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;box-shadow:0 1px 4px #1565c010}
-.hdr-left h1{font-size:16px;font-weight:800;color:var(--blue)}
-.hdr-left p{font-size:11px;color:var(--muted);margin-top:1px}
-.hdr-right{display:flex;gap:8px}
+  position:sticky;top:0;z-index:100;box-shadow:0 1px 4px #1565c010;flex-wrap:wrap;gap:8px}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.brand{font-size:20px;font-weight:900;letter-spacing:-1px;cursor:default}
+.brand-cri{color:var(--blue)}.brand-fund{color:var(--green)}
+.hdr-name{border-left:1px solid var(--border);padding-left:12px}
+.hdr-name h1{font-size:14px;font-weight:700;color:var(--txt);cursor:pointer}
+.hdr-name p{font-size:11px;color:var(--muted)}
+.hdr-btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn{border:none;border-radius:7px;cursor:pointer;font-weight:700;
+  font-family:inherit;padding:6px 12px;font-size:12px;white-space:nowrap}
+.btn-green{background:var(--green);color:#fff}
+.btn-blue{background:var(--blueL);color:var(--blue);border:1px solid var(--border)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-gold{background:#fff8e1;color:var(--gold);border:1px solid #ffe082}
 
-.summary{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px 0}
+/* SUMMARY */
+.summary{display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px 0}
 .sc{background:var(--card);border:1px solid var(--border);border-radius:10px;
   padding:10px 14px;flex:1;min-width:120px;box-shadow:0 1px 3px #1565c008}
 .sc label{display:block;font-size:9px;color:var(--muted);letter-spacing:1px;
-  text-transform:uppercase;margin-bottom:3px}
-.sc .val{font-size:16px;font-weight:700;font-family:monospace;color:var(--blue)}
+  text-transform:uppercase;margin-bottom:3px;font-weight:700}
+.sc .val{font-size:15px;font-weight:700;font-family:monospace;color:var(--blue)}
 .sc .sub{font-size:10px;color:var(--muted);margin-top:2px}
+.sc-usd{border-left:3px solid var(--blue)}
+.sc-ars{border-left:3px solid var(--gold)}
+.sc-global{border-left:3px solid var(--green)}
+.fx-box{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.fx-item label{font-size:9px;color:var(--muted);text-transform:uppercase;display:block}
+.fx-item .val{font-size:13px;color:var(--gold)}
 
-.tabs-bar{padding:10px 18px 0}
+/* TABS */
+.tabs-bar{padding:10px 16px 0}
 .tabs{display:inline-flex;gap:2px;background:var(--blueL);padding:3px;
-  border-radius:9px;border:1px solid var(--border)}
-.tab{padding:7px 14px;border:none;border-radius:6px;cursor:pointer;
+  border-radius:9px;border:1px solid var(--border);overflow-x:auto}
+.tab{padding:7px 12px;border:none;border-radius:6px;cursor:pointer;
   font-weight:600;font-size:12px;font-family:inherit;
   background:transparent;color:var(--muted);white-space:nowrap}
 .tab.active{background:var(--green);color:#fff}
 
-/* ── TWO COLUMN ── */
-.body-wrap{display:flex;align-items:flex-start;gap:14px;padding:12px 18px 50px}
+/* BODY */
+.body-wrap{display:flex;gap:12px;padding:10px 16px 50px;align-items:flex-start}
 .main{flex:1;min-width:0}
-.sidebar{width:270px;flex-shrink:0;position:sticky;top:60px;
+.sidebar{width:260px;flex-shrink:0;position:sticky;top:60px;
   max-height:calc(100vh - 72px);overflow-y:auto}
-@media(max-width:900px){
-  .body-wrap{flex-direction:column}
-  .sidebar{width:100%;position:static;max-height:none}
-}
+@media(max-width:900px){.body-wrap{flex-direction:column}.sidebar{width:100%;position:static;max-height:none}}
 
-.page{display:none}
-.page.active{display:block}
+.page{display:none}.page.active{display:block}
 
-/* ── BUTTONS ── */
-.btn{border:none;border-radius:7px;cursor:pointer;font-weight:700;
-  font-family:inherit;padding:7px 14px;font-size:12px}
-.btn-green{background:var(--green);color:#fff}
-.btn-blue{background:var(--blueL);color:var(--blue);border:1px solid var(--border)}
-.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
-.btn-icon{background:none;border:none;cursor:pointer;font-size:13px;padding:3px 6px}
+/* SECTION */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sec-title{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px}
 
-/* ── PORTFOLIO TABLE ── */
-.section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.section-title{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px}
-
+/* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);
   background:var(--card);box-shadow:0 1px 4px #1565c008}
-.tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:700px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:680px}
 .tbl thead tr{background:var(--blueLL)}
-.tbl th{padding:9px 10px;text-align:right;color:var(--muted);font-size:10px;
+.tbl th{padding:8px 10px;text-align:right;color:var(--muted);font-size:10px;
   font-weight:700;letter-spacing:.5px;border-bottom:2px solid var(--border);white-space:nowrap}
 .tbl th:first-child{text-align:left}
-.tbl td{padding:9px 10px;text-align:right;border-bottom:1px solid #eef2f9;
+.tbl td{padding:8px 10px;text-align:right;border-bottom:1px solid #eef2f9;
   color:var(--txt);white-space:nowrap;vertical-align:middle}
 .tbl td:first-child{text-align:left}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:#f8fbff}
-.tbl .total-row td{background:var(--blueLL);font-weight:700;border-top:2px solid var(--border)}
-
+.tbl .tot-row td{background:var(--blueLL);font-weight:700;border-top:2px solid var(--border)}
+.up{color:var(--green)!important;font-weight:700!important}
+.dn{color:var(--red)!important;font-weight:700!important}
+.neu{color:var(--muted)}
 .asset-cell{display:flex;align-items:center;gap:8px}
-.asset-logo{width:28px;height:28px;border-radius:6px;object-fit:contain;
-  background:#f0f4ff;flex-shrink:0;display:block}
-.asset-logo-fb{width:28px;height:28px;border-radius:6px;display:flex;
-  align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
-.asset-info .tkr{font-size:13px;font-weight:800;color:var(--blue)}
-.asset-info .typ{font-size:10px;color:var(--muted)}
-.asset-info .brk{margin-top:2px}
+.alogo{width:26px;height:26px;border-radius:6px;object-fit:contain;background:#f0f4ff;flex-shrink:0}
+.alogo-fb{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;font-size:9px;font-weight:800;flex-shrink:0}
+.ainfo .tkr{font-size:13px;font-weight:800;color:var(--blue)}
+.ainfo .typ{font-size:10px;color:var(--muted)}
+.ainfo .brks{margin-top:2px}
 .brk-tag{font-size:9px;background:var(--blueL);color:var(--blue);
   padding:1px 5px;border-radius:3px;margin-right:2px;font-weight:600}
 
-.up{color:var(--green)!important;font-weight:600!important}
-.dn{color:var(--red)!important;font-weight:600!important}
-.tbl td.up,.tbl td.dn{font-weight:700!important}
-.neu{color:var(--muted)}
-
-/* ── ORDERS ── */
-.ord-card{background:var(--card);border-radius:10px;padding:10px 14px;
+/* ORDERS */
+.ord-card{background:var(--card);border-radius:10px;padding:10px 12px;
   margin-bottom:7px;border:1px solid var(--border)}
 .ord-card.buy{border-left:3px solid var(--green)}
 .ord-card.sell{border-left:3px solid var(--red)}
@@ -108,41 +108,46 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 .ord-badge.buy{background:#e8fdf5;color:var(--green)}
 .ord-badge.sell{background:#fff0f0;color:var(--red)}
 .ord-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.ord-right{text-align:right;font-size:12px}
 
-/* ── BROKERS ── */
+/* BROKERS */
 .broker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
 .broker-card{background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:14px;text-align:center;cursor:pointer;transition:.15s;
-  box-shadow:0 1px 3px #1565c008}
-.broker-card:hover{border-color:var(--blue2);transform:translateY(-2px);
-  box-shadow:0 4px 12px #1565c018}
+  padding:14px;text-align:center;cursor:pointer;transition:.15s;box-shadow:0 1px 3px #1565c008}
+.broker-card:hover{border-color:var(--blue2);transform:translateY(-2px)}
 .broker-card h4{color:var(--blue);font-size:13px;margin-bottom:3px}
 .broker-card span{font-size:11px;color:var(--muted)}
 .back-btn{background:none;border:1px solid var(--border);color:var(--muted);
   padding:5px 12px;border-radius:6px;cursor:pointer;margin-bottom:12px;
   font-family:inherit;font-size:12px}
-.add-broker{display:flex;gap:8px;margin-top:16px;padding-top:14px;
-  border-top:1px dashed var(--border)}
+.add-broker{display:flex;gap:8px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--border)}
 .add-broker input{flex:1;background:var(--bg);border:1px solid var(--border);
-  border-radius:7px;padding:9px 12px;color:var(--txt);font-size:13px;
-  outline:none;font-family:inherit}
+  border-radius:7px;padding:9px 12px;color:var(--txt);font-size:13px;outline:none;font-family:inherit}
 
-/* ── CHARTS ── */
+/* CHARTS */
 .chart-box{background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:14px;margin-bottom:12px;box-shadow:0 1px 3px #1565c008}
+  padding:13px;margin-bottom:12px;box-shadow:0 1px 3px #1565c008}
 .chart-box h3{font-size:10px;color:var(--muted);text-transform:uppercase;
   letter-spacing:1px;font-weight:700;margin-bottom:10px}
-.pie-legend{flex:1}
-.pie-row{display:flex;justify-content:space-between;margin-bottom:7px;font-size:12px}
+.pie-legend{flex:1;font-size:11px}
+.pie-row{display:flex;justify-content:space-between;margin-bottom:7px}
 .pie-dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
 
-/* ── SIDEBAR ── */
+/* BROKER DETAIL CHARTS */
+.kpi-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:9px;
+  padding:10px 14px;flex:1;min-width:100px}
+.kpi-card label{font-size:9px;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;display:block;margin-bottom:3px}
+.kpi-card .val{font-size:15px;font-weight:800}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.charts-grid .chart-box{margin-bottom:0}
+.chart-full{grid-column:1/-1}
+
+/* SIDEBAR */
 .side-box{background:var(--card);border:1px solid var(--border);border-radius:10px;
   margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px #1565c008}
 .side-hdr{background:var(--blueLL);padding:8px 12px;font-size:10px;font-weight:700;
-  color:var(--blue);letter-spacing:1px;text-transform:uppercase;
-  border-bottom:1px solid var(--border)}
+  color:var(--blue);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border)}
 .quote-row{display:flex;justify-content:space-between;align-items:center;
   padding:7px 12px;border-bottom:1px solid #f0f4f9;font-size:12px}
 .quote-row:last-child{border-bottom:none}
@@ -153,18 +158,18 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 .chg.up{background:#e8fdf5;color:var(--green)}
 .chg.dn{background:#fff0f0;color:var(--red)}
 .news-item{display:block;padding:8px 12px;border-bottom:1px solid #f0f4f9;
-  text-decoration:none;transition:.1s;color:inherit}
+  text-decoration:none;color:inherit;transition:.1s}
 .news-item:last-child{border-bottom:none}
 .news-item:hover{background:var(--blueLL)}
-.news-item .ntitle{font-size:11px;color:var(--txt);font-weight:600;line-height:1.4}
-.news-item .nmeta{font-size:10px;color:var(--muted);margin-top:2px}
+.ntitle{font-size:11px;color:var(--txt);font-weight:600;line-height:1.4}
+.nmeta{font-size:10px;color:var(--muted);margin-top:2px}
 .side-msg{padding:14px 12px;text-align:center;font-size:12px;color:var(--muted)}
 
-/* ── MODALS ── */
+/* MODALS */
 .overlay{display:none;position:fixed;inset:0;background:#00000055;z-index:500;
   align-items:flex-end;justify-content:center}
 .overlay.open{display:flex}
-.modal{background:#fff;border-radius:18px 18px 0 0;padding:18px 18px 34px;
+.modal{background:#fff;border-radius:18px 18px 0 0;padding:18px 16px 34px;
   width:100%;max-width:520px;max-height:92vh;overflow-y:auto;
   -webkit-overflow-scrolling:touch;box-shadow:0 -4px 24px #1565c020}
 .modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
@@ -178,20 +183,34 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
   outline:none;font-family:inherit;-webkit-appearance:none}
 .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M5 7L0 0h10z' fill='%2342a5f5'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
-.modal-btns{display:flex;gap:10px;margin-top:16px}
+.modal-btns{display:flex;gap:10px;margin-top:14px}
 .modal-btns .btn{flex:1;padding:12px;font-size:14px}
-.autocomplete-wrap{position:relative}
-.autocomplete-list{display:none;position:absolute;top:100%;left:0;right:0;
-  background:#fff;border:1px solid var(--border);border-radius:8px;
-  z-index:600;max-height:200px;overflow-y:auto;
-  box-shadow:0 4px 14px #1565c018;margin-top:2px}
+.ac-wrap{position:relative}
+.ac-list{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;
+  border:1px solid var(--border);border-radius:8px;z-index:600;max-height:200px;
+  overflow-y:auto;box-shadow:0 4px 14px #1565c018;margin-top:2px}
 .ac-item{padding:9px 12px;cursor:pointer;display:flex;justify-content:space-between;
   border-bottom:1px solid #f0f4f9;font-size:13px}
 .ac-item:last-child{border-bottom:none}
 .ac-item:hover{background:var(--blueLL)}
 .ac-item strong{color:var(--blue)}
 .ac-item span{color:var(--muted);font-size:11px}
-.field-hint{font-size:10px;color:var(--green);margin-top:3px}
+.total-preview{background:var(--blueL);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;margin-bottom:12px}
+.total-preview .lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.total-preview .val{font-size:16px;font-weight:800;color:var(--blue);margin-top:2px}
+.total-preview .sub{font-size:10px;color:var(--muted);margin-top:1px}
+.price-cur{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-size:11px;font-weight:700;color:var(--muted)}
+.price-hint{font-size:10px;color:var(--green);margin-top:3px}
+
+/* ASSET MENU */
+.asset-menu{display:none;position:absolute;right:0;top:100%;background:#fff;
+  border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px #1565c018;
+  z-index:200;min-width:160px;overflow:hidden}
+.asset-menu div{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f4f9}
+.asset-menu div:last-child{border-bottom:none}
+.asset-menu div:hover{background:var(--blueLL)}
 
 .empty{text-align:center;padding:40px 20px;color:var(--muted)}
 .empty-icon{font-size:40px;margin-bottom:8px}
@@ -201,57 +220,47 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 
 <!-- HEADER -->
 <div class="hdr">
-  <div class="hdr-left" style="display:flex;align-items:center;gap:12px">
-    <div style="font-size:22px;font-weight:900;color:var(--blue);letter-spacing:-1px;cursor:default">
-      <span style="color:var(--blue)">CRI</span><span style="color:var(--green)">FUND</span>
-    </div>
-    <div style="border-left:1px solid var(--border);padding-left:12px">
-      <div style="display:flex;align-items:center;gap:6px">
-        <h1 id="portfolioName" style="font-size:15px;font-weight:700;color:var(--txt);cursor:pointer" 
-          onclick="editPortfolioName()" title="Click para editar">Mi Portfolio</h1>
-        <span onclick="editPortfolioName()" style="font-size:11px;color:var(--muted);cursor:pointer">✎</span>
-      </div>
-      <p id="statusBar" style="font-size:11px;color:var(--muted)">Tocá Actualizar para obtener precios</p>
+  <div class="hdr-brand">
+    <div class="brand"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></div>
+    <div class="hdr-name">
+      <h1 id="pfName" onclick="editName()" title="Click para editar">Mi Portfolio ✎</h1>
+      <p id="statusBar">Tocá Actualizar para obtener precios</p>
     </div>
   </div>
-  <div class="hdr-right">
+  <div class="hdr-btns">
     <button class="btn btn-blue" onclick="toggleCur()" id="btnCur">USD</button>
-    <button class="btn btn-blue" onclick="exportData()" title="Exportar datos">⬇ Export</button>
-    <button class="btn btn-blue" onclick="document.getElementById('importFile').click()" title="Importar datos">⬆ Import</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-    <button class="btn btn-blue" onclick="configAPIKey()" title="Configurar API Key FMP" id="btnApi" style="color:var(--gold)">⚙ FMP</button>
-
+    <button class="btn btn-blue" onclick="exportData()">⬇ Export</button>
+    <button class="btn btn-blue" onclick="document.getElementById('impFile').click()">⬆ Import</button>
+    <input type="file" id="impFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="btn btn-gold" onclick="configFMP()" id="btnFMP">⚙ FMP</button>
     <button class="btn btn-green" onclick="doRefresh()" id="btnRef">↻ Actualizar</button>
+    <button class="btn btn-blue" onclick="handleAuth()" id="btnAuth">Iniciar sesión</button>
   </div>
 </div>
 
 <!-- SUMMARY -->
 <div class="summary">
-  <!-- Posicion USD -->
-  <div class="sc" style="border-left:3px solid var(--blue)">
+  <div class="sc sc-usd">
     <label>💵 Posición USD</label>
     <div class="val" id="sValUSD">$0,00</div>
-    <div class="sub" id="sPnlUSD" style="margin-top:3px">P&L: —</div>
+    <div class="sub" id="sPnlUSD">P&L: —</div>
   </div>
-  <!-- Posicion ARS -->
-  <div class="sc" style="border-left:3px solid var(--gold)">
+  <div class="sc sc-ars">
     <label>🪙 Posición ARS</label>
-    <div class="val" id="sValARS" style="color:var(--gold)">$0,00</div>
-    <div class="sub" id="sPnlARS" style="margin-top:3px">P&L: —</div>
+    <div class="val" id="sValARS" style="color:var(--gold)">$0</div>
+    <div class="sub" id="sPnlARS">P&L: —</div>
   </div>
-  <!-- Global -->
-  <div class="sc" style="border-left:3px solid var(--green)">
-    <label>🌐 Global (en USD)</label>
+  <div class="sc sc-global">
+    <label>🌐 Global (USD)</label>
     <div class="val" id="sValGlobal" style="color:var(--green)">$0,00</div>
-    <div class="sub" id="sPnlGlobal" style="margin-top:3px">P&L: —</div>
+    <div class="sub" id="sPnlGlobal">P&L: —</div>
   </div>
-  <!-- Dolares -->
-  <div class="sc" style="min-width:160px">
+  <div class="sc">
     <label>Tipo de cambio</label>
-    <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">
-      <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Blue</div><div class="val" id="sBlue" style="color:var(--gold);font-size:13px">$—</div></div>
-      <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">MEP</div><div class="val" id="sMep" style="color:var(--gold);font-size:13px">$—</div></div>
-      <div><div style="font-size:9px;color:var(--muted);text-transform:uppercase">CCL</div><div class="val" id="sCcl" style="color:var(--gold);font-size:13px">$—</div></div>
+    <div class="fx-box">
+      <div class="fx-item"><label>Blue</label><div class="val" id="sBlue">$—</div></div>
+      <div class="fx-item"><label>MEP</label><div class="val" id="sMep">$—</div></div>
+      <div class="fx-item"><label>CCL</label><div class="val" id="sCcl">$—</div></div>
     </div>
   </div>
 </div>
@@ -270,42 +279,43 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 <div class="body-wrap">
   <div class="main">
 
-    <!-- PORTFOLIO PAGE -->
+    <!-- PORTFOLIO -->
     <div class="page active" id="page-portfolio">
-      <div class="section-hdr">
-        <span class="section-title">MIS ACTIVOS</span>
+      <div class="sec-hdr">
+        <span class="sec-title">MIS ACTIVOS</span>
         <button class="btn btn-green" onclick="openOverlay('order')">+ Nueva orden</button>
       </div>
       <div id="assetTable"></div>
     </div>
 
-    <!-- ORDERS PAGE -->
+    <!-- ORDERS -->
     <div class="page" id="page-orders">
-      <div class="section-hdr">
-        <span class="section-title">HISTORIAL DE ÓRDENES</span>
+      <div class="sec-hdr">
+        <span class="sec-title">HISTORIAL</span>
         <button class="btn btn-green" onclick="openOverlay('order')">+ Nueva orden</button>
       </div>
       <div id="orderList"></div>
     </div>
 
-    <!-- BROKERS PAGE -->
+    <!-- BROKERS -->
     <div class="page" id="page-brokers">
-      <div id="brokerGrid-view">
-        <div class="section-hdr"><span class="section-title">MIS BROKERS</span></div>
+      <div id="brokerGridView">
+        <div class="sec-hdr"><span class="sec-title">MIS BROKERS</span></div>
         <div class="broker-grid" id="brokerGrid"></div>
         <div class="add-broker">
-          <input id="newBrokerInput" placeholder="Agregar broker...">
-          <button class="btn btn-green" onclick="addCustomBroker()">+ Agregar</button>
+          <input id="newBrokerInput" placeholder="Agregar broker personalizado...">
+          <button class="btn btn-green" onclick="addBroker()">+ Agregar</button>
         </div>
       </div>
-      <div id="brokerDetail-view" style="display:none">
+      <div id="brokerDetailView" style="display:none">
         <button class="back-btn" onclick="hideBrokerDetail()">← Volver</button>
-        <div class="section-title" id="brokerDetailTitle" style="margin-bottom:10px"></div>
+        <div class="sec-title" id="brokerDetailTitle" style="margin-bottom:10px"></div>
+        <div id="brokerDetailCharts"></div>
         <div id="brokerDetailTable"></div>
       </div>
     </div>
 
-    <!-- CHARTS PAGE -->
+    <!-- CHARTS -->
     <div class="page" id="page-charts">
       <div class="chart-box">
         <h3>Evolución del portfolio (90 días)</h3>
@@ -314,11 +324,20 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
         </div>
         <canvas id="lineChart" style="display:none" height="180"></canvas>
       </div>
-      <div class="chart-box">
-        <h3>Composición</h3>
-        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-          <canvas id="pieChart" width="170" height="170"></canvas>
-          <div class="pie-legend" id="pieLegend"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="chart-box">
+          <h3>Composición por activo</h3>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <canvas id="pieChart" width="150" height="150" style="flex-shrink:0"></canvas>
+            <div id="pieLegend" class="pie-legend"></div>
+          </div>
+        </div>
+        <div class="chart-box">
+          <h3>ARS vs USD</h3>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <canvas id="arsUsdChart" width="150" height="150" style="flex-shrink:0"></canvas>
+            <div id="arsUsdLegend" class="pie-legend"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -329,9 +348,9 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
   <div class="sidebar">
     <div class="side-box">
       <div class="side-hdr">🥧 Composición</div>
-      <div style="padding:12px;display:flex;gap:10px;align-items:center">
-        <canvas id="sidebarPie" width="110" height="110" style="flex-shrink:0"></canvas>
-        <div id="sidebarPieLegend" style="flex:1;font-size:11px"></div>
+      <div style="padding:10px;display:flex;gap:8px;align-items:center">
+        <canvas id="sidebarPie" width="100" height="100" style="flex-shrink:0"></canvas>
+        <div id="sidebarLegend" style="flex:1;font-size:10px"></div>
       </div>
     </div>
     <div class="side-box">
@@ -357,15 +376,15 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
     Tus datos se sincronizan en todos tus dispositivos.
   </p>
   <div class="field"><label>Email</label>
-    <input id="auth-email" type="email" placeholder="tu@email.com">
+    <input id="authEmail" type="email" placeholder="tu@email.com">
   </div>
   <div class="field"><label>Contraseña</label>
-    <input id="auth-pass" type="password" placeholder="Mínimo 6 caracteres">
+    <input id="authPass" type="password" placeholder="Mínimo 6 caracteres">
   </div>
-  <div id="auth-msg" style="font-size:12px;color:var(--red);margin-bottom:8px;min-height:16px"></div>
+  <div id="authMsg" style="font-size:12px;color:var(--red);margin-bottom:8px;min-height:16px"></div>
   <div class="modal-btns">
-    <button class="btn btn-green" onclick="signIn()" style="flex:1">Ingresar</button>
-    <button class="btn btn-blue" onclick="signUp()" style="flex:1;background:var(--blueL);color:var(--blue);border:1px solid var(--border)">Registrarme</button>
+    <button class="btn btn-green" onclick="signIn()">Ingresar</button>
+    <button class="btn btn-blue" onclick="signUp()">Registrarme</button>
   </div>
   <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px">
     Sin cuenta los datos se guardan solo en este browser.
@@ -377,29 +396,26 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
 <div class="overlay" id="overlay-order">
 <div class="modal">
   <div class="modal-hdr">
-    <h2 id="modalOrderTitle">Nueva orden</h2>
-    <button class="modal-x" onclick="closeOverlay('order')">×</button>
+    <h2>Nueva orden</h2>
+    <button class="modal-x" onclick="closeOverlay('order');resetOrder()">×</button>
   </div>
-  <div class="field">
-    <label>Acción</label>
-    <select id="o-action" onchange="onActionChange()">
+  <div class="field"><label>Acción</label>
+    <select id="oAction" onchange="onActionChange()">
       <option value="Compra">Compra</option>
       <option value="Venta">Venta</option>
     </select>
   </div>
-  <!-- Venta: ticker from portfolio -->
-  <div class="field" id="field-sell-ticker" style="display:none">
-    <label>Activo a vender</label>
-    <select id="o-sell-ticker" onchange="onSellTickerChange()">
-      <option value="">— Seleccionar —</option>
-    </select>
-    <div class="field-hint" id="sell-max-hint"></div>
+  <div id="sellFields" style="display:none">
+    <div class="field"><label>Activo a vender</label>
+      <select id="oSellTicker" onchange="onSellChange()">
+        <option value="">— Seleccionar —</option>
+      </select>
+      <div id="sellHint" class="price-hint"></div>
+    </div>
   </div>
-  <!-- Compra: market + autocomplete -->
-  <div id="fields-buy">
-    <div class="field">
-      <label>Mercado</label>
-      <select id="o-market" onchange="onMarketChange()">
+  <div id="buyFields">
+    <div class="field"><label>Mercado</label>
+      <select id="oMarket" onchange="onMarketChange()">
         <option value="usa">Acción USA / ETF</option>
         <option value="cedear">CEDEAR</option>
         <option value="arg">Acción Argentina</option>
@@ -407,1370 +423,150 @@ body{background:#f5f7fa;color:#1a2740;font-family:-apple-system,'Segoe UI',sans-
         <option value="bono">Bono / Renta Fija</option>
       </select>
     </div>
-    <div class="field">
-      <label>Ticker</label>
-      <div class="autocomplete-wrap">
-        <input id="o-ticker" placeholder="Escribí para buscar..." autocomplete="off"
+    <div class="field"><label>Ticker</label>
+      <div class="ac-wrap">
+        <input id="oTicker" placeholder="Escribí para buscar..." autocomplete="off"
           oninput="onTickerInput(this.value)"
-          onblur="setTimeout(()=>hideAC(),200)">
-        <div class="autocomplete-list" id="ac-list"></div>
+          onblur="setTimeout(hideAC,200)">
+        <div class="ac-list" id="acList"></div>
       </div>
     </div>
   </div>
-  <div class="field">
-    <label>Cantidad</label>
-    <input id="o-qty" type="number" inputmode="decimal" placeholder="10" min="0" oninput="updateOrderTotal()">
+  <div class="field"><label>Cantidad</label>
+    <input id="oQty" type="number" inputmode="decimal" placeholder="10" min="0" oninput="calcTotal()">
   </div>
-  <div class="field">
-    <label id="o-price-label">Precio (USD)</label>
+  <div class="field"><label id="oPriceLbl">Precio (USD)</label>
     <div style="position:relative">
-      <input id="o-price" type="number" inputmode="decimal" placeholder="150.00" min="0" style="padding-right:50px" oninput="updateOrderTotal()">
-      <span id="o-price-currency" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--muted)">USD</span>
+      <input id="oPrice" type="number" inputmode="decimal" placeholder="150.00" min="0"
+        style="padding-right:50px" oninput="calcTotal()">
+      <span id="oPriceCur" class="price-cur">USD</span>
     </div>
-    <div id="o-price-hint" style="font-size:10px;color:var(--muted);margin-top:3px"></div>
+    <div id="oPriceHint" class="price-hint"></div>
   </div>
-  <div class="field">
-    <label>Comisión (USD)</label>
-    <input id="o-comm" type="number" inputmode="decimal" placeholder="0.00" min="0" oninput="updateOrderTotal()">
+  <div class="field"><label>Comisión</label>
+    <input id="oComm" type="number" inputmode="decimal" placeholder="0.00" min="0" oninput="calcTotal()">
   </div>
-  <div style="background:var(--blueL);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:12px;color:var(--muted);font-weight:600">TOTAL DE LA OPERACIÓN</span>
-      <span id="orderTotal" style="font-size:16px;font-weight:800;color:var(--blue)">$0,00</span>
-    </div>
-    <div id="orderTotalARS" style="font-size:10px;color:var(--muted);text-align:right;margin-top:2px"></div>
+  <div class="total-preview">
+    <div class="lbl">Total de la operación</div>
+    <div class="val" id="oTotal">$0,00</div>
+    <div class="sub" id="oTotalSub"></div>
   </div>
-  <div class="field">
-    <label>Broker</label>
-    <select id="o-broker">
-      <option value="">— Seleccionar —</option>
-    </select>
+  <div class="field"><label>Broker</label>
+    <select id="oBroker"><option value="">— Seleccionar —</option></select>
   </div>
-  <div class="field">
-    <label>Fecha</label>
-    <input id="o-date" type="date">
+  <div class="field"><label>Fecha</label>
+    <input id="oDate" type="date">
   </div>
-  <div class="field">
-    <label>Notas (opcional)</label>
-    <input id="o-notes" placeholder="Notas...">
+  <div class="field"><label>Notas (opcional)</label>
+    <input id="oNotes" placeholder="Notas...">
   </div>
   <div class="modal-btns">
     <button class="btn btn-green" onclick="saveOrder()">Registrar</button>
-    <button class="btn btn-ghost" onclick="closeOverlay('order')">Cancelar</button>
+    <button class="btn btn-ghost" onclick="closeOverlay('order');resetOrder()">Cancelar</button>
   </div>
 </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // CONSTANTS
-// ═══════════════════════════════════════════════════════
-const AV = '8X9MWKFC0MU3LNSY';  // Alpha Vantage fallback
-window._FMP_KEY = localStorage.getItem('pf6_fmp_key') || '';
-
-// ── SUPABASE ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+const AV  = '8X9MWKFC0MU3LNSY';
 const SUPA_URL = 'https://ypplfrqwspgdjwboikdz.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlwcGxmcnF3c3BnZGp3Ym9pa2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MzUzOTQsImV4cCI6MjA5NDExMTM5NH0.2ixCpb8i8ZIexCCM-RJwH-rvV3fOwaMasN6V1Fx-bKw';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
-let currentUser = null;
-const COLS = ['#1565c0','#42a5f5','#00a876','#f59f00','#e53935','#7c3aed','#0891b2'];
-const PIE_COLS = ['#42a5f5','#f59f00','#e53935','#7c3aed','#00a876','#0891b2','#f97316'];
 
-const DEFAULT_BROKERS = ['IOL','IOL Dólares','Binance','Santander','Galicia',
-  'Bull Market','Interactive Brokers','Balanz','PPI','TDA','Lemon','Gate.io','Kucoin'];
+const COLS = ['#1565c0','#42a5f5','#00a876','#f59f00','#e53935','#7c3aed','#0891b2','#f97316','#14b8a6','#8b5cf6'];
+const DEFAULT_BROKERS = ['IOL Dólares','IOL Argentina','Bull Market','Galicia','Binance','Santander','Interactive Brokers','Balanz','PPI','TDA','Lemon','Gate.io','Kucoin'];
 
-// Ticker lists for autocomplete
 const TICKERS = {
   usa:[
     {t:'AAPL',n:'Apple'},{t:'MSFT',n:'Microsoft'},{t:'GOOGL',n:'Alphabet'},
     {t:'AMZN',n:'Amazon'},{t:'NVDA',n:'Nvidia'},{t:'META',n:'Meta'},
     {t:'TSLA',n:'Tesla'},{t:'JPM',n:'JPMorgan'},{t:'V',n:'Visa'},
-    {t:'MA',n:'Mastercard'},{t:'WMT',n:'Walmart'},{t:'KO',n:'Coca-Cola'},
-    {t:'PEP',n:'PepsiCo'},{t:'DIS',n:'Disney'},{t:'NFLX',n:'Netflix'},
-    {t:'ADBE',n:'Adobe'},{t:'CRM',n:'Salesforce'},{t:'CSCO',n:'Cisco'},
-    {t:'INTC',n:'Intel'},{t:'AMD',n:'AMD'},{t:'QCOM',n:'Qualcomm'},
+    {t:'KO',n:'Coca-Cola'},{t:'DIS',n:'Disney'},{t:'NFLX',n:'Netflix'},
+    {t:'ADBE',n:'Adobe'},{t:'AMD',n:'AMD'},{t:'INTC',n:'Intel'},
     {t:'SBUX',n:'Starbucks'},{t:'NKE',n:'Nike'},{t:'PFE',n:'Pfizer'},
-    {t:'MRNA',n:'Moderna'},{t:'JNJ',n:'Johnson & Johnson'},
-    {t:'UNH',n:'UnitedHealth'},{t:'GS',n:'Goldman Sachs'},
-    {t:'MS',n:'Morgan Stanley'},{t:'BAC',n:'Bank of America'},
     {t:'MELI',n:'MercadoLibre'},{t:'GLOB',n:'Globant'},
-    {t:'BIOX',n:'Bioceres'},{t:'VIST',n:'Vista Energy'},
-    {t:'PDYN',n:'Palladyne AI'},{t:'SUPV',n:'Supervielle'},
-    {t:'LOMA',n:'Loma Negra'},{t:'BMA',n:'Banco Macro'},
-    {t:'BBAR',n:'BBVA Argentina'},{t:'GGAL',n:'Galicia'},
+    {t:'VIST',n:'Vista Energy'},{t:'PDYN',n:'Palladyne AI'},
+    {t:'SUPV',n:'Supervielle'},{t:'LOMA',n:'Loma Negra'},
+    {t:'BMA',n:'Banco Macro'},{t:'BBAR',n:'BBVA Argentina'},
     {t:'CEPU',n:'Central Puerto'},{t:'YPF',n:'YPF'},
-    {t:'PAMP',n:'Pampa Energía'},{t:'COIN',n:'Coinbase'},
-    {t:'PYPL',n:'PayPal'},{t:'SPOT',n:'Spotify'},
-    {t:'BABA',n:'Alibaba'},{t:'JD',n:'JD.com'},
+    {t:'GGAL',n:'Galicia'},{t:'PAMP',n:'Pampa Energía'},
+    {t:'COIN',n:'Coinbase'},{t:'PYPL',n:'PayPal'},{t:'SPOT',n:'Spotify'},
     {t:'SPY',n:'S&P 500 ETF'},{t:'QQQ',n:'Nasdaq ETF'},
-    {t:'GLD',n:'Gold ETF'},{t:'TLT',n:'Bond ETF'},
-    {t:'USO',n:'Oil ETF'},{t:'IWM',n:'Russell 2000'},
+    {t:'GLD',n:'Gold ETF'},{t:'TLT',n:'Bond ETF'},{t:'USO',n:'Oil ETF'},
+    {t:'CAG',n:'Conagra'},{t:'CPB',n:'Campbell Soup'},{t:'ENPH',n:'Enphase'},
+    {t:'FISV',n:'Fiserv'},{t:'FMC',n:'FMC Corp'},{t:'FVRR',n:'Fiverr'},
+    {t:'GIS',n:'General Mills'},{t:'KHC',n:'Kraft Heinz'},{t:'KKR',n:'KKR'},
+    {t:'PG',n:'P&G'},{t:'PRCT',n:'Procept Bio'},{t:'RIVN',n:'Rivian'},
+    {t:'SJM',n:'J.M. Smucker'},{t:'BIOX',n:'Bioceres'},
   ],
   cedear:[
-    {t:'AAPL',n:'Apple CEDEAR'},{t:'MSFT',n:'Microsoft CEDEAR'},
-    {t:'GOOGL',n:'Alphabet CEDEAR'},{t:'AMZN',n:'Amazon CEDEAR'},
-    {t:'NVDA',n:'Nvidia CEDEAR'},{t:'META',n:'Meta CEDEAR'},
-    {t:'TSLA',n:'Tesla CEDEAR'},{t:'KO',n:'Coca-Cola CEDEAR'},
-    {t:'DIS',n:'Disney CEDEAR'},{t:'NFLX',n:'Netflix CEDEAR'},
-    {t:'ACN',n:'Accenture CEDEAR'},{t:'COIN',n:'Coinbase CEDEAR'},
-    {t:'MELI',n:'MercadoLibre CEDEAR'},{t:'BIOX',n:'Bioceres CEDEAR'},
-    {t:'SPOT',n:'Spotify CEDEAR'},{t:'FXI',n:'iShares China CEDEAR'},
-    {t:'JD',n:'JD.com CEDEAR'},{t:'BABA',n:'Alibaba CEDEAR'},
-    {t:'CL',n:'Colgate CEDEAR'},{t:'UNH',n:'UnitedHealth CEDEAR'},
-    {t:'LRCX',n:'Lam Research CEDEAR'},{t:'GS',n:'Goldman CEDEAR'},
+    {t:'AAPL',n:'Apple'},{t:'MSFT',n:'Microsoft'},{t:'GOOGL',n:'Alphabet'},
+    {t:'AMZN',n:'Amazon'},{t:'NVDA',n:'Nvidia'},{t:'META',n:'Meta'},
+    {t:'TSLA',n:'Tesla'},{t:'KO',n:'Coca-Cola'},{t:'DIS',n:'Disney'},
+    {t:'NFLX',n:'Netflix'},{t:'COIN',n:'Coinbase'},{t:'SPOT',n:'Spotify'},
+    {t:'MELI',n:'MercadoLibre'},{t:'BIOX',n:'Bioceres'},{t:'GLOB',n:'Globant'},
+    {t:'ACN',n:'Accenture'},{t:'CL',n:'Colgate'},{t:'FXI',n:'iShares China'},
+    {t:'JD',n:'JD.com'},{t:'MSTR',n:'MicroStrategy'},{t:'UNH',n:'UnitedHealth'},
+    {t:'VIST',n:'Vista Oil'},{t:'HOOD',n:'Robinhood'},{t:'LAC',n:'Lithium Americas'},
+    {t:'ORCL',n:'Oracle'},{t:'PAGS',n:'PagSeguro'},{t:'PYPL',n:'PayPal'},
+    {t:'RGTI',n:'Rigetti'},{t:'SH',n:'ProShares Short'},{t:'SHOP',n:'Shopify'},
+    {t:'SONY',n:'Sony'},{t:'UBER',n:'Uber'},{t:'PFE',n:'Pfizer'},
+    {t:'NKE',n:'Nike'},{t:'XP',n:'XP Inc'},{t:'GS',n:'Goldman'},
   ],
   arg:[
-    {t:'GGAL',n:'Galicia'},{t:'BMA',n:'Macro'},
-    {t:'BBAR',n:'BBVA'},{t:'SUPV',n:'Supervielle'},
-    {t:'YPF',n:'YPF'},{t:'PAMP',n:'Pampa'},
+    {t:'GGAL',n:'Galicia'},{t:'BMA',n:'Macro'},{t:'BBAR',n:'BBVA'},
+    {t:'SUPV',n:'Supervielle'},{t:'YPF',n:'YPF'},{t:'PAMP',n:'Pampa'},
     {t:'CEPU',n:'Central Puerto'},{t:'TECO2',n:'Telecom'},
     {t:'ALUA',n:'Aluar'},{t:'LOMA',n:'Loma Negra'},
-    {t:'TXAR',n:'Ternium Arg.'},{t:'EDN',n:'Edenor'},
-    {t:'CRES',n:'Cresud'},{t:'IRSA',n:'IRSA'},
+    {t:'EDN',n:'Edenor'},{t:'CRES',n:'Cresud'},{t:'IRSA',n:'IRSA'},
   ],
   cripto:[
-    {t:'BTC',n:'Bitcoin'},{t:'ETH',n:'Ethereum'},
-    {t:'SOL',n:'Solana'},{t:'BNB',n:'BNB'},
-    {t:'XRP',n:'Ripple'},{t:'ADA',n:'Cardano'},
-    {t:'DOGE',n:'Dogecoin'},{t:'USDT',n:'Tether'},
-    {t:'MATIC',n:'Polygon'},{t:'AVAX',n:'Avalanche'},
+    {t:'BTC',n:'Bitcoin'},{t:'ETH',n:'Ethereum'},{t:'SOL',n:'Solana'},
+    {t:'BNB',n:'BNB'},{t:'XRP',n:'Ripple'},{t:'ADA',n:'Cardano'},
+    {t:'DOGE',n:'Dogecoin'},{t:'USDT',n:'Tether'},{t:'MATIC',n:'Polygon'},
   ],
   bono:[
     {t:'GD30',n:'Global 2030'},{t:'GD35',n:'Global 2035'},
     {t:'AL30',n:'Bonos 2030'},{t:'AL35',n:'Bonos 2035'},
-    {t:'TLT',n:'US 20yr Bond ETF'},
+    {t:'TLT',n:'US Bond ETF'},
   ],
 };
 
-// Market quotes config
-const MARKET_QUOTES = [
-  {label:'S&P 500',   id:'sp500',   src:'av',  sym:'SPY'},
-  {label:'Nasdaq 100',id:'nasdaq',  src:'av',  sym:'QQQ'},
-  {label:'Oro',       id:'gold',    src:'av',  sym:'GLD'},
-  {label:'WTI (Oil)', id:'wti',     src:'av',  sym:'USO'},
-  {label:'Bitcoin',   id:'btc',     src:'cg',  sym:'bitcoin'},
-  {label:'Merval',    id:'merval',  src:'av',  sym:'GGAL'},
-  {label:'Dólar Blue',id:'dblue',   src:'dapi',sym:'blue'},
-  {label:'Euro Blue', id:'eblue',   src:'dapi',sym:'euro'},
-];
-
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════
-let orders    = JSON.parse(localStorage.getItem('pf6_orders')   || '[]');
-let snapshots = JSON.parse(localStorage.getItem('pf6_snaps')    || '[]');
-let brokers   = JSON.parse(localStorage.getItem('pf6_brokers')  || JSON.stringify(DEFAULT_BROKERS));
-let prices    = {};  // {ticker: price, ticker_prev: prevClose, USD_ARS: rate}
+// ═══════════════════════════════════════════════════════════════════════════
+let orders    = JSON.parse(localStorage.getItem('pf6_orders')  || '[]');
+let snapshots = JSON.parse(localStorage.getItem('pf6_snaps')   || '[]');
+let brokers   = JSON.parse(localStorage.getItem('pf6_brokers') || JSON.stringify(DEFAULT_BROKERS));
+let prices    = {};
+let mkt       = {};
 let currency  = 'USD';
-let lineChart = null;
-let pieChart  = null;
+let currentUser = null;
+let _lineChart = null, _pieChart = null, _arsUsdChart = null, _sidebarPie = null;
+let _brokerPie = null, _brokerArs = null, _brokerBar = null;
 
-function save(){
+function localSave(){
   localStorage.setItem('pf6_orders',   JSON.stringify(orders));
   localStorage.setItem('pf6_snaps',    JSON.stringify(snapshots));
   localStorage.setItem('pf6_brokers',  JSON.stringify(brokers));
 }
 
-// ═══════════════════════════════════════════════════════
-// FORMAT
-// ═══════════════════════════════════════════════════════
-function n2(n, d=2){
-  if(n == null || isNaN(n)) return '—';
-  return new Intl.NumberFormat('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
-}
-const $u = n => `$${n2(n)}`;
-const $a = n => `$${n2(n,0)}`;
-const pc = n => `${n>=0?'+':''}${n2(n)}%`;
-const ars = () => mkt.dblue?.price || prices['USD_ARS'] || 1000;
-const dv  = v => currency==='USD' ? $u(v) : $a(v * ars());
-
-// ═══════════════════════════════════════════════════════
-// LOGO
-// ═══════════════════════════════════════════════════════
-const DOMAINS = {
-  AAPL:'apple.com',MSFT:'microsoft.com',GOOGL:'google.com',GOOG:'google.com',
-  AMZN:'amazon.com',META:'meta.com',NVDA:'nvidia.com',TSLA:'tesla.com',
-  JPM:'jpmorganchase.com',V:'visa.com',MA:'mastercard.com',WMT:'walmart.com',
-  KO:'coca-cola.com',PEP:'pepsi.com',DIS:'disney.com',NFLX:'netflix.com',
-  MELI:'mercadolibre.com',GLOB:'globant.com',BIOX:'bioceres.com',
-  VIST:'vistaoil.com',SUPV:'gruposupervielle.com.ar',GGAL:'galicia.ar',
-  YPF:'ypf.com',PAMP:'pampaenergia.com',BMA:'macro.com.ar',
-  BBAR:'bbva.com.ar',CEPU:'central-puerto.com',LOMA:'lomanegra.com.ar',
-  PDYN:'palladyne.ai',COIN:'coinbase.com',SPOT:'spotify.com',PYPL:'paypal.com',
-  GS:'goldmansachs.com',MS:'morganstanley.com',BAC:'bankofamerica.com',
-};
-const CRYPTO_LOGOS = {
-  BTC:'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
-  ETH:'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
-  SOL:'https://assets.coingecko.com/coins/images/4128/small/solana.png',
-  BNB:'https://assets.coingecko.com/coins/images/825/small/bnb-icon2_2x.png',
-  XRP:'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
-  DOGE:'https://assets.coingecko.com/coins/images/5/small/dogecoin.png',
-  ADA:'https://assets.coingecko.com/coins/images/975/small/cardano.png',
-};
-
-function makeLogo(ticker, type, size){
-  size = size || 28;
-  const c = COLS[(ticker||'?').charCodeAt(0) % COLS.length];
-  const init = (ticker||'?').slice(0,2).toUpperCase();
-
-  let src = null;
-  if(type === 'Cripto') src = CRYPTO_LOGOS[ticker?.toUpperCase()] || null;
-  else {
-    const domain = DOMAINS[ticker?.toUpperCase()] || (ticker?.toLowerCase() + '.com');
-    src = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-  }
-
-  const fb = document.createElement('div');
-  fb.className = 'asset-logo-fb';
-  fb.style.cssText = `width:${size}px;height:${size}px;font-size:${Math.round(size*0.36)}px;background:${c}22;color:${c};border:1px solid ${c}44;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0`;
-  fb.textContent = init;
-
-  if(!src) return fb;
-
-  const img = document.createElement('img');
-  img.className = 'asset-logo';
-  img.src = src;
-  img.alt = ticker;
-  img.style.cssText = `width:${size}px;height:${size}px`;
-  img.onerror = () => img.replaceWith(fb);
-  return img;
+async function save(){
+  localSave();
+  if(currentUser) await supaSync();
 }
 
-// ═══════════════════════════════════════════════════════
-// PORTFOLIO CALC
-// ═══════════════════════════════════════════════════════
-function getPortfolio(filterBroker){
-  const map = {};
-  const ords = filterBroker
-    ? orders.filter(o => o.broker === filterBroker)
-    : orders;
-  ords.forEach(o => {
-    if(!map[o.ticker]) map[o.ticker] = {
-      ticker:o.ticker, type:o.type||'Acción USA', qty:0, cost:0, comm:0
-    };
-    if(o.action === 'Compra'){
-      map[o.ticker].qty   += o.qty;
-      map[o.ticker].cost  += o.qty * o.price + (o.comm||0);
-      map[o.ticker].comm  += (o.comm||0);
-    } else {
-      const r = map[o.ticker].qty > 0 ? o.qty / map[o.ticker].qty : 0;
-      map[o.ticker].cost -= map[o.ticker].cost * r;
-      map[o.ticker].qty  -= o.qty;
-    }
-  });
-  return Object.values(map)
-    .filter(a => a.qty > 0.0001)
-    .map(a => ({ ...a, avgPrice: a.qty > 0 ? a.cost / a.qty : 0 }));
-}
-
-function getPortfolioFull(){
-  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
-  return getPortfolio(null).map(a => {
-    const isARS = prices[a.ticker+'_ars'] === true;
-    const rawPrice = prices[a.ticker] || 0;
-    const rawPrev  = prices[a.ticker + '_prev'] || 0;
-    // Convert to USD if price is in ARS
-    const price    = rawPrice > 0 ? (isARS ? rawPrice / ccl : rawPrice) : 0;
-    const prev     = rawPrev  > 0 ? (isARS ? rawPrev  / ccl : rawPrev)  : 0;
-    const priceARS = isARS ? rawPrice : price * ccl;  // for display
-    const hasPx    = price > 0;
-    const value    = a.qty * price;
-    const pnl      = hasPx ? value - a.cost : null;
-    const pnlPct   = hasPx && a.cost > 0 ? pnl / a.cost * 100 : null;
-    const dayPct   = prev && price ? (price - prev) / prev * 100 : null;
-    const dayDol   = prev && price ? (price - prev) * a.qty : null;
-    const brokerList = [...new Set(orders.filter(o=>o.ticker===a.ticker&&o.broker).map(o=>o.broker))];
-    return { ...a, price, priceARS, prev, hasPx, value, pnl, pnlPct, dayPct, dayDol, brokerList, isARS };
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// PRICE FETCH
-// ═══════════════════════════════════════════════════════
-// ── ARGENTINA PRICES via Yahoo Finance .BA ───────────────────────────────────
-async function fetchArgPrice(ticker){
-  // Yahoo Finance uses ticker.BA for Argentine market
-  const sym = ticker + '.BA';
-  // Try via corsproxy
-  const urls = [
-    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`,
-  ];
-  for(const url of urls){
-    try{
-      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-      const d = await r.json();
-      const meta = d?.chart?.result?.[0]?.meta;
-      if(meta?.regularMarketPrice > 0){
-        return {
-          price:  meta.regularMarketPrice,
-          prev:   meta.chartPreviousClose || meta.regularMarketPrice,
-          chgPct: meta.chartPreviousClose
-            ? (meta.regularMarketPrice - meta.chartPreviousClose) / meta.chartPreviousClose * 100
-            : 0,
-          currency: 'ARS'
-        };
-      }
-    }catch(e){}
-  }
-  return null;
-}
-
-async function fetchPrice(sym, assetType){
-  const isArgAsset = assetType === 'CEDEAR' || assetType === 'Acción Argentina' || assetType === 'Bono/Renta Fija';
-
-  // For Argentine assets: try Yahoo Finance .BA (returns ARS)
-  if(isArgAsset){
-    const yba = await fetchArgPrice(sym);
-    if(yba) return yba;
-  }
-
-  // For US assets: multiple sources
-  if(!isArgAsset){
-    // Source 1: FMP (250/día gratis - configurar con ⚙ FMP)
-    const fmpKey = window._FMP_KEY;
-    if(fmpKey && fmpKey !== 'YOUR_API_KEY'){
-      try{
-        const r = await fetch(`https://financialmodelingprep.com/api/v3/quote/${sym}?apikey=${fmpKey}`);
-        const d = await r.json();
-        if(Array.isArray(d) && d[0]?.price > 0){
-          console.log(`FMP OK: ${sym} = ${d[0].price}`);
-          return {price:d[0].price, prev:d[0].previousClose||d[0].price, chgPct:d[0].changesPercentage||0, currency:'USD'};
-        }
-      }catch(e){ console.log(`FMP error ${sym}:`, e.message); }
-    }
-
-    // Source 2: Yahoo Finance via corsproxy (free, no key)
-    try{
-      const yhUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
-      const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(yhUrl)}`);
-      const d = await r.json();
-      const meta = d?.chart?.result?.[0]?.meta;
-      if(meta?.regularMarketPrice > 0){
-        console.log(`Yahoo OK: ${sym} = ${meta.regularMarketPrice}`);
-        return {
-          price:  meta.regularMarketPrice,
-          prev:   meta.chartPreviousClose || meta.regularMarketPrice,
-          chgPct: meta.chartPreviousClose ? (meta.regularMarketPrice - meta.chartPreviousClose)/meta.chartPreviousClose*100 : 0,
-          currency: 'USD'
-        };
-      }
-    }catch(e){ console.log(`Yahoo error ${sym}:`, e.message); }
-
-    // Source 3: Alpha Vantage fallback (25/día)
-    try{
-      const r = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${AV}`);
-      const d = await r.json();
-      const gq = d?.['Global Quote'];
-      if(gq?.['05. price'] && parseFloat(gq['05. price']) > 0){
-        console.log(`AV OK: ${sym} = ${gq['05. price']}`);
-        return {
-          price:  parseFloat(gq['05. price']),
-          prev:   parseFloat(gq['08. previous close']),
-          chgPct: parseFloat((gq['10. change percent']||'0').replace('%','')),
-          currency: 'USD'
-        };
-      }
-    }catch(e){ console.log(`AV error ${sym}:`, e.message); }
-
-    console.log(`No price found for ${sym}`);
-  }
-  return null;
-}
-
-const fetchAV = (sym) => fetchPrice(sym, 'Acción USA');
-
-async function doRefresh(){
-  const pf = getPortfolio();
-  if(!pf.length){ setStatus('Sin activos para actualizar', false); return; }
-
-  setStatus('Obteniendo precios...', true);
-  document.getElementById('btnRef').textContent = '...';
-  document.getElementById('btnRef').disabled = true;
-
-  const cryptos = pf.filter(a => a.type === 'Cripto');
-  const stocks  = pf.filter(a => a.type !== 'Cripto');
-
-  // Crypto via CoinGecko (no rate limit)
-  if(cryptos.length){
-    const CGIDS = {BTC:'bitcoin',ETH:'ethereum',SOL:'solana',BNB:'binancecoin',
-      XRP:'ripple',ADA:'cardano',DOGE:'dogecoin',USDT:'tether',
-      MATIC:'matic-network',AVAX:'avalanche-2'};
-    const ids = cryptos.map(a => CGIDS[a.ticker?.toUpperCase()] || a.ticker?.toLowerCase()).filter(Boolean);
-    try{
-      const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`);
-      const d = await r.json();
-      cryptos.forEach(a => {
-        const id = CGIDS[a.ticker?.toUpperCase()] || a.ticker?.toLowerCase();
-        if(d[id]){
-          prices[a.ticker] = d[id].usd;
-          // prev approximated from 24h change
-          const chg = d[id].usd_24h_change || 0;
-          prices[a.ticker+'_prev'] = d[id].usd / (1 + chg/100);
-        }
-      });
-    }catch(e){}
-  }
-
-  // Stocks via Alpha Vantage (respect 25/day limit — fetch sequentially)
-  for(const a of stocks){
-    const sym = a.type === 'Acción Argentina' ? a.ticker + '.BA' : a.ticker;
-    const data = await fetchPrice(sym, a.type);
-    if(data && data.price > 0){
-      const isArgAsset = a.type==='CEDEAR'||a.type==='Acción Argentina'||a.type==='Bono/Renta Fija';
-      if(isArgAsset && data.currency === 'ARS'){
-        // Store ARS price — render will convert to USD using CCL
-        prices[a.ticker] = data.price;           // in ARS
-        prices[a.ticker+'_prev'] = data.prev;    // in ARS
-        prices[a.ticker+'_ars'] = true;          // flag: price is in ARS
-      } else {
-        prices[a.ticker] = data.price;           // in USD
-        prices[a.ticker+'_prev'] = data.prev;    // in USD
-      }
-    }
-  }
-
-  // USD/ARS Blue
-  try{
-    const r = await fetch('https://dolarapi.com/v1/dolares/blue');
-    const d = await r.json();
-    if(d.venta > 100) prices['USD_ARS'] = d.venta;
-  }catch(e){
-    try{
-      const r = await fetch('https://api.bluelytics.com.ar/v2/latest');
-      const d = await r.json();
-      if(d.blue?.value_sell > 100) prices['USD_ARS'] = d.blue.value_sell;
-    }catch(e){}
-  }
-
-  // Snapshot
-  const today = new Date().toISOString().slice(0,10);
-  const total = getPortfolio().reduce((s,a) => s + a.qty * (prices[a.ticker]||0), 0);
-  snapshots = [...snapshots.filter(s=>s.date!==today), {date:today,usd:total}].slice(-365);
-  save();
-
-  const got = stocks.filter(a => prices[a.ticker]>0).length + cryptos.filter(a=>prices[a.ticker]>0).length;
-  setStatus(`${got}/${pf.length} precios · Blue $${n2(prices['USD_ARS']||1000,0)}`, false);
-  document.getElementById('btnRef').textContent = '↻ Actualizar';
-  document.getElementById('btnRef').disabled = false;
-
-  render();
-  loadMarketQuotes();
-}
-
-// ═══════════════════════════════════════════════════════
-// MARKET QUOTES (sidebar)
-// ═══════════════════════════════════════════════════════
-const mkt = {}; // cached market data
-
-async function loadMarketQuotes(){
-  const panel = document.getElementById('quotesPanel');
-  panel.innerHTML = '<div class="side-msg">Actualizando...</div>';
-
-  // BTC via CoinGecko (free)
-  try{
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
-    const d = await r.json();
-    mkt.btc = {price: d.bitcoin.usd, chg: d.bitcoin.usd_24h_change};
-  }catch(e){}
-
-  // USD/ARS + Euro via dolarapi
-  try{
-    const r = await fetch('https://dolarapi.com/v1/dolares/blue');
-    const d = await r.json();
-    mkt.dblue = {price: d.venta, buy: d.compra};
-    if(!prices['USD_ARS'] && d.venta > 100) prices['USD_ARS'] = d.venta;
-  }catch(e){}
-  try{
-    const r = await fetch('https://dolarapi.com/v1/dolares/bolsa');
-    const d = await r.json();
-    mkt.dmep = {price: d.venta, buy: d.compra};
-  }catch(e){}
-  try{
-    const r = await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');
-    const d = await r.json();
-    mkt.dccl = {price: d.venta, buy: d.compra};
-  }catch(e){}
-
-  // Stocks/ETFs - always USA type
-  const avSyms = ['SPY','QQQ','GLD','USO'];
-  for(const sym of avSyms){
-    const data = await fetchPrice(sym, 'Acción USA');
-    if(data) mkt[sym.toLowerCase()] = data;
-  }
-  // GGAL as Merval proxy
-  if(!mkt.ggal){
-    const data = await fetchPrice('GGAL', 'Acción USA');
-    if(data) mkt.ggal = data;
-  }
-
-  // Render
-  const rows = [
-    {label:'S&P 500',    d:mkt.spy,   fmt:'$', dp:2},
-    {label:'Nasdaq 100', d:mkt.qqq,   fmt:'$', dp:2},
-    {label:'Oro (GLD)',  d:mkt.gld,   fmt:'$', dp:2},
-    {label:'WTI (USO)',  d:mkt.uso,   fmt:'$', dp:2},
-    {label:'Bitcoin',    d:mkt.btc,   fmt:'$', dp:0},
-    {label:'Merval*',    d:mkt.ggal,  fmt:'$', dp:2},
-    // Blue/MEP/CCL shown in summary header, not here
-  ];
-
-  // Update header cards
-  document.getElementById('sBlue').textContent = mkt.dblue ? `$${n2(mkt.dblue.price,0)}` : '$—';
-  document.getElementById('sMep').textContent  = mkt.dmep  ? `$${n2(mkt.dmep.price,0)}`  : '$—';
-  document.getElementById('sCcl').textContent  = mkt.dccl  ? `$${n2(mkt.dccl.price,0)}`  : '$—';
-
-  panel.innerHTML = rows.map(r => {
-    if(!r.d) return `<div class="quote-row"><span class="quote-name">${r.label}</span><span class="quote-price" style="color:var(--muted)">—</span></div>`;
-    const priceStr = `$${n2(r.d.price, r.dp)}`;
-    let chgHTML = '';
-    if(!r.ars && r.d.chgPct != null){
-      const cls = r.d.chgPct >= 0 ? 'up' : 'dn';
-      chgHTML = `<span class="chg ${cls}">${r.d.chgPct>=0?'+':''}${n2(r.d.chgPct,2)}%</span>`;
-    } else if(r.ars && r.d.buy){
-      chgHTML = `<span style="font-size:10px;color:var(--muted)">C $${n2(r.d.buy,0)}</span>`;
-    }
-    return `<div class="quote-row">
-      <span class="quote-name">${r.label}</span>
-      <div class="quote-right"><span class="quote-price">${priceStr}</span>${chgHTML}</div>
-    </div>`;
-  }).join('');
-}
-
-async function loadNews(){
-  const panel = document.getElementById('newsPanel');
-  // Argentine financial news sources via RSS2JSON (free)
-  const feeds = [
-    {name:'Ámbito', url:'https://www.ambito.com/rss/pages/finanzas.xml'},
-    {name:'Infobae', url:'https://www.infobae.com/feeds/rss/economia.xml'},
-    {name:'El Cronista', url:'https://www.cronista.com/files/rss/home.xml'},
-  ];
-  const rss2json = 'https://api.rss2json.com/v1/api.json?rss_url=';
-
-  for(const feed of feeds){
-    try{
-      const r = await fetch(rss2json + encodeURIComponent(feed.url));
-      const d = await r.json();
-      if(d.status === 'ok' && d.items?.length){
-        panel.innerHTML = d.items.slice(0,10).map(n => {
-          const date = n.pubDate ? n.pubDate.slice(5,10) : '';
-          const title = n.title?.replace(/<[^>]*>/g,'') || '';
-          return `<a class="news-item" href="${n.link}" target="_blank" rel="noreferrer">
-            <div class="ntitle">${title}</div>
-            <div class="nmeta">${feed.name}${date?' · '+date:''}</div>
-          </a>`;
-        }).join('');
-        return;
-      }
-    }catch(e){}
-  }
-  // Fallback: Alpha Vantage with Argentina topic
-  try{
-    const r = await fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&topics=economy_fiscal&tickers=YPF,MELI,GGAL&limit=8&apikey=${AV}`);
-    const d = await r.json();
-    const items = d?.feed || [];
-    if(items.length){
-      panel.innerHTML = items.slice(0,8).map(n => {
-        const date = n.time_published ? n.time_published.slice(4,6)+'/'+n.time_published.slice(6,8) : '';
-        return `<a class="news-item" href="${n.url}" target="_blank" rel="noreferrer">
-          <div class="ntitle">${n.title}</div>
-          <div class="nmeta">${n.source}${date?' · '+date:''}</div>
-        </a>`;
-      }).join('');
-      return;
-    }
-  }catch(e){}
-  panel.innerHTML = '<div class="side-msg">Sin noticias disponibles</div>';
-}
-
-// ═══════════════════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════════════════
-function render(){
-  const pf = getPortfolioFull();
-  const totUSD  = pf.reduce((s,a) => s + a.value, 0);
-  const totCost = pf.reduce((s,a) => s + a.cost, 0);
-  const totPnL  = totUSD - totCost;
-  const totPct  = totCost > 0 ? totPnL / totCost * 100 : 0;
-
-  // Split USD vs ARS positions
-  const pfUSD = pf.filter(a => a.type !== 'CEDEAR' && a.type !== 'Acción Argentina' && a.type !== 'Bono/Renta Fija');
-  const pfARS = pf.filter(a => a.type === 'CEDEAR' || a.type === 'Acción Argentina' || a.type === 'Bono/Renta Fija');
-  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
-
-  const totUSD_usd  = pfUSD.reduce((s,a)=>s+a.value,0);
-  const costUSD_usd = pfUSD.reduce((s,a)=>s+a.cost,0);
-  const pnlUSD_usd  = totUSD_usd - costUSD_usd;
-
-  const totARS_usd  = pfARS.reduce((s,a)=>s+a.value,0);  // stored in USD
-  const costARS_usd = pfARS.reduce((s,a)=>s+a.cost,0);
-  const pnlARS_usd  = totARS_usd - costARS_usd;
-  const totARS_ars  = totARS_usd * ccl;
-  const pnlARS_ars  = pnlARS_usd * ccl;
-
-  const totGlobal   = totUSD_usd + totARS_usd;
-  const pnlGlobal   = pnlUSD_usd + pnlARS_usd;
-
-  // Summary cards
-  document.getElementById('sValUSD').textContent = $u(totUSD_usd);
-  const pnlUSDel = document.getElementById('sPnlUSD');
-  pnlUSDel.textContent = `P&L: ${pnlUSD_usd>=0?'+':''}${$u(pnlUSD_usd)}`;
-  pnlUSDel.style.color = pnlUSD_usd >= 0 ? 'var(--green)' : 'var(--red)';
-
-  document.getElementById('sValARS').textContent = $a(totARS_ars);
-  const pnlARSel = document.getElementById('sPnlARS');
-  pnlARSel.textContent = `P&L: ${pnlARS_ars>=0?'+':''}${$a(pnlARS_ars)}`;
-  pnlARSel.style.color = pnlARS_ars >= 0 ? 'var(--green)' : 'var(--red)';
-
-  document.getElementById('sValGlobal').textContent = $u(totGlobal);
-  const pnlGlobEl = document.getElementById('sPnlGlobal');
-  pnlGlobEl.textContent = `P&L: ${pnlGlobal>=0?'+':''}${$u(pnlGlobal)}`;
-  pnlGlobEl.style.color = pnlGlobal >= 0 ? 'var(--green)' : 'var(--red)';
-  // Update Blue/MEP/CCL in header
-  document.getElementById('sBlue').textContent = mkt.dblue ? `$${n2(mkt.dblue.price,0)}` : '$—';
-  document.getElementById('sMep').textContent  = mkt.dmep  ? `$${n2(mkt.dmep.price,0)}`  : '$—';
-  document.getElementById('sCcl').textContent  = mkt.dccl  ? `$${n2(mkt.dccl.price,0)}`  : '$—';
-
-  // Asset table
-  renderAssetTable(pf, 'assetTable', totUSD, totPnL);
-
-  // Orders
-  renderOrders();
-
-  // Brokers
-  renderBrokerGrid();
-
-  // Charts
-  renderCharts(pf, totUSD);
-  renderSidebarPie(pf);
-}
-
-function renderAssetTable(pf, containerId, totUSD, totPnL, skipPie=false){
-  const el = document.getElementById(containerId);
-  if(!pf.length){
-    el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div>Cargá una orden para empezar.</div></div>';
-    return;
-  }
-
-  const wrap = document.createElement('div');
-  wrap.className = 'tbl-wrap';
-  const tbl = document.createElement('table');
-  tbl.className = 'tbl';
-
-  const ccl2 = mkt.dccl?.price || mkt.dblue?.price || 1200;
-  const isARStype = t => t==='CEDEAR'||t==='Acción Argentina'||t==='Bono/Renta Fija';
-  tbl.innerHTML = `<thead><tr>
-    <th>Activo</th><th>Cant.</th><th>Últ. Precio</th>
-    <th>Var% Diaria</th><th>Var$ Diaria</th>
-    <th>PPC</th><th>Gan%</th><th>Gan$</th><th>Total</th><th></th>
-  </tr></thead>`;
-
-  const tbody = document.createElement('tbody');
-  pf.forEach(a => {
-    const tr = document.createElement('tr');
-
-    // Asset cell
-    const tdAsset = document.createElement('td');
-    const cell = document.createElement('div');
-    cell.className = 'asset-cell';
-    cell.appendChild(makeLogo(a.ticker, a.type, 26));
-    const info = document.createElement('div');
-    info.className = 'asset-info';
-    info.innerHTML = `<div class="tkr">${a.ticker}</div><div class="typ">${a.type}</div>`;
-    if(a.brokerList && a.brokerList.length){
-      const brk = document.createElement('div');
-      brk.className = 'brk';
-      a.brokerList.forEach(b => {
-        const tag = document.createElement('span');
-        tag.className = 'brk-tag';
-        tag.textContent = b;
-        brk.appendChild(tag);
-      });
-      info.appendChild(brk);
-    }
-    cell.appendChild(info);
-    tdAsset.appendChild(cell);
-
-    const dc = a.dayPct != null ? (a.dayPct >= 0 ? 'up' : 'dn') : 'neu';
-    const gc = a.hasPx ? (a.pnl >= 0 ? 'up' : 'dn') : 'neu';
-
-    tr.appendChild(tdAsset);
-    const priceColor = a.hasPx ? (a.price > a.avgPrice ? 'up' : a.price < a.avgPrice ? 'dn' : '') : '';
-    tr.innerHTML += `
-      <td>${n2(a.qty,2)}</td>
-      <td class="${priceColor}">${a.hasPx ? (isARStype(a.type) ? $a(a.priceARS||a.price*ccl2) : $u(a.price)) : '—'}</td>
-      <td class="${dc}">${a.dayPct != null ? pc(a.dayPct) : '—'}</td>
-      <td class="${dc}">${a.dayDol != null ? (a.dayDol>=0?'+':'')+$u(a.dayDol) : '—'}</td>
-      <td style="font-weight:600;color:inherit">${isARStype(a.type) ? $a(a.avgPrice*ccl2) : $u(a.avgPrice)}</td>
-      <td class="${gc}" style="font-weight:700">${a.hasPx ? pc(a.pnlPct) : '—'}</td>
-      <td class="${gc}" style="font-weight:700">${a.hasPx ? (a.pnl>=0?'+':'')+$u(a.pnl) : '—'}</td>
-      <td class="${gc}" style="font-weight:800">${a.hasPx ? dv(a.value) : '—'}</td>
-      <td style="position:relative">
-        <button class="btn-icon" onclick="toggleAssetMenu('${a.ticker}')" title="Opciones" style="font-size:16px;padding:2px 6px">⋯</button>
-        <div id="menu_${a.ticker}" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 14px #1565c018;z-index:200;min-width:160px;overflow:hidden">
-          <div onclick="quickOrder('${a.ticker}','${a.type}','Compra');toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f4f9;color:var(--green);font-weight:600" onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">
-            📈 Comprar
-          </div>
-          <div onclick="quickOrder('${a.ticker}','${a.type}','Venta');toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f4f9;color:var(--red);font-weight:600" onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">
-            📉 Vender
-          </div>
-          <div onclick="goTV('${a.ticker}','${a.type}');toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f4f9" onmouseover="this.style.background='#f0f6ff'" onmouseout="this.style.background=''">
-            📊 Ver gráfico
-          </div>
-          <div onclick="if(confirm('Eliminar ${a.ticker}?')){delTicker('${a.ticker}')};toggleAssetMenu('${a.ticker}')" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--muted)" onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background=''">
-            ✕ Eliminar
-          </div>
-        </div>
-      </td>`;
-
-    // Re-insert the asset cell (was overwritten by innerHTML +=)
-    tr.cells[0].replaceWith(tdAsset);
-    tbody.appendChild(tr);
-  });
-
-  // Total row
-  const tot = document.createElement('tr');
-  tot.className = 'total-row';
-  const pnlClass = totPnL >= 0 ? 'up' : 'dn';
-  tot.innerHTML = `<td colspan="7" style="font-weight:700">TOTAL PORTFOLIO</td>
-    <td class="${pnlClass}">${(totPnL>=0?'+':'')+$u(totPnL)}</td>
-    <td style="font-weight:800">${dv(totUSD)}</td><td></td>`;
-  tbody.appendChild(tot);
-
-  tbl.appendChild(tbody);
-  wrap.appendChild(tbl);
-  el.innerHTML = '';
-  el.appendChild(wrap);
-}
-
-function renderOrders(){
-  const el = document.getElementById('orderList');
-  const sorted = [...orders].sort((a,b) => new Date(b.date) - new Date(a.date));
-  if(!sorted.length){
-    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div>Sin órdenes todavía.</div></div>';
-    return;
-  }
-  el.innerHTML = '';
-  sorted.forEach(o => {
-    const div = document.createElement('div');
-    div.className = `ord-card ${o.action==='Compra'?'buy':'sell'}`;
-    const total = o.qty * o.price + (o.comm||0);
-    div.innerHTML = `
-      <div class="ord-row">
-        <div class="ord-left">
-          <span class="ord-badge ${o.action==='Compra'?'buy':'sell'}">${o.action}</span>
-          <div>
-            <strong>${o.ticker}</strong>
-            <div class="ord-meta">${o.date}${o.broker?' · '+o.broker:''}${o.comm?' · Comis. '+$u(o.comm):''}</div>
-          </div>
-        </div>
-        <div class="ord-right">
-          <div style="font-family:monospace;font-weight:600">${n2(o.qty,4)} × ${$u(o.price)}</div>
-          <div style="color:var(--muted)">Total: ${$u(total)}</div>
-        </div>
-      </div>
-      ${o.notes?`<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">${o.notes}</div>`:''}
-      <div style="text-align:right;margin-top:6px">
-        <button class="btn-icon" onclick="delOrder('${o.id}')" style="color:var(--muted)">✕ Eliminar</button>
-      </div>`;
-    el.appendChild(div);
-  });
-}
-
-function renderBrokerGrid(){
-  const el = document.getElementById('brokerGrid');
-  const sel = document.getElementById('o-broker');
-  el.innerHTML = '';
-  sel.innerHTML = '<option value="">— Seleccionar —</option>';
-  brokers.forEach(b => {
-    const count = orders.filter(o => o.broker === b).length;
-    const total = orders.filter(o=>o.broker===b&&o.action==='Compra').reduce((s,o)=>s+o.qty*o.price+(o.comm||0),0);
-    const card = document.createElement('div');
-    card.className = 'broker-card';
-    card.innerHTML = `<h4>${b}</h4><span>${count} operaciones${total?'<br>'+$u(total):''}</span>`;
-    card.onclick = () => showBrokerDetail(b);
-    el.appendChild(card);
-    sel.innerHTML += `<option value="${b}">${b}</option>`;
-  });
-}
-
-function showBrokerDetail(name){
-  document.getElementById('brokerGrid-view').style.display = 'none';
-  document.getElementById('brokerDetail-view').style.display = 'block';
-  document.getElementById('brokerDetailTitle').textContent = 'ACTIVOS EN ' + name.toUpperCase();
-
-  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
-  const isARSt = t => t==='CEDEAR'||t==='Acción Argentina'||t==='Bono/Renta Fija';
-
-  const pf = getPortfolio(name).map(a => {
-    const isARS  = prices[a.ticker+'_ars'] === true;
-    const rawPx  = prices[a.ticker] || 0;
-    const rawPrev= prices[a.ticker+'_prev'] || 0;
-    const price  = rawPx  > 0 ? (isARS ? rawPx/ccl  : rawPx)  : 0;
-    const prev   = rawPrev> 0 ? (isARS ? rawPrev/ccl : rawPrev): 0;
-    const priceARS = isARS ? rawPx : price*ccl;
-    const hasPx  = price > 0;
-    const value  = a.qty * price;
-    const pnl    = hasPx ? value - a.cost : null;
-    const pnlPct = hasPx && a.cost > 0 ? pnl/a.cost*100 : null;
-    const dayPct = prev && price ? (price-prev)/prev*100 : null;
-    const brokerList = [name];
-    return {...a,price,priceARS,prev,hasPx,value,pnl,pnlPct,dayPct,brokerList,isARS};
-  });
-
-  const totVal  = pf.reduce((s,a)=>s+a.value,0);
-  const totPnlV = pf.reduce((s,a)=>s+(a.pnl||0),0);
-
-  // Render broker charts ABOVE the table
-  const detailEl = document.getElementById('brokerDetailTable');
-  detailEl.innerHTML = '';
-  renderBrokerCharts(pf, name, totVal, detailEl);
-  renderAssetTable(pf, 'brokerDetailTable', totVal, totPnlV, true);
-}
-
-function hideBrokerDetail(){
-  document.getElementById('brokerGrid-view').style.display = 'block';
-  document.getElementById('brokerDetail-view').style.display = 'none';
-}
-
-function addCustomBroker(){
-  const name = document.getElementById('newBrokerInput').value.trim();
-  if(name && !brokers.includes(name)){
-    brokers.push(name); save(); renderBrokerGrid();
-    document.getElementById('newBrokerInput').value = '';
-  }
-}
-
-let sidebarPieChart = null;
-let brokerPieChart = null;
-let brokerLineChart = null;
-let brokerBarChart = null;
-
-function renderBrokerCharts(pf, brokerName, totVal, containerEl){
-  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
-  const isARSt = t => t==='CEDEAR'||t==='Acción Argentina'||t==='Bono/Renta Fija';
-
-  // Compute stats
-  const totCost  = pf.reduce((s,a)=>s+a.cost,0);
-  const totPnL   = pf.reduce((s,a)=>s+(a.pnl||0),0);
-  const roe      = totCost>0 ? (totPnL/totCost*100) : 0;
-  const arsAssets= pf.filter(a=>isARSt(a.type));
-  const usdAssets= pf.filter(a=>!isARSt(a.type));
-  const arsVal   = arsAssets.reduce((s,a)=>s+a.value,0);
-  const usdVal   = usdAssets.reduce((s,a)=>s+a.value,0);
-
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'margin-bottom:14px';
-
-  // Row 1: KPI cards
-  const kpiRow = document.createElement('div');
-  kpiRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px';
-  const kpis = [
-    {label:'Valor Total', val:`$${n2(totVal,2)}`, color:'var(--blue)'},
-    {label:'Costo Base',  val:`$${n2(totCost,2)}`, color:'var(--txt)'},
-    {label:'P&L',         val:`${totPnL>=0?'+':''}$${n2(totPnL,2)}`, color:totPnL>=0?'var(--green)':'var(--red)'},
-    {label:'ROE',         val:`${roe>=0?'+':''}${n2(roe,2)}%`, color:roe>=0?'var(--green)':'var(--red)'},
-  ];
-  kpis.forEach(k=>{
-    kpiRow.innerHTML += `<div style="background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px 14px;flex:1;min-width:100px">
-      <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">${k.label}</div>
-      <div style="font-size:15px;font-weight:800;color:${k.color}">${k.val}</div>
-    </div>`;
-  });
-  wrap.appendChild(kpiRow);
-
-  // Row 2: Charts grid
-  const chartsRow = document.createElement('div');
-  chartsRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px';
-
-  // Chart 1: Composición torta
-  const pieBox = document.createElement('div');
-  pieBox.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px';
-  pieBox.innerHTML = '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">Composición</div>';
-  const pieWrap = document.createElement('div');
-  pieWrap.style.cssText = 'display:flex;gap:10px;align-items:center';
-  const pieCanvas = document.createElement('canvas');
-  pieCanvas.width = 100; pieCanvas.height = 100;
-  const pieLeg = document.createElement('div');
-  pieLeg.style.cssText = 'flex:1;font-size:10px';
-  const pd = pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
-  pd.forEach((d,i)=>{
-    pieLeg.innerHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:4px">
-      <div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:${PIE_COLS[i%PIE_COLS.length]};margin-right:4px"></span>${d.name}</div>
-      <span style="color:var(--muted)">${n2(totVal>0?d.value/totVal*100:0)}%</span>
-    </div>`;
-  });
-  pieWrap.appendChild(pieCanvas);
-  pieWrap.appendChild(pieLeg);
-  pieBox.appendChild(pieWrap);
-  chartsRow.appendChild(pieBox);
-  if(pd.length){
-    if(brokerPieChart) brokerPieChart.destroy();
-    brokerPieChart = new Chart(pieCanvas,{
-      type:'doughnut',
-      data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:PIE_COLS,borderWidth:2,borderColor:'#f5f7fa'}]},
-      options:{responsive:false,plugins:{legend:{display:false}}}
-    });
-  }
-
-  // Chart 2: ARS vs USD composición
-  const arsBox = document.createElement('div');
-  arsBox.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px';
-  arsBox.innerHTML = '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">ARS vs USD</div>';
-  const arsCanvas = document.createElement('canvas');
-  arsCanvas.width = 100; arsCanvas.height = 100;
-  const arsLeg = document.createElement('div');
-  arsLeg.style.cssText = 'flex:1;font-size:10px;margin-top:8px';
-  const arsTotal = arsVal+usdVal;
-  arsLeg.innerHTML = `
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#f59f00;margin-right:4px"></span>ARS (CEDEARs)</div><span style="color:var(--muted)">${n2(arsTotal>0?arsVal/arsTotal*100:0)}%</span></div>
-    <div style="display:flex;justify-content:space-between"><div><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#1565c0;margin-right:4px"></span>USD</div><span style="color:var(--muted)">${n2(arsTotal>0?usdVal/arsTotal*100:0)}%</span></div>`;
-  const arsWrap = document.createElement('div');
-  arsWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center';
-  arsWrap.appendChild(arsCanvas);
-  arsWrap.appendChild(arsLeg);
-  arsBox.appendChild(arsWrap);
-  chartsRow.appendChild(arsBox);
-  new Chart(arsCanvas,{
-    type:'doughnut',
-    data:{labels:['ARS','USD'],datasets:[{data:[arsVal,usdVal],backgroundColor:['#f59f00','#1565c0'],borderWidth:2,borderColor:'#f5f7fa'}]},
-    options:{responsive:false,plugins:{legend:{display:false}}}
-  });
-
-  // Chart 3: Rendimiento % por activo (bar)
-  const barBox = document.createElement('div');
-  barBox.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;grid-column:1/-1';
-  barBox.innerHTML = '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px">Rendimiento % por activo</div>';
-  const barCanvas = document.createElement('canvas');
-  barCanvas.height = 120;
-  barBox.appendChild(barCanvas);
-  chartsRow.appendChild(barBox);
-  const pfWithPnl = pf.filter(a=>a.pnlPct!=null);
-  if(pfWithPnl.length){
-    if(brokerBarChart) brokerBarChart.destroy();
-    brokerBarChart = new Chart(barCanvas,{
-      type:'bar',
-      data:{
-        labels: pfWithPnl.map(a=>a.ticker),
-        datasets:[{
-          data: pfWithPnl.map(a=>a.pnlPct),
-          backgroundColor: pfWithPnl.map(a=>a.pnlPct>=0?'#00a87666':'#e5393566'),
-          borderColor: pfWithPnl.map(a=>a.pnlPct>=0?'#00a876':'#e53935'),
-          borderWidth:1
-        }]
-      },
-      options:{
-        responsive:true,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${n2(ctx.raw,2)}%`}}},
-        scales:{
-          x:{ticks:{color:'#6b8cba',font:{size:10}},grid:{display:false}},
-          y:{ticks:{color:'#6b8cba',callback:v=>`${v}%`},grid:{color:'#eef2f9'}}
-        }
-      }
-    });
-  }
-
-  wrap.appendChild(chartsRow);
-  containerEl.insertBefore(wrap, containerEl.firstChild);
-}
-
-function renderSidebarPie(pf){
-  const el = document.getElementById('sidebarPie');
-  const leg = document.getElementById('sidebarPieLegend');
-  const pd = pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
-  const totUSD = pd.reduce((s,d)=>s+d.value,0);
-  if(sidebarPieChart) sidebarPieChart.destroy();
-  if(!pd.length){ leg.innerHTML='<span style="color:var(--muted)">Sin activos</span>'; return; }
-  sidebarPieChart = new Chart(el,{
-    type:'doughnut',
-    data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),
-      backgroundColor:PIE_COLS,borderWidth:2,borderColor:'#f5f7fa'}]},
-    options:{responsive:false,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${$u(ctx.raw)}`}}}}
-  });
-  leg.innerHTML = pd.slice(0,5).map((d,i)=>
-    `<div style="display:flex;justify-content:space-between;margin-bottom:5px">
-      <div><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PIE_COLS[i%PIE_COLS.length]};margin-right:5px"></span><strong>${d.name}</strong></div>
-      <span style="color:var(--muted)">${n2(totUSD>0?d.value/totUSD*100:0)}%</span>
-    </div>`).join('') + (pd.length>5?`<div style="color:var(--muted);font-size:10px">+${pd.length-5} más</div>`:'');
-}
-
-function renderBrokerPie(pf, containerEl){
-  // Remove old pie if exists
-  const existing = containerEl.querySelector('.broker-pie-wrap');
-  if(existing) existing.remove();
-
-  const pd = pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
-  const totUSD = pd.reduce((s,d)=>s+d.value,0);
-  if(!pd.length) return;
-
-  const wrap = document.createElement('div');
-  wrap.className = 'broker-pie-wrap';
-  wrap.style.cssText = 'background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;gap:12px;align-items:center';
-
-  const title = document.createElement('div');
-  title.style.cssText = 'font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px';
-  title.textContent = 'Composición';
-
-  const canvasWrap = document.createElement('div');
-  const canvas = document.createElement('canvas');
-  canvas.width = 110; canvas.height = 110;
-  canvasWrap.appendChild(canvas);
-
-  const leg = document.createElement('div');
-  leg.style.cssText = 'flex:1;font-size:11px';
-  leg.innerHTML = pd.slice(0,5).map((d,i)=>
-    `<div style="display:flex;justify-content:space-between;margin-bottom:5px">
-      <div><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PIE_COLS[i%PIE_COLS.length]};margin-right:5px"></span><strong>${d.name}</strong></div>
-      <span style="color:var(--muted)">${n2(totUSD>0?d.value/totUSD*100:0)}%</span>
-    </div>`).join('') + (pd.length>5?`<div style="color:var(--muted);font-size:10px">+${pd.length-5} más</div>`:'');
-
-  wrap.appendChild(canvasWrap);
-  wrap.appendChild(leg);
-  containerEl.insertBefore(wrap, containerEl.firstChild);
-
-  if(brokerPieChart) brokerPieChart.destroy();
-  brokerPieChart = new Chart(canvas,{
-    type:'doughnut',
-    data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),
-      backgroundColor:PIE_COLS,borderWidth:2,borderColor:'#f5f7fa'}]},
-    options:{responsive:false,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${$u(ctx.raw)}`}}}}
-  });
-}
-
-function renderCharts(pf, totUSD){
-  // Line chart
-  const s90 = snapshots.slice(-90);
-  const lc = document.getElementById('lineChart');
-  const nc = document.getElementById('noChart');
-  if(s90.length >= 2){
-    nc.style.display = 'none'; lc.style.display = 'block';
-    const labels = s90.map(s => s.date.slice(5));
-    const vals   = s90.map(s => currency==='USD' ? s.usd : s.usd * ars());
-    if(lineChart) lineChart.destroy();
-    lineChart = new Chart(lc, {
-      type:'line',
-      data:{labels, datasets:[{data:vals, borderColor:'#42a5f5',
-        backgroundColor:'#42a5f514', fill:true, tension:0.4, pointRadius:2}]},
-      options:{responsive:true, plugins:{legend:{display:false}},
-        scales:{x:{ticks:{color:'#6b8cba',maxTicksLimit:6},grid:{color:'#eef2f9'}},
-                y:{ticks:{color:'#6b8cba',callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#eef2f9'}}}}
-    });
-  } else { nc.style.display='block'; lc.style.display='none'; }
-
-  // Pie chart
-  const pc_el = document.getElementById('pieChart');
-  const pd = pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
-  if(pieChart) pieChart.destroy();
-  if(pd.length){
-    pieChart = new Chart(pc_el, {
-      type:'doughnut',
-      data:{labels:pd.map(d=>d.name), datasets:[{data:pd.map(d=>d.value),
-        backgroundColor:PIE_COLS, borderWidth:2, borderColor:'#f5f7fa'}]},
-      options:{responsive:false, plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${$u(ctx.raw)}`}}}}
-    });
-    document.getElementById('pieLegend').innerHTML = pd.map((d,i) =>
-      `<div class="pie-row">
-        <div><span class="pie-dot" style="background:${PIE_COLS[i%PIE_COLS.length]}"></span><strong>${d.name}</strong></div>
-        <div style="text-align:right">
-          <div style="font-family:monospace;font-size:12px">${$u(d.value)}</div>
-          <div style="font-size:10px;color:var(--muted)">${n2(totUSD>0?d.value/totUSD*100:0)}%</div>
-        </div>
-      </div>`).join('');
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// ORDER MODAL
-// ═══════════════════════════════════════════════════════
-function onActionChange(){
-  const isVenta = document.getElementById('o-action').value === 'Venta';
-  document.getElementById('field-sell-ticker').style.display = isVenta ? 'block' : 'none';
-  document.getElementById('fields-buy').style.display = isVenta ? 'none' : 'block';
-  if(isVenta){
-    const pf = getPortfolio();
-    const sel = document.getElementById('o-sell-ticker');
-    sel.innerHTML = '<option value="">— Seleccionar activo —</option>';
-    pf.forEach(a => sel.innerHTML += `<option value="${a.ticker}">${a.ticker} (${n2(a.qty,4)} disp.)</option>`);
-  }
-}
-
-function onSellTickerChange(){
-  const ticker = document.getElementById('o-sell-ticker').value;
-  const pf = getPortfolio();
-  const a = pf.find(x => x.ticker === ticker);
-  document.getElementById('sell-max-hint').textContent = a ? `Máx: ${n2(a.qty,4)} · PPC: ${$u(a.avgPrice)}` : '';
-  document.getElementById('o-price').value = a && prices[a.ticker] ? prices[a.ticker].toFixed(2) : '';
-}
-
-function onMarketChange(){
-  document.getElementById('o-ticker').value = '';
-  hideAC();
-  updatePriceCurrency();
-}
-
-function updatePriceCurrency(){
-  const mktVal = document.getElementById('o-market').value;
-  const isARS = (mktVal === 'cedear' || mktVal === 'arg' || mktVal === 'bono');
-  const label = document.getElementById('o-price-label');
-  const cur = document.getElementById('o-price-currency');
-  const hint = document.getElementById('o-price-hint');
-  const ccl = mkt.dccl?.price || 1200;
-  if(isARS){
-    label.textContent = 'Precio (ARS)';
-    cur.textContent = 'ARS';
-    cur.style.color = 'var(--gold)';
-    hint.textContent = `CCL: $${n2(ccl,0)} → la app convierte a USD automáticamente`;
-  } else {
-    label.textContent = 'Precio (USD)';
-    cur.textContent = 'USD';
-    cur.style.color = 'var(--muted)';
-    hint.textContent = '';
-  }
-}
-
-function onTickerInput(val){
-  const mkt = document.getElementById('o-market').value;
-  const list = TICKERS[mkt] || TICKERS.usa;
-  const q = val.toUpperCase();
-  document.getElementById('o-ticker').value = q;
-  if(!q){ hideAC(); return; }
-  const matches = list.filter(s => s.t.startsWith(q) || s.n.toUpperCase().includes(q)).slice(0,8);
-  const box = document.getElementById('ac-list');
-  if(!matches.length){ hideAC(); return; }
-  box.style.display = 'block';
-  box.innerHTML = matches.map(s =>
-    `<div class="ac-item" onmousedown="selectTicker('${s.t}')">
-      <strong>${s.t}</strong><span>${s.n}</span>
-    </div>`).join('');
-}
-
-function selectTicker(t){ 
-  document.getElementById('o-ticker').value = t; 
-  hideAC(); 
-}
-function hideAC(){ document.getElementById('ac-list').style.display = 'none'; }
-
-function saveOrder(){
-  const isVenta = document.getElementById('o-action').value === 'Venta';
-  const ticker = isVenta
-    ? document.getElementById('o-sell-ticker').value
-    : document.getElementById('o-ticker').value.trim().toUpperCase();
-  const qty   = parseFloat(document.getElementById('o-qty').value);
-  const price = parseFloat(document.getElementById('o-price').value);
-  if(!ticker || !qty || !price){ alert('Faltan datos obligatorios'); return; }
-
-  if(isVenta){
-    const pf = getPortfolio();
-    const held = pf.find(a => a.ticker === ticker);
-    if(!held){ alert(`No tenés ${ticker} en cartera`); return; }
-    if(qty > held.qty + 0.0001){ alert(`Solo tenés ${n2(held.qty,4)} unidades de ${ticker}`); return; }
-  }
-
-  // Determine type
-  const mktVal = document.getElementById('o-market').value;
-  const typeMap = {usa:'Acción USA',cedear:'CEDEAR',arg:'Acción Argentina',cripto:'Cripto',bono:'Bono/Renta Fija'};
-  const type = isVenta
-    ? (getPortfolio().find(a=>a.ticker===ticker)?.type || 'Acción USA')
-    : (typeMap[mktVal] || 'Acción USA');
-
-  // Determine currency and convert to USD if ARS
-  const isARS = (mktVal === 'cedear' || mktVal === 'arg' || mktVal === 'bono') && !isVenta;
-  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
-  const priceUSD = isARS ? price / ccl : price;
-  const commUSD  = isARS ? (parseFloat(document.getElementById('o-comm').value)||0) / ccl
-                          : (parseFloat(document.getElementById('o-comm').value)||0);
-
-  orders.push({
-    id: Date.now(),
-    ticker, type,
-    action: document.getElementById('o-action').value,
-    qty,
-    price: priceUSD,        // always stored in USD
-    priceOrig: price,       // original price in native currency
-    currency: isARS ? 'ARS' : 'USD',
-    cclAtOrder: isARS ? ccl : null,
-    comm: commUSD,
-    broker: document.getElementById('o-broker').value,
-    date:   document.getElementById('o-date').value || new Date().toISOString().slice(0,10),
-    notes:  document.getElementById('o-notes').value,
-  });
-  save();
-  closeOverlay('order');
-  resetOrderModal();
-  render();
-  doRefresh();
-}
-
-function resetOrderModal(){
-  ['o-qty','o-price','o-comm','o-notes','o-ticker'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('o-action').value = 'Compra';
-  document.getElementById('o-broker').value = '';
-  document.getElementById('o-date').value = new Date().toISOString().slice(0,10);
-// Load portfolio name
-const _savedName = localStorage.getItem('pf6_name');
-if(_savedName) document.getElementById('portfolioName').textContent = _savedName;
-
-// Check if already logged in
-supa.auth.getSession().then(({ data: { session } }) => {
-  if(session?.user) onLogin(session.user);
-});
-// Listen for auth changes
-supa.auth.onAuthStateChange((event, session) => {
-  if(event === 'SIGNED_IN' && session?.user) onLogin(session.user);
-});
-  document.getElementById('o-market').value = 'usa';
-  onActionChange();
-}
-
-// ═══════════════════════════════════════════════════════
-// ACTIONS
-// ═══════════════════════════════════════════════════════
-function delOrder(id){
-  orders = orders.filter(o => String(o.id) !== String(id));
-  save(); render();
-}
-
-function delTicker(ticker){
-  if(confirm(`Eliminar todas las órdenes de ${ticker}?`)){
-    orders = orders.filter(o => o.ticker !== ticker);
-    save(); render();
-  }
-}
-
-function goTV(ticker, type){
-  const sym = type==='Acción Argentina'?`BCBA:${ticker}`:type==='Cripto'?`BINANCE:${ticker}USDT`:ticker;
-  window.open(`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`, '_blank');
-}
-
-function toggleCur(){
-  currency = currency === 'USD' ? 'ARS' : 'USD';
-  document.getElementById('btnCur').textContent = currency;
-  render();
-}
-
-function setStatus(msg, loading){
-  const el = document.getElementById('statusBar');
-  el.textContent = msg;
-  el.style.color = loading ? 'var(--blue2)' : 'var(--muted)';
-}
-
-// ═══════════════════════════════════════════════════════
-// UI HELPERS
-// ═══════════════════════════════════════════════════════
-function goTab(name, btn){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  btn.classList.add('active');
-  if(name === 'brokers') hideBrokerDetail();
-  if(name === 'charts') renderCharts(getPortfolioFull(), getPortfolioFull().reduce((s,a)=>s+a.value,0));
-}
-
-function openOverlay(name){
-  document.getElementById('overlay-'+name).classList.add('open');
-  if(name === 'order') updatePriceCurrency();
-}
-function closeOverlay(name){
-  document.getElementById('overlay-'+name).classList.remove('open');
-}
-
-// ═══════════════════════════════════════════════════════
-// PORTFOLIO NAME
-// ═══════════════════════════════════════════════════════
-function editPortfolioName(){
-  const current = localStorage.getItem('pf6_name') || 'Mi Portfolio';
-  const name = prompt('Nombre del portfolio:', current);
-  if(name && name.trim()){
-    localStorage.setItem('pf6_name', name.trim());
-    document.getElementById('portfolioName').textContent = name.trim();
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// ASSET MENU
-// ═══════════════════════════════════════════════════════
-function toggleAssetMenu(ticker){
-  const menu = document.getElementById('menu_' + ticker);
-  if(!menu) return;
-  // Close all other menus
-  document.querySelectorAll('[id^="menu_"]').forEach(m => {
-    if(m.id !== 'menu_' + ticker) m.style.display = 'none';
-  });
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-// Close menus on click outside
-document.addEventListener('click', e => {
-  if(!e.target.closest('[id^="menu_"]') && !e.target.closest('.btn-icon')){
-    document.querySelectorAll('[id^="menu_"]').forEach(m => m.style.display = 'none');
-  }
-});
-
-function quickOrder(ticker, type, action){
-  // Pre-fill order modal with ticker and action
-  document.getElementById('o-action').value = action;
-  onActionChange();
-  if(action === 'Venta'){
-    const sel = document.getElementById('o-sell-ticker');
-    // Wait for options to render then select
-    setTimeout(() => {
-      sel.value = ticker;
-      onSellTickerChange();
-    }, 50);
-  } else {
-    document.getElementById('o-ticker').value = ticker;
-    // Set market based on type
-    const mktMap = {'Acción USA':'usa','ETF':'usa','CEDEAR':'cedear','Acción Argentina':'arg','Cripto':'cripto','Bono/Renta Fija':'bono'};
-    document.getElementById('o-market').value = mktMap[type] || 'usa';
-    updatePriceCurrency();
-  }
-  // Pre-fill current price if available
-  const px = prices[ticker];
-  if(px && px > 0){
-    const isARS = prices[ticker+'_ars'];
-    const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
-    document.getElementById('o-price').value = isARS ? (px).toFixed(2) : px.toFixed(2);
-  }
-  updateOrderTotal();
-  openOverlay('order');
-}
-
-// ═══════════════════════════════════════════════════════
-// ORDER TOTAL CALCULATOR
-// ═══════════════════════════════════════════════════════
-function updateOrderTotal(){
-  const qty   = parseFloat(document.getElementById('o-qty').value) || 0;
-  const price = parseFloat(document.getElementById('o-price').value) || 0;
-  const comm  = parseFloat(document.getElementById('o-comm').value) || 0;
-  const total = qty * price + comm;
-  const mktVal = document.getElementById('o-market').value;
-  const isARS = (mktVal === 'cedear' || mktVal === 'arg' || mktVal === 'bono');
-  const ccl = mkt.dccl?.price || mkt.dblue?.price || 1200;
-
-  const totalEl = document.getElementById('orderTotal');
-  const totalARSEl = document.getElementById('orderTotalARS');
-  if(!totalEl) return;
-
-  if(isARS){
-    totalEl.textContent = total > 0 ? `$${n2(total,0)} ARS` : '$0,00';
-    totalARSEl.textContent = total > 0 ? `≈ USD ${n2(total/ccl,2)}` : '';
-  } else {
-    totalEl.textContent = total > 0 ? `$${n2(total,2)} USD` : '$0,00';
-    totalARSEl.textContent = total > 0 ? `≈ ARS ${n2(total*ccl,0)}` : '';
-  }
-  totalEl.style.color = total > 0 ? 'var(--blue)' : 'var(--muted)';
-}
-
-// ═══════════════════════════════════════════════════════
-// SUPABASE AUTH & SYNC
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════════════════════════════
 async function signIn(){
-  const email = document.getElementById('auth-email').value.trim();
-  const pass  = document.getElementById('auth-pass').value;
-  const msg   = document.getElementById('auth-msg');
+  const email = document.getElementById('authEmail').value.trim();
+  const pass  = document.getElementById('authPass').value;
+  const msg   = document.getElementById('authMsg');
+  msg.style.color = 'var(--red)';
   msg.textContent = 'Ingresando...';
   const { data, error } = await supa.auth.signInWithPassword({email, password:pass});
   if(error){ msg.textContent = error.message; return; }
@@ -1779,211 +575,865 @@ async function signIn(){
 }
 
 async function signUp(){
-  const email = document.getElementById('auth-email').value.trim();
-  const pass  = document.getElementById('auth-pass').value;
-  const msg   = document.getElementById('auth-msg');
+  const email = document.getElementById('authEmail').value.trim();
+  const pass  = document.getElementById('authPass').value;
+  const msg   = document.getElementById('authMsg');
   if(pass.length < 6){ msg.textContent = 'La contraseña debe tener al menos 6 caracteres'; return; }
   msg.textContent = 'Creando cuenta...';
-  const { data, error } = await supa.auth.signUp({email, password:pass});
+  const { error } = await supa.auth.signUp({email, password:pass});
   if(error){ msg.textContent = error.message; return; }
   msg.style.color = 'var(--green)';
-  msg.textContent = '✓ Cuenta creada. Revisá tu email para confirmar.';
-}
-
-async function signOut(){
-  await supa.auth.signOut();
-  currentUser = null;
-  document.getElementById('btnAuth').textContent = 'Iniciar sesión';
-  document.getElementById('btnAuth').style.background = 'var(--blueL)';
-  // Fall back to localStorage
-  orders    = JSON.parse(localStorage.getItem('pf6_orders')  || '[]');
-  snapshots = JSON.parse(localStorage.getItem('pf6_snaps')   || '[]');
-  brokers   = JSON.parse(localStorage.getItem('pf6_brokers') || JSON.stringify(DEFAULT_BROKERS));
-  render();
+  msg.textContent = '✓ Revisá tu email para confirmar la cuenta.';
 }
 
 async function onLogin(user){
   currentUser = user;
   const btn = document.getElementById('btnAuth');
-  btn.textContent = user.email.split('@')[0];
+  btn.textContent = '👤 ' + user.email.split('@')[0];
   btn.style.background = 'var(--green)';
   btn.style.color = '#fff';
   btn.onclick = () => { if(confirm('Cerrar sesión?')) signOut(); };
-  await loadFromSupabase();
+  await supaLoad();
 }
 
-async function loadFromSupabase(){
+async function signOut(){
+  await supa.auth.signOut();
+  currentUser = null;
+  const btn = document.getElementById('btnAuth');
+  btn.textContent = 'Iniciar sesión';
+  btn.style.background = '';
+  btn.style.color = '';
+  btn.onclick = handleAuth;
+  render();
+}
+
+async function supaLoad(){
   if(!currentUser) return;
   try{
-    // Load orders
-    const { data: ords } = await supa
-      .from('orders')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .order('date', {ascending:true});
-    if(ords && ords.length > 0){
-      orders = ords.map(o => ({...o.data, id: o.id}));
-    }
-    // Load snapshots
-    const { data: snaps } = await supa
-      .from('snapshots')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .order('date', {ascending:true});
+    const { data: ords } = await supa.from('orders').select('*')
+      .eq('user_id', currentUser.id).order('created_at');
+    if(ords?.length) orders = ords.map(o => o.data);
+
+    const { data: snaps } = await supa.from('snapshots').select('*')
+      .eq('user_id', currentUser.id).order('date');
     if(snaps) snapshots = snaps.map(s => ({date:s.date, usd:s.usd}));
-    // Load settings
-    const { data: settings } = await supa
-      .from('settings')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .single();
-    if(settings){
-      if(settings.brokers) brokers = settings.brokers;
-      if(settings.portfolio_name){
-        localStorage.setItem('pf6_name', settings.portfolio_name);
-        document.getElementById('portfolioName').textContent = settings.portfolio_name;
+
+    const { data: set } = await supa.from('settings').select('*')
+      .eq('user_id', currentUser.id).single();
+    if(set){
+      if(set.brokers) brokers = set.brokers;
+      if(set.portfolio_name){
+        localStorage.setItem('pf6_name', set.portfolio_name);
+        document.getElementById('pfName').textContent = set.portfolio_name + ' ✎';
       }
     }
+    localSave();
     render();
-    setStatus('Datos cargados desde la nube ☁', false);
-  }catch(e){ console.log('Supabase load error:', e); }
+    setStatus('☁ Datos cargados desde la nube', false);
+  }catch(e){ console.log('Load error:', e); }
 }
 
-async function saveToSupabase(){
+async function supaSync(){
   if(!currentUser) return;
   try{
-    // Upsert orders
-    const orderRows = orders.map(o => ({
-      id: typeof o.id === 'number' ? undefined : o.id,
-      user_id: currentUser.id,
-      data: o
-    }));
-    // Delete all and re-insert (simpler for now)
     await supa.from('orders').delete().eq('user_id', currentUser.id);
-    if(orders.length > 0){
-      const insertRows = orders.map(o => ({user_id: currentUser.id, data: o}));
-      await supa.from('orders').insert(insertRows);
+    if(orders.length){
+      await supa.from('orders').insert(orders.map(o => ({user_id:currentUser.id, data:o})));
     }
-    // Upsert settings
     await supa.from('settings').upsert({
       user_id: currentUser.id,
       brokers,
       portfolio_name: localStorage.getItem('pf6_name') || 'Mi Portfolio',
       updated_at: new Date().toISOString()
     }, {onConflict:'user_id'});
-    console.log('Saved to Supabase');
-  }catch(e){ console.log('Supabase save error:', e); }
+  }catch(e){ console.log('Sync error:', e); }
 }
 
-function handleAuth(){
-  if(currentUser) return;
-  openOverlay('login');
+async function supaSnap(date, usd){
+  if(!currentUser) return;
+  try{
+    await supa.from('snapshots').upsert({user_id:currentUser.id, date, usd}, {onConflict:'user_id,date'});
+  }catch(e){}
 }
 
-// Override save() to also sync to Supabase
-const _localSave = () => {
-  localStorage.setItem('pf6_orders',   JSON.stringify(orders));
-  localStorage.setItem('pf6_snaps',    JSON.stringify(snapshots));
-  localStorage.setItem('pf6_brokers',  JSON.stringify(brokers));
+function handleAuth(){ openOverlay('login'); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FORMAT & HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function n2(n,d=2){ return isNaN(n)||n==null?'—':new Intl.NumberFormat('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n); }
+const $u = n => `$${n2(n)}`;
+const $a = n => `$${n2(n,0)}`;
+const pc = n => `${n>=0?'+':''}${n2(n)}%`;
+const ccl = () => mkt.dccl?.price || mkt.dblue?.price || 1480;
+const isARS = t => t==='CEDEAR'||t==='Acción Argentina'||t==='Bono/Renta Fija';
+const dv = v => currency==='USD' ? $u(v) : $a(v * ccl());
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LOGO
+// ═══════════════════════════════════════════════════════════════════════════
+const DOMAINS = {
+  AAPL:'apple.com',MSFT:'microsoft.com',GOOGL:'google.com',AMZN:'amazon.com',
+  NVDA:'nvidia.com',META:'meta.com',TSLA:'tesla.com',JPM:'jpmorganchase.com',
+  V:'visa.com',KO:'coca-cola.com',DIS:'disney.com',NFLX:'netflix.com',
+  MELI:'mercadolibre.com',GLOB:'globant.com',COIN:'coinbase.com',
+  SPOT:'spotify.com',PYPL:'paypal.com',VIST:'vistaoil.com',
+  SUPV:'gruposupervielle.com.ar',GGAL:'galicia.ar',YPF:'ypf.com',
+  PAMP:'pampaenergia.com',BMA:'macro.com.ar',BBAR:'bbva.com.ar',
+  CEPU:'central-puerto.com',LOMA:'lomanegra.com.ar',BIOX:'bioceres.com',
+  PDYN:'palladyne.ai',NKE:'nike.com',PFE:'pfizer.com',GS:'goldmansachs.com',
+  ACN:'accenture.com',CL:'colgate.com',SHOP:'shopify.com',UBER:'uber.com',
+  SONY:'sony.com',MSTR:'microstrategy.com',EDN:'edenor.com.ar',
 };
+const CG = {BTC:'1/bitcoin',ETH:'279/ethereum',SOL:'4128/solana',BNB:'825/bnb-icon2_2x',XRP:'44/xrp-symbol-white-128',DOGE:'5/dogecoin',ADA:'975/cardano'};
 
-function save(){
-  _localSave();
-  if(currentUser) saveToSupabase();
+function makeLogo(ticker, type, size=26){
+  const c = COLS[(ticker||'?').charCodeAt(0)%COLS.length];
+  const init = (ticker||'?').slice(0,2).toUpperCase();
+  const fb = document.createElement('div');
+  fb.className='alogo-fb';
+  fb.style.cssText=`width:${size}px;height:${size}px;font-size:${Math.round(size*.36)}px;background:${c}22;color:${c};border:1px solid ${c}44`;
+  fb.textContent=init;
+
+  let src = null;
+  if(type==='Cripto' && CG[ticker?.toUpperCase()]){
+    src=`https://assets.coingecko.com/coins/images/${CG[ticker.toUpperCase()]}.png`;
+  } else {
+    const dom = DOMAINS[ticker?.toUpperCase()] || `${ticker?.toLowerCase()}.com`;
+    src=`https://www.google.com/s2/favicons?domain=${dom}&sz=64`;
+  }
+  const img=document.createElement('img');
+  img.className='alogo'; img.src=src; img.alt=ticker;
+  img.style.cssText=`width:${size}px;height:${size}px`;
+  img.onerror=()=>img.replaceWith(fb);
+  return img;
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// PORTFOLIO CALC
+// ═══════════════════════════════════════════════════════════════════════════
+function getPortfolio(broker=null){
+  const map={};
+  const ords = broker ? orders.filter(o=>o.broker===broker) : orders;
+  ords.forEach(o=>{
+    if(!map[o.ticker]) map[o.ticker]={ticker:o.ticker,type:o.type||'Acción USA',qty:0,cost:0,comm:0};
+    const m=map[o.ticker];
+    if(o.action==='Compra'){m.qty+=o.qty;m.cost+=o.qty*o.price+(o.comm||0);m.comm+=(o.comm||0);}
+    else{const r=m.qty>0?o.qty/m.qty:0;m.cost-=m.cost*r;m.qty-=o.qty;}
+  });
+  return Object.values(map).filter(a=>a.qty>0.0001).map(a=>({...a,avgPrice:a.qty>0?a.cost/a.qty:0}));
+}
+
+function enrich(pf){
+  const c=ccl();
+  return pf.map(a=>{
+    const isPxARS = prices[a.ticker+'_ars']===true;
+    const rawPx   = prices[a.ticker]||0;
+    const rawPrev = prices[a.ticker+'_prev']||0;
+    const price   = rawPx>0?(isPxARS?rawPx/c:rawPx):0;
+    const prev    = rawPrev>0?(isPxARS?rawPrev/c:rawPrev):0;
+    const priceARS= isPxARS?rawPx:price*c;
+    const hasPx   = price>0;
+    const value   = a.qty*price;
+    const pnl     = hasPx?value-a.cost:null;
+    const pnlPct  = hasPx&&a.cost>0?pnl/a.cost*100:null;
+    const dayPct  = prev&&price?(price-prev)/prev*100:null;
+    const dayDol  = prev&&price?(price-prev)*a.qty:null;
+    const brkList = [...new Set(orders.filter(o=>o.ticker===a.ticker&&o.broker).map(o=>o.broker))];
+    return{...a,price,priceARS,prev,hasPx,value,pnl,pnlPct,dayPct,dayDol,brkList};
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PRICE FETCH
+// ═══════════════════════════════════════════════════════════════════════════
+async function fetchArgPrice(ticker){
+  const sym=ticker+'.BA';
+  for(const base of ['https://query1','https://query2']){
+    try{
+      const url=`${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
+      const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+      const d=await r.json();
+      const meta=d?.chart?.result?.[0]?.meta;
+      if(meta?.regularMarketPrice>0) return{
+        price:meta.regularMarketPrice,
+        prev:meta.chartPreviousClose||meta.regularMarketPrice,
+        chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0,
+        currency:'ARS'
+      };
+    }catch(e){}
+  }
+  return null;
+}
+
+async function fetchUSPrice(sym){
+  const fmp=localStorage.getItem('pf6_fmp')||'';
+  if(fmp){
+    try{
+      const r=await fetch(`https://financialmodelingprep.com/api/v3/quote/${sym}?apikey=${fmp}`);
+      const d=await r.json();
+      if(d?.[0]?.price>0){console.log(`FMP: ${sym}=${d[0].price}`);return{price:d[0].price,prev:d[0].previousClose||d[0].price,chgPct:d[0].changesPercentage||0,currency:'USD'};}
+    }catch(e){}
+  }
+  for(const base of ['https://query1','https://query2']){
+    try{
+      const url=`${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
+      const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+      const d=await r.json();
+      const meta=d?.chart?.result?.[0]?.meta;
+      if(meta?.regularMarketPrice>0){console.log(`Yahoo: ${sym}=${meta.regularMarketPrice}`);return{price:meta.regularMarketPrice,prev:meta.chartPreviousClose||meta.regularMarketPrice,chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0,currency:'USD'};}
+    }catch(e){}
+  }
+  try{
+    const r=await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${AV}`);
+    const d=await r.json();
+    const gq=d?.['Global Quote'];
+    if(gq?.['05. price']&&parseFloat(gq['05. price'])>0){
+      return{price:parseFloat(gq['05. price']),prev:parseFloat(gq['08. previous close']),chgPct:parseFloat((gq['10. change percent']||'0').replace('%','')),currency:'USD'};
+    }
+  }catch(e){}
+  return null;
+}
+
+async function doRefresh(){
+  const pf=getPortfolio();
+  if(!pf.length){setStatus('Sin activos',false);return;}
+  setStatus('Obteniendo precios...',true);
+  document.getElementById('btnRef').textContent='...';
+  document.getElementById('btnRef').disabled=true;
+
+  // Crypto
+  const cryptos=pf.filter(a=>a.type==='Cripto');
+  if(cryptos.length){
+    const CGIDS={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',BNB:'binancecoin',XRP:'ripple',ADA:'cardano',DOGE:'dogecoin',USDT:'tether',MATIC:'matic-network'};
+    const ids=cryptos.map(a=>CGIDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase()).filter(Boolean);
+    try{
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`);
+      const d=await r.json();
+      cryptos.forEach(a=>{
+        const id=CGIDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase();
+        if(d[id]){prices[a.ticker]=d[id].usd;prices[a.ticker+'_prev']=d[id].usd/(1+(d[id].usd_24h_change||0)/100);}
+      });
+    }catch(e){}
+  }
+
+  // Argentine assets
+  const argAssets=pf.filter(a=>isARS(a.type));
+  for(const a of argAssets){
+    const data=await fetchArgPrice(a.ticker);
+    if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;prices[a.ticker+'_ars']=true;}
+  }
+
+  // US assets
+  const usAssets=pf.filter(a=>!isARS(a.type)&&a.type!=='Cripto');
+  for(const a of usAssets){
+    const data=await fetchUSPrice(a.ticker);
+    if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;}
+  }
+
+  // Dolar
+  try{const r=await fetch('https://dolarapi.com/v1/dolares/blue');const d=await r.json();if(d.venta>100)mkt.dblue={price:d.venta,buy:d.compra};}catch(e){}
+  try{const r=await fetch('https://dolarapi.com/v1/dolares/bolsa');const d=await r.json();if(d.venta>100)mkt.dmep={price:d.venta,buy:d.compra};}catch(e){}
+  try{const r=await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');const d=await r.json();if(d.venta>100)mkt.dccl={price:d.venta,buy:d.compra};}catch(e){}
+
+  // Snapshot
+  const today=new Date().toISOString().slice(0,10);
+  const c=ccl();
+  const total=getPortfolio().reduce((s,a)=>{
+    const isPxARS=prices[a.ticker+'_ars']===true;
+    const px=prices[a.ticker]||0;
+    return s+a.qty*(isPxARS?px/c:px);
+  },0);
+  snapshots=[...snapshots.filter(s=>s.date!==today),{date:today,usd:total}].slice(-365);
+  localSave();
+  if(currentUser) await supaSnap(today,total);
+
+  const got=pf.filter(a=>prices[a.ticker]>0).length;
+  setStatus(`${got}/${pf.length} precios · Blue $${n2(mkt.dblue?.price||0,0)} · MEP $${n2(mkt.dmep?.price||0,0)} · CCL $${n2(mkt.dccl?.price||0,0)}`,false);
+  document.getElementById('btnRef').textContent='↻ Actualizar';
+  document.getElementById('btnRef').disabled=false;
+
+  // Update fx display
+  document.getElementById('sBlue').textContent=mkt.dblue?`$${n2(mkt.dblue.price,0)}`:'$—';
+  document.getElementById('sMep').textContent=mkt.dmep?`$${n2(mkt.dmep.price,0)}`:'$—';
+  document.getElementById('sCcl').textContent=mkt.dccl?`$${n2(mkt.dccl.price,0)}`:'$—';
+
+  render();
+  loadSidebar();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+function render(){
+  const pf=enrich(getPortfolio());
+  const c=ccl();
+  const isARSt=isARS;
+
+  const pfUSD=pf.filter(a=>!isARSt(a.type));
+  const pfARS=pf.filter(a=>isARSt(a.type));
+  const totUSD_usd=pfUSD.reduce((s,a)=>s+a.value,0);
+  const costUSD_usd=pfUSD.reduce((s,a)=>s+a.cost,0);
+  const pnlUSD=totUSD_usd-costUSD_usd;
+  const totARS_usd=pfARS.reduce((s,a)=>s+a.value,0);
+  const costARS_usd=pfARS.reduce((s,a)=>s+a.cost,0);
+  const pnlARS=totARS_usd-costARS_usd;
+  const totGlobal=totUSD_usd+totARS_usd;
+  const pnlGlobal=pnlUSD+pnlARS;
+
+  // Summary
+  el('sValUSD').textContent=$u(totUSD_usd);
+  el('sPnlUSD').textContent=`P&L: ${pnlUSD>=0?'+':''}${$u(pnlUSD)}`;
+  el('sPnlUSD').style.color=pnlUSD>=0?'var(--green)':'var(--red)';
+  el('sValARS').textContent=$a(totARS_usd*c);
+  el('sPnlARS').textContent=`P&L: ${pnlARS>=0?'+':''}${$a(pnlARS*c)}`;
+  el('sPnlARS').style.color=pnlARS>=0?'var(--green)':'var(--red)';
+  el('sValGlobal').textContent=$u(totGlobal);
+  el('sPnlGlobal').textContent=`P&L: ${pnlGlobal>=0?'+':''}${$u(pnlGlobal)}`;
+  el('sPnlGlobal').style.color=pnlGlobal>=0?'var(--green)':'var(--red)';
+  el('sBlue').textContent=mkt.dblue?`$${n2(mkt.dblue.price,0)}`:'$—';
+  el('sMep').textContent=mkt.dmep?`$${n2(mkt.dmep.price,0)}`:'$—';
+  el('sCcl').textContent=mkt.dccl?`$${n2(mkt.dccl.price,0)}`:'$—';
+
+  renderTable(pf, 'assetTable', totUSD_usd+totARS_usd, pnlGlobal);
+  renderOrders();
+  renderBrokerGrid();
+  renderMainCharts(pf, totGlobal, totARS_usd, totUSD_usd, c);
+  renderSidebarPie(pf, totGlobal);
+}
+
+function renderTable(pf, containerId, totVal, totPnL){
+  const el2=el(containerId);
+  if(!pf.length){el2.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div>Cargá una orden para empezar.</div></div>';return;}
+  const c=ccl();
+  const wrap=document.createElement('div');wrap.className='tbl-wrap';
+  const tbl=document.createElement('table');tbl.className='tbl';
+  tbl.innerHTML=`<thead><tr>
+    <th>Activo</th><th>Cant.</th><th>Últ. Precio</th>
+    <th>Var% Diaria</th><th>Var$ Diaria</th>
+    <th>PPC</th><th>Gan%</th><th>Gan$</th><th>Total</th><th></th>
+  </tr></thead>`;
+  const tbody=document.createElement('tbody');
+  pf.forEach(a=>{
+    const dc=a.dayPct!=null?(a.dayPct>=0?'up':'dn'):'neu';
+    const gc=a.hasPx?(a.pnl>=0?'up':'dn'):'neu';
+    const priceStr=a.hasPx?(isARS(a.type)?$a(a.priceARS):$u(a.price)):'—';
+    const ppcStr=isARS(a.type)?$a(a.avgPrice*c):$u(a.avgPrice);
+    const totStr=a.hasPx?(isARS(a.type)?$a(a.value*c):$u(a.value)):'—';
+
+    const tr=document.createElement('tr');
+
+    // Asset cell
+    const td=document.createElement('td');
+    const cell=document.createElement('div');cell.className='asset-cell';
+    cell.appendChild(makeLogo(a.ticker,a.type,26));
+    const info=document.createElement('div');info.className='ainfo';
+    info.innerHTML=`<div class="tkr">${a.ticker}</div><div class="typ">${a.type}</div>`;
+    if(a.brkList?.length){
+      const bd=document.createElement('div');bd.className='brks';
+      a.brkList.forEach(b=>{const s=document.createElement('span');s.className='brk-tag';s.textContent=b;bd.appendChild(s);});
+      info.appendChild(bd);
+    }
+    cell.appendChild(info);td.appendChild(cell);tr.appendChild(td);
+
+    tr.innerHTML+=`
+      <td>${n2(a.qty,2)}</td>
+      <td class="${a.hasPx&&a.price>a.avgPrice?'up':a.hasPx&&a.price<a.avgPrice?'dn':''}">${priceStr}</td>
+      <td class="${dc}">${a.dayPct!=null?pc(a.dayPct):'—'}</td>
+      <td class="${dc}">${a.dayDol!=null?(a.dayDol>=0?'+':'')+$u(a.dayDol):'—'}</td>
+      <td style="font-weight:600">${ppcStr}</td>
+      <td class="${gc}">${a.hasPx?pc(a.pnlPct):'—'}</td>
+      <td class="${gc}" style="font-weight:700">${a.hasPx?(a.pnl>=0?'+':'')+$u(a.pnl):'—'}</td>
+      <td class="${gc}" style="font-weight:700">${totStr}</td>
+      <td style="position:relative">
+        <button style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px 6px;color:var(--muted)" onclick="toggleMenu('${a.ticker}',event)">⋯</button>
+        <div class="asset-menu" id="menu_${a.ticker}">
+          <div style="color:var(--green)" onclick="quickOrder('${a.ticker}','${a.type}','Compra')">📈 Comprar</div>
+          <div style="color:var(--red)" onclick="quickOrder('${a.ticker}','${a.type}','Venta')">📉 Vender</div>
+          <div onclick="goTV('${a.ticker}','${a.type}')">📊 Ver gráfico</div>
+          <div style="color:var(--muted)" onclick="if(confirm('Eliminar ${a.ticker}?'))delTicker('${a.ticker}')">✕ Eliminar</div>
+        </div>
+      </td>`;
+    tr.cells[0].replaceWith(td);
+    tbody.appendChild(tr);
+  });
+  const tot=document.createElement('tr');tot.className='tot-row';
+  const pnlClass=totPnL>=0?'up':'dn';
+  tot.innerHTML=`<td colspan="7" style="font-weight:700">TOTAL</td>
+    <td class="${pnlClass}">${(totPnL>=0?'+':'')+$u(totPnL)}</td>
+    <td style="font-weight:800">${dv(totVal)}</td><td></td>`;
+  tbody.appendChild(tot);
+  tbl.appendChild(tbody);wrap.appendChild(tbl);
+  el2.innerHTML='';el2.appendChild(wrap);
+}
+
+function renderOrders(){
+  const el2=el('orderList');
+  const sorted=[...orders].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!sorted.length){el2.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div>Sin órdenes.</div></div>';return;}
+  el2.innerHTML='';
+  sorted.forEach(o=>{
+    const div=document.createElement('div');
+    div.className=`ord-card ${o.action==='Compra'?'buy':'sell'}`;
+    const total=o.qty*o.price+(o.comm||0);
+    div.innerHTML=`<div class="ord-row">
+      <div class="ord-left">
+        <span class="ord-badge ${o.action==='Compra'?'buy':'sell'}">${o.action}</span>
+        <div><strong>${o.ticker}</strong><div class="ord-meta">${o.date}${o.broker?' · '+o.broker:''}${o.currency==='ARS'?' · ARS':''}</div></div>
+      </div>
+      <div style="text-align:right;font-size:12px">
+        <div style="font-family:monospace;font-weight:600">${n2(o.qty,4)} × ${o.currency==='ARS'?$a(o.priceOrig||o.price*ccl()):$u(o.price)}</div>
+        <div style="color:var(--muted)">Total: ${$u(total)}</div>
+      </div>
+    </div>
+    ${o.notes?`<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">${o.notes}</div>`:''}
+    <div style="text-align:right;margin-top:6px">
+      <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px" onclick="delOrder('${o.id}')">✕ Eliminar</button>
+    </div>`;
+    el2.appendChild(div);
+  });
+}
+
+function renderBrokerGrid(){
+  const grid=el('brokerGrid');
+  const sel=el('oBroker');
+  grid.innerHTML='';
+  sel.innerHTML='<option value="">— Seleccionar —</option>';
+  brokers.forEach(b=>{
+    const count=orders.filter(o=>o.broker===b).length;
+    const card=document.createElement('div');card.className='broker-card';
+    card.innerHTML=`<h4>${b}</h4><span>${count} operaciones</span>`;
+    card.onclick=()=>showBrokerDetail(b);
+    grid.appendChild(card);
+    sel.innerHTML+=`<option value="${b}">${b}</option>`;
+  });
+}
+
+function showBrokerDetail(name){
+  el('brokerGridView').style.display='none';
+  el('brokerDetailView').style.display='block';
+  el('brokerDetailTitle').textContent='BROKER: '+name.toUpperCase();
+
+  const pf=enrich(getPortfolio(name));
+  const c=ccl();
+  const totVal=pf.reduce((s,a)=>s+a.value,0);
+  const totCost=pf.reduce((s,a)=>s+a.cost,0);
+  const totPnL=totVal-totCost;
+  const roe=totCost>0?totPnL/totCost*100:0;
+  const arsVal=pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+a.value,0);
+  const usdVal=pf.filter(a=>!isARS(a.type)).reduce((s,a)=>s+a.value,0);
+
+  const chartsEl=el('brokerDetailCharts');
+  chartsEl.innerHTML='';
+
+  // KPI row
+  const kpi=document.createElement('div');kpi.className='kpi-row';
+  [
+    {l:'Valor Total',v:$u(totVal),c:roe>=0?'var(--blue)':'var(--txt)'},
+    {l:'Costo Base',v:$u(totCost),c:'var(--txt)'},
+    {l:'P&L',v:(totPnL>=0?'+':'')+$u(totPnL),c:totPnL>=0?'var(--green)':'var(--red)'},
+    {l:'ROE',v:(roe>=0?'+':'')+n2(roe,2)+'%',c:roe>=0?'var(--green)':'var(--red)'},
+  ].forEach(k=>{
+    const d=document.createElement('div');d.className='kpi-card';
+    d.innerHTML=`<label>${k.l}</label><div class="val" style="color:${k.c}">${k.v}</div>`;
+    kpi.appendChild(d);
+  });
+  chartsEl.appendChild(kpi);
+
+  // Charts grid
+  const grid=document.createElement('div');grid.className='charts-grid';
+
+  // Pie composición
+  const pieBox=document.createElement('div');pieBox.className='chart-box';
+  pieBox.innerHTML='<h3>Composición</h3>';
+  const pieWrap=document.createElement('div');pieWrap.style.cssText='display:flex;gap:10px;align-items:center';
+  const pieC=document.createElement('canvas');pieC.width=110;pieC.height=110;
+  const pieLeg=document.createElement('div');pieLeg.style.cssText='flex:1;font-size:10px';
+  const pd=pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  pd.forEach((d,i)=>{pieLeg.innerHTML+=`<div class="pie-row"><div><span class="pie-dot" style="background:${COLS[i%COLS.length]}"></span>${d.name}</div><span>${n2(totVal>0?d.value/totVal*100:0)}%</span></div>`;});
+  pieWrap.appendChild(pieC);pieWrap.appendChild(pieLeg);pieBox.appendChild(pieWrap);
+  if(_brokerPie) _brokerPie.destroy();
+  if(pd.length) _brokerPie=new Chart(pieC,{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
+  grid.appendChild(pieBox);
+
+  // ARS vs USD
+  const arsBox=document.createElement('div');arsBox.className='chart-box';
+  arsBox.innerHTML='<h3>ARS vs USD</h3>';
+  const arsC=document.createElement('canvas');arsC.width=110;arsC.height=110;
+  const arsLeg=document.createElement('div');
+  const tot2=arsVal+usdVal;
+  arsLeg.style.cssText='font-size:10px;margin-top:8px';
+  arsLeg.innerHTML=`<div class="pie-row"><div><span class="pie-dot" style="background:#f59f00"></span>ARS (${n2(tot2>0?arsVal/tot2*100:0)}%)</div><span>${$u(arsVal)}</span></div>
+    <div class="pie-row"><div><span class="pie-dot" style="background:#1565c0"></span>USD (${n2(tot2>0?usdVal/tot2*100:0)}%)</div><span>${$u(usdVal)}</span></div>`;
+  const arsWrap=document.createElement('div');arsWrap.style.cssText='display:flex;flex-direction:column;align-items:center';
+  arsWrap.appendChild(arsC);arsWrap.appendChild(arsLeg);arsBox.appendChild(arsWrap);
+  if(_brokerArs) _brokerArs.destroy();
+  _brokerArs=new Chart(arsC,{type:'doughnut',data:{labels:['ARS','USD'],datasets:[{data:[arsVal,usdVal],backgroundColor:['#f59f00','#1565c0'],borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
+  grid.appendChild(arsBox);
+
+  // Bar rendimiento
+  const barBox=document.createElement('div');barBox.className='chart-box chart-full';
+  barBox.innerHTML='<h3>Rendimiento % por activo</h3>';
+  const barC=document.createElement('canvas');barC.height=100;
+  barBox.appendChild(barC);grid.appendChild(barBox);
+  const pfPnl=pf.filter(a=>a.pnlPct!=null);
+  if(_brokerBar) _brokerBar.destroy();
+  if(pfPnl.length) _brokerBar=new Chart(barC,{
+    type:'bar',
+    data:{labels:pfPnl.map(a=>a.ticker),datasets:[{data:pfPnl.map(a=>a.pnlPct),backgroundColor:pfPnl.map(a=>a.pnlPct>=0?'#00a87666':'#e5393566'),borderColor:pfPnl.map(a=>a.pnlPct>=0?'#00a876':'#e53935'),borderWidth:1}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b8cba',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#6b8cba',callback:v=>`${v}%`},grid:{color:'#eef2f9'}}}}
+  });
+
+  chartsEl.appendChild(grid);
+  renderTable(pf,'brokerDetailTable',totVal,totPnL);
+}
+
+function hideBrokerDetail(){
+  el('brokerGridView').style.display='block';
+  el('brokerDetailView').style.display='none';
+}
+
+function addBroker(){
+  const name=el('newBrokerInput').value.trim();
+  if(name&&!brokers.includes(name)){brokers.push(name);save();renderBrokerGrid();el('newBrokerInput').value='';}
+}
+
+function renderMainCharts(pf, totGlobal, totARS, totUSD, c){
+  // Line chart
+  const s90=snapshots.slice(-90);
+  const lc=el('lineChart'),nc=el('noChart');
+  if(s90.length>=2){
+    nc.style.display='none';lc.style.display='block';
+    if(_lineChart) _lineChart.destroy();
+    _lineChart=new Chart(lc,{
+      type:'line',
+      data:{labels:s90.map(s=>s.date.slice(5)),datasets:[{data:s90.map(s=>currency==='USD'?s.usd:s.usd*c),borderColor:'#42a5f5',backgroundColor:'#42a5f514',fill:true,tension:0.4,pointRadius:2}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b8cba',maxTicksLimit:6},grid:{color:'#eef2f9'}},y:{ticks:{color:'#6b8cba',callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#eef2f9'}}}}
+    });
+  }else{nc.style.display='block';lc.style.display='none';}
+
+  // Pie por activo
+  const pd=pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  if(_pieChart) _pieChart.destroy();
+  if(pd.length){
+    _pieChart=new Chart(el('pieChart'),{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
+    el('pieLegend').innerHTML=pd.slice(0,8).map((d,i)=>`<div class="pie-row"><div><span class="pie-dot" style="background:${COLS[i%COLS.length]}"></span><strong>${d.name}</strong></div><span style="color:var(--muted)">${n2(totGlobal>0?d.value/totGlobal*100:0)}%</span></div>`).join('');
+  }
+
+  // ARS vs USD
+  if(_arsUsdChart) _arsUsdChart.destroy();
+  _arsUsdChart=new Chart(el('arsUsdChart'),{type:'doughnut',data:{labels:['ARS','USD'],datasets:[{data:[totARS,totUSD],backgroundColor:['#f59f00','#1565c0'],borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
+  const tot2=totARS+totUSD;
+  el('arsUsdLegend').innerHTML=`<div class="pie-row"><div><span class="pie-dot" style="background:#f59f00"></span><strong>ARS/CEDEAR</strong></div><span style="color:var(--muted)">${n2(tot2>0?totARS/tot2*100:0)}%</span></div>
+    <div class="pie-row"><div><span class="pie-dot" style="background:#1565c0"></span><strong>USD</strong></div><span style="color:var(--muted)">${n2(tot2>0?totUSD/tot2*100:0)}%</span></div>
+    <div style="margin-top:8px;font-size:11px"><strong>Total:</strong> ${$u(totGlobal)}</div>`;
+}
+
+function renderSidebarPie(pf, totGlobal){
+  const pd=pf.filter(a=>a.value>0).map(a=>({name:a.ticker,value:a.value}));
+  if(_sidebarPie) _sidebarPie.destroy();
+  if(!pd.length){el('sidebarLegend').innerHTML='<span style="color:var(--muted)">Sin activos</span>';return;}
+  _sidebarPie=new Chart(el('sidebarPie'),{type:'doughnut',data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},options:{responsive:false,plugins:{legend:{display:false}}}});
+  el('sidebarLegend').innerHTML=pd.slice(0,5).map((d,i)=>`<div style="display:flex;justify-content:space-between;margin-bottom:4px"><div><span class="pie-dot" style="background:${COLS[i%COLS.length]}"></span>${d.name}</div><span style="color:var(--muted)">${n2(totGlobal>0?d.value/totGlobal*100:0)}%</span></div>`).join('')+(pd.length>5?`<div style="color:var(--muted);font-size:10px">+${pd.length-5} más</div>`:'');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SIDEBAR MARKET DATA
+// ═══════════════════════════════════════════════════════════════════════════
+async function loadSidebar(){
+  // Quotes
+  if(!mkt.spy){const d=await fetchUSPrice('SPY');if(d)mkt.spy=d;}
+  if(!mkt.qqq){const d=await fetchUSPrice('QQQ');if(d)mkt.qqq=d;}
+  if(!mkt.gld){const d=await fetchUSPrice('GLD');if(d)mkt.gld=d;}
+  if(!mkt.uso){const d=await fetchUSPrice('USO');if(d)mkt.uso=d;}
+  if(!mkt.ggal){const d=await fetchUSPrice('GGAL');if(d)mkt.ggal=d;}
+  if(!mkt.btc){
+    try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');const d=await r.json();mkt.btc={price:d.bitcoin.usd,chgPct:d.bitcoin.usd_24h_change};}catch(e){}
+  }
+
+  const rows=[
+    {label:'S&P 500',d:mkt.spy},{label:'Nasdaq 100',d:mkt.qqq},
+    {label:'Oro (GLD)',d:mkt.gld},{label:'WTI (USO)',d:mkt.uso},
+    {label:'Bitcoin',d:mkt.btc},{label:'Merval*',d:mkt.ggal},
+  ];
+  el('quotesPanel').innerHTML=rows.map(r=>{
+    if(!r.d) return `<div class="quote-row"><span class="quote-name">${r.label}</span><span class="quote-price" style="color:var(--muted)">—</span></div>`;
+    const cls=r.d.chgPct>=0?'up':'dn';
+    return `<div class="quote-row"><span class="quote-name">${r.label}</span>
+      <div class="quote-right"><span class="quote-price">$${n2(r.d.price,r.label==='Bitcoin'?0:2)}</span>
+      ${r.d.chgPct!=null?`<span class="chg ${cls}">${r.d.chgPct>=0?'+':''}${n2(r.d.chgPct,2)}%</span>`:''}</div></div>`;
+  }).join('');
+
+  // News
+  const feeds=[
+    {name:'Ámbito',url:'https://www.ambito.com/rss/pages/finanzas.xml'},
+    {name:'El Cronista',url:'https://www.cronista.com/files/rss/home.xml'},
+    {name:'Infobae',url:'https://www.infobae.com/feeds/rss/economia.xml'},
+  ];
+  for(const feed of feeds){
+    try{
+      const r=await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`);
+      const d=await r.json();
+      if(d.status==='ok'&&d.items?.length){
+        el('newsPanel').innerHTML=d.items.slice(0,10).map(n=>`<a class="news-item" href="${n.link}" target="_blank" rel="noreferrer">
+          <div class="ntitle">${(n.title||'').replace(/<[^>]*>/g,'')}</div>
+          <div class="nmeta">${feed.name}${n.pubDate?' · '+n.pubDate.slice(5,10):''}</div>
+        </a>`).join('');
+        return;
+      }
+    }catch(e){}
+  }
+  el('newsPanel').innerHTML='<div class="side-msg">Sin noticias disponibles</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ORDER MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+function onActionChange(){
+  const isVenta=el('oAction').value==='Venta';
+  el('sellFields').style.display=isVenta?'block':'none';
+  el('buyFields').style.display=isVenta?'none':'block';
+  if(isVenta){
+    const pf=getPortfolio();
+    const sel=el('oSellTicker');
+    sel.innerHTML='<option value="">— Seleccionar —</option>';
+    pf.forEach(a=>sel.innerHTML+=`<option value="${a.ticker}">${a.ticker} (${n2(a.qty,4)} disp.)</option>`);
+  }
+}
+
+function onSellChange(){
+  const ticker=el('oSellTicker').value;
+  const pf=getPortfolio();
+  const a=pf.find(x=>x.ticker===ticker);
+  el('sellHint').textContent=a?`Máx: ${n2(a.qty,4)} · PPC: ${$u(a.avgPrice)}`:'';
+  if(a&&prices[a.ticker]>0){
+    const c=ccl();
+    const isPxARS=prices[a.ticker+'_ars']===true;
+    el('oPrice').value=isPxARS?(prices[a.ticker]).toFixed(2):prices[a.ticker].toFixed(2);
+    calcTotal();
+  }
+}
+
+function onMarketChange(){el('oTicker').value='';hideAC();updatePriceCurrency();}
+
+function updatePriceCurrency(){
+  const mktVal=el('oMarket').value;
+  const isA=(mktVal==='cedear'||mktVal==='arg'||mktVal==='bono');
+  el('oPriceLbl').textContent=isA?'Precio (ARS)':'Precio (USD)';
+  el('oPriceCur').textContent=isA?'ARS':'USD';
+  el('oPriceCur').style.color=isA?'var(--gold)':'var(--muted)';
+  el('oPriceHint').textContent=isA?`CCL: $${n2(ccl(),0)} → app convierte a USD automáticamente`:'';
+  calcTotal();
+}
+
+function calcTotal(){
+  const qty=parseFloat(el('oQty').value)||0;
+  const price=parseFloat(el('oPrice').value)||0;
+  const comm=parseFloat(el('oComm').value)||0;
+  const total=qty*price+comm;
+  const mktVal=el('oMarket').value;
+  const isA=(mktVal==='cedear'||mktVal==='arg'||mktVal==='bono')&&el('oAction').value==='Compra';
+  const c=ccl();
+  el('oTotal').textContent=total>0?(isA?`$${n2(total,0)} ARS`:`$${n2(total,2)} USD`):'$0,00';
+  el('oTotalSub').textContent=total>0?(isA?`≈ USD ${n2(total/c,2)}`:`≈ ARS ${n2(total*c,0)}`):'';
+  el('oTotal').style.color=total>0?'var(--blue)':'var(--muted)';
+}
+
+function onTickerInput(val){
+  const mktVal=el('oMarket').value;
+  const list=TICKERS[mktVal]||TICKERS.usa;
+  const q=val.toUpperCase();
+  if(!q){hideAC();return;}
+  const matches=list.filter(s=>s.t.startsWith(q)||s.n.toUpperCase().includes(q)).slice(0,8);
+  const box=el('acList');
+  if(!matches.length){hideAC();return;}
+  box.style.display='block';
+  box.innerHTML=matches.map(s=>`<div class="ac-item" onmousedown="pickTicker('${s.t}')"><strong>${s.t}</strong><span>${s.n}</span></div>`).join('');
+}
+function pickTicker(t){el('oTicker').value=t;hideAC();}
+function hideAC(){el('acList').style.display='none';}
+
+function saveOrder(){
+  const isVenta=el('oAction').value==='Venta';
+  const ticker=isVenta?el('oSellTicker').value:el('oTicker').value.trim().toUpperCase();
+  const qty=parseFloat(el('oQty').value);
+  const price=parseFloat(el('oPrice').value);
+  if(!ticker||!qty||!price){alert('Faltan datos obligatorios');return;}
+
+  if(isVenta){
+    const pf=getPortfolio();
+    const held=pf.find(a=>a.ticker===ticker);
+    if(!held){alert(`No tenés ${ticker} en cartera`);return;}
+    if(qty>held.qty+0.0001){alert(`Solo tenés ${n2(held.qty,4)} de ${ticker}`);return;}
+  }
+
+  const mktVal=el('oMarket').value;
+  const typeMap={usa:'Acción USA',cedear:'CEDEAR',arg:'Acción Argentina',cripto:'Cripto',bono:'Bono/Renta Fija'};
+  const type=isVenta?(getPortfolio().find(a=>a.ticker===ticker)?.type||'Acción USA'):(typeMap[mktVal]||'Acción USA');
+  const isA=isARS(type)&&!isVenta;
+  const c=ccl();
+  const priceUSD=isA?price/c:price;
+  const commUSD=(parseFloat(el('oComm').value)||0)/(isA?c:1);
+
+  orders.push({
+    id:Date.now(),ticker,type,
+    action:el('oAction').value,
+    qty,price:priceUSD,priceOrig:price,
+    currency:isA?'ARS':'USD',cclAtOrder:isA?c:null,
+    comm:commUSD,broker:el('oBroker').value,
+    date:el('oDate').value||new Date().toISOString().slice(0,10),
+    notes:el('oNotes').value,
+  });
+  save();closeOverlay('order');resetOrder();render();doRefresh();
+}
+
+function resetOrder(){
+  ['oQty','oPrice','oComm','oNotes','oTicker'].forEach(id=>el(id).value='');
+  el('oAction').value='Compra';el('oBroker').value='';
+  el('oDate').value=new Date().toISOString().slice(0,10);
+  el('oMarket').value='usa';
+  onActionChange();updatePriceCurrency();
+}
+
+function quickOrder(ticker,type,action){
+  el('oAction').value=action;onActionChange();
+  if(action==='Venta'){
+    setTimeout(()=>{el('oSellTicker').value=ticker;onSellChange();},50);
+  } else {
+    el('oTicker').value=ticker;
+    const mktMap={'Acción USA':'usa','ETF':'usa','CEDEAR':'cedear','Acción Argentina':'arg','Cripto':'cripto','Bono/Renta Fija':'bono'};
+    el('oMarket').value=mktMap[type]||'usa';
+    updatePriceCurrency();
+    const isPxARS=prices[ticker+'_ars']===true;
+    const px=prices[ticker];
+    if(px>0) el('oPrice').value=px.toFixed(2);
+  }
+  calcTotal();openOverlay('order');
+  closeMenu();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+function delOrder(id){orders=orders.filter(o=>String(o.id)!==String(id));save();render();}
+function delTicker(ticker){orders=orders.filter(o=>o.ticker!==ticker);save();render();}
+function goTV(ticker,type){
+  const sym=type==='Acción Argentina'?`BCBA:${ticker}`:type==='Cripto'?`BINANCE:${ticker}USDT`:ticker;
+  window.open(`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sym)}`,'_blank');
+  closeMenu();
+}
+
+function toggleMenu(ticker,e){
+  e.stopPropagation();
+  closeMenu();
+  const m=el('menu_'+ticker);
+  if(m) m.style.display='block';
+}
+function closeMenu(){document.querySelectorAll('.asset-menu').forEach(m=>m.style.display='none');}
+document.addEventListener('click',closeMenu);
+
+function toggleCur(){currency=currency==='USD'?'ARS':'USD';el('btnCur').textContent=currency;render();}
+
+function setStatus(msg,loading){
+  const e=el('statusBar');
+  e.textContent=msg;
+  e.style.color=loading?'var(--blue2)':'var(--muted)';
+}
+
+function editName(){
+  const cur=localStorage.getItem('pf6_name')||'Mi Portfolio';
+  const name=prompt('Nombre del portfolio:',cur);
+  if(name?.trim()){
+    localStorage.setItem('pf6_name',name.trim());
+    el('pfName').textContent=name.trim()+' ✎';
+    if(currentUser) supaSync();
+  }
+}
+
+function configFMP(){
+  const cur=localStorage.getItem('pf6_fmp')||'';
+  const key=prompt('API Key de Financial Modeling Prep (financialmodelingprep.com)\nPlan gratuito: 250 requests/día\n\nKey actual: '+(cur?cur.slice(0,8)+'...':'ninguna'),cur);
+  if(key===null)return;
+  localStorage.setItem('pf6_fmp',key.trim());
+  const btn=el('btnFMP');
+  btn.textContent=key.trim()?'⚙ FMP ✓':'⚙ FMP';
+  btn.className=key.trim()?'btn btn-green':'btn btn-gold';
+  if(key.trim()) alert('✓ FMP configurado. Tocá Actualizar.');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // IMPORT / EXPORT
-// ═══════════════════════════════════════════════════════
-function configIOL(){
-  // IOL API has CORS restrictions — prices come from Yahoo Finance .BA instead
-  alert('Los precios de CEDEARs y acciones argentinas se obtienen via Yahoo Finance (BCBA).\n\nSon precios del día anterior (cierre) ya que Yahoo no da tiempo real gratis.\n\nPara tiempo real necesitarías un servidor proxy propio.');
-}
-
-function configAPIKey(){
-  const current = localStorage.getItem('pf6_fmp_key') || '';
-  const key = prompt('Pegá tu API key de Financial Modeling Prep (financialmodelingprep.com):\n\nPlan gratis: 250 requests/día — suficiente para tu portfolio.\n\nAPI Key actual: ' + (current ? current.slice(0,6)+'...' : 'ninguna'), current);
-  if(key === null) return;
-  localStorage.setItem('pf6_fmp_key', key.trim());
-  // Update FMP constant
-  window._FMP_KEY = key.trim();
-  const btn = document.getElementById('btnApi');
-  btn.style.color = key.trim() ? 'var(--green)' : 'var(--gold)';
-  btn.textContent = key.trim() ? '⚙ API ✓' : '⚙ API';
-  if(key.trim()) { alert('✓ API Key guardada. Tocá Actualizar para obtener precios.'); }
-}
-
+// ═══════════════════════════════════════════════════════════════════════════
 function exportData(){
-  const data = {
-    orders,
-    snapshots,
-    brokers,
-    exportedAt: new Date().toISOString(),
-    version: 1
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `portfolio_backup_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const data={version:1,exportedAt:new Date().toISOString(),brokers,orders,snapshots};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download=`crifund_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
 }
 
 function importData(event){
-  const file = event.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
     try{
-      const data = JSON.parse(e.target.result);
-      // Support both formats: array of orders directly, or full backup object
+      const data=JSON.parse(e.target.result);
       if(Array.isArray(data)){
-        // Raw orders array
-        if(confirm(`Importar ${data.length} órdenes? Esto REEMPLAZA los datos actuales.`)){
-          orders = data;
-          save(); render();
-          alert(`✓ ${data.length} órdenes importadas correctamente`);
+        if(confirm(`Importar ${data.length} órdenes? Reemplaza los datos actuales.`)){
+          orders=data;save();render();alert(`✓ ${data.length} órdenes importadas`);
         }
       } else if(data.orders){
-        // Full backup object
-        const msg = `Importar backup de ${data.exportedAt?.slice(0,10)||'fecha desconocida'}?
-${data.orders.length} órdenes · ${data.brokers?.length||0} brokers
-
-Esto REEMPLAZA los datos actuales.`;
-        if(confirm(msg)){
-          orders    = data.orders    || [];
-          snapshots = data.snapshots || [];
-          brokers   = data.brokers   || DEFAULT_BROKERS;
-          save(); render();
-          alert(`✓ Importación exitosa: ${orders.length} órdenes`);
+        if(confirm(`Importar backup de ${data.exportedAt?.slice(0,10)||'?'}?\n${data.orders.length} órdenes\n\nReemplaza los datos actuales.`)){
+          orders=data.orders||[];snapshots=data.snapshots||[];brokers=data.brokers||DEFAULT_BROKERS;
+          save();render();alert(`✓ ${orders.length} órdenes importadas`);
         }
-      } else {
-        alert('Formato de archivo no reconocido');
-      }
-    } catch(err){
-      alert('Error al leer el archivo: ' + err.message);
-    }
-    event.target.value = ''; // Reset input
+      } else {alert('Formato no reconocido');}
+    }catch(err){alert('Error: '+err.message);}
+    event.target.value='';
   };
   reader.readAsText(file);
 }
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-document.getElementById('o-date').value = new Date().toISOString().slice(0,10);
-// Load saved API key
-// FMP key already loaded at top via localStorage.getItem
-const btn = document.getElementById('btnApi');
-if(window._FMP_KEY && btn){ btn.style.color='var(--green)'; btn.textContent='⚙ FMP ✓'; }
+// ═══════════════════════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function el(id){return document.getElementById(id);}
+function goTab(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el('page-'+name).classList.add('active');btn.classList.add('active');
+  if(name==='brokers') hideBrokerDetail();
+  if(name==='charts') renderMainCharts(enrich(getPortfolio()),0,0,0,ccl());
+}
+function openOverlay(name){el('overlay-'+name).classList.add('open');}
+function closeOverlay(name){el('overlay-'+name).classList.remove('open');}
 
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+el('oDate').value=new Date().toISOString().slice(0,10);
+
+// Restore name
+const savedName=localStorage.getItem('pf6_name');
+if(savedName) el('pfName').textContent=savedName+' ✎';
+
+// Restore FMP button state
+if(localStorage.getItem('pf6_fmp')){
+  el('btnFMP').textContent='⚙ FMP ✓';
+  el('btnFMP').className='btn btn-green';
+}
+
+// Supabase auth
+supa.auth.getSession().then(({data:{session}})=>{
+  if(session?.user) onLogin(session.user);
+  else {render();if(getPortfolio().length)doRefresh();setTimeout(loadSidebar,1000);}
+});
+supa.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_IN'&&session?.user&&!currentUser) onLogin(session.user);
+});
 
 renderBrokerGrid();
-render();
-if(getPortfolio().length) doRefresh();
-// Load sidebar independently
-setTimeout(() => { loadMarketQuotes(); loadNews(); }, 500);
 </script>
 </body>
 </html>
