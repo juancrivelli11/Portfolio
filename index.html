@@ -280,7 +280,7 @@ body.dark canvas{filter:brightness(0.9)}
 <body>
 
 <!-- HEADER -->
-<div style="background:linear-gradient(135deg,#e8f0fe 0%,#f0f6ff 50%,#e3f2fd 100%);border-bottom:1px solid var(--border);padding:16px 16px 12px;text-align:center">
+<div style="background:transparent;padding:14px 16px 6px;text-align:center">
   <img src="logo.png" alt="CriFund" style="height:70px;width:auto;object-fit:contain"
     onerror="this.style.display='none'">
 </div>
@@ -1794,7 +1794,7 @@ function editName(){
   const name=prompt('Nombre del portfolio:',cur);
   if(name?.trim()){
     localStorage.setItem('pf6_name',name.trim());
-    el('pfName').textContent=name.trim()+' ✎';
+    el('pfName').textContent=name.trim();
     if(currentUser) supaSync();
   }
 }
@@ -1870,7 +1870,7 @@ if(localStorage.getItem('pf6_dark')==='1'){
   document.getElementById('btnDark').textContent='☀️';
 }
 const savedName=localStorage.getItem('pf6_name');
-if(savedName) el('pfName').textContent=savedName+' ✎';
+if(savedName) el('pfName').textContent=savedName;
 
 // Restore FMP button state
 if(localStorage.getItem('pf6_fmp')){
