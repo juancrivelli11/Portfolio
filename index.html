@@ -280,7 +280,7 @@ body.dark canvas{filter:brightness(0.9)}
 <body>
 
 <!-- HEADER -->
-<div style="background:#fff;border-bottom:none;padding:14px 16px 8px;text-align:center">
+<div style="background:linear-gradient(135deg,#e8f0fe 0%,#f0f6ff 50%,#e3f2fd 100%);border-bottom:1px solid var(--border);padding:16px 16px 12px;text-align:center">
   <img src="logo.png" alt="CriFund" style="height:70px;width:auto;object-fit:contain"
     onerror="this.style.display='none'">
 </div>
@@ -288,7 +288,7 @@ body.dark canvas{filter:brightness(0.9)}
   <div class="hdr-brand">
     <div class="brand"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></div>
     <div class="hdr-name">
-      <h1 id="pfName" onclick="editName()" title="Click para editar">Mi Portfolio ✎</h1>
+      <h1 id="pfName" onclick="editName()" title="Click para editar" style="cursor:pointer">Mi Portfolio</h1>
       <p id="statusBar">Tocá Actualizar para obtener precios</p>
     </div>
   </div>
@@ -1183,10 +1183,10 @@ function renderTable(pf, containerId, totVal, totPnL){
       <td>${n2(a.qty,2)}</td>
       <td class="${a.hasPx&&a.price>a.avgPrice?'up':a.hasPx&&a.price<a.avgPrice?'dn':''}">${priceStr}</td>
       <td class="${dc}">${a.dayPct!=null?pc(a.dayPct):'—'}</td>
-      <td class="${dc}">${a.dayDol!=null?(a.dayDol>=0?'+':'')+$u(a.dayDol):'—'}</td>
+      <td class="${dc}">${a.dayDol!=null?(a.dayDol>=0?'+':'')+( isARS(a.type)?$a(a.dayDol*c):$u(a.dayDol) ):'—'}</td>
       <td style="font-weight:600">${ppcStr}</td>
       <td class="${gc}">${a.hasPx?pc(a.pnlPct):'—'}</td>
-      <td class="${gc}" style="font-weight:700">${a.hasPx?(a.pnl>=0?'+':'')+$u(a.pnl):'—'}</td>
+      <td class="${gc}" style="font-weight:700">${a.hasPx?(a.pnl>=0?'+':'')+( isARS(a.type)?$a(a.pnl*c):$u(a.pnl) ):'—'}</td>
       <td class="${gc}" style="font-weight:700">${totStr}</td>
       <td style="position:relative">
         <button style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px 6px;color:var(--muted)" onclick="toggleMenu('${containerId}_${a.ticker}',event)">⋯</button>
