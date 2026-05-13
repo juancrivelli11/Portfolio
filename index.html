@@ -1193,9 +1193,15 @@ function renderTable(pf, containerId, totVal, totPnL){
   });
   const tot=document.createElement('tr');tot.className='tot-row';
   const pnlClass=totPnL>=0?'up':'dn';
+  // Calculate totals in native currencies
+  const _c=ccl();
+  const _arsTotal=pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost)*_c,0);
+  const _usdTotal=pf.filter(a=>!isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
+  const _totStr = _arsTotal>0&&_usdTotal>0 ? `${$u(_usdTotal)} + ${$a(_arsTotal)}` :
+                  _arsTotal>0 ? $a(_arsTotal) : $u(_usdTotal);
   tot.innerHTML=`<td colspan="7" style="font-weight:700">TOTAL</td>
     <td class="${pnlClass}">${(totPnL>=0?'+':'')+$u(totPnL)}</td>
-    <td style="font-weight:800">${dv(totVal)}</td><td></td>`;
+    <td style="font-weight:800">${_totStr}</td><td></td>`;
   tbody.appendChild(tot);
   tbl.appendChild(tbody);wrap.appendChild(tbl);
   el2.innerHTML='';el2.appendChild(wrap);
@@ -1275,8 +1281,14 @@ function showBrokerDetail(name){
 
   // KPI row
   const kpi=document.createElement('div');kpi.className='kpi-row';
+  const c3=ccl();
+  const totValARS = pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0)*c3;
+  const totValUSD = pf.filter(a=>!isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
+  const totValDisplay = totValARS>0 && totValUSD===0 ? $a(totValARS) :
+                        totValARS===0 ? $u(totValUSD) :
+                        `${$u(totValUSD)} + ${$a(totValARS)}`;
   [
-    {l:'Valor Total',v:$u(totVal),c:roe>=0?'var(--blue)':'var(--txt)'},
+    {l:'Valor Total',v:totValDisplay,c:roe>=0?'var(--blue)':'var(--txt)'},
     {l:'Costo Base',v:$u(totCost),c:'var(--txt)'},
     {l:'P&L',v:(totPnL>=0?'+':'')+$u(totPnL),c:totPnL>=0?'var(--green)':'var(--red)'},
     {l:'ROE',v:(roe>=0?'+':'')+n2(roe,2)+'%',c:roe>=0?'var(--green)':'var(--red)'},
