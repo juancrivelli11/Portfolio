@@ -1657,15 +1657,40 @@ function saveOrder(){
   const priceUSD=isA?price/c:price;
   const commUSD=(parseFloat(el('oComm').value)||0)/(isA?c:1);
 
+  const broker = el('oBroker').value;
+  const orderDate = el('oDate').value||new Date().toISOString().slice(0,10);
+  const isCompra = el('oAction').value === 'Compra';
+
   orders.push({
     id:Date.now(),ticker,type,
-    action:el('oAction').value,
+    action:isCompra?'Compra':'Venta',
     qty,price:priceUSD,priceOrig:price,
     currency:isA?'ARS':'USD',cclAtOrder:isA?c:null,
-    comm:commUSD,broker:el('oBroker').value,
-    date:el('oDate').value||new Date().toISOString().slice(0,10),
+    comm:commUSD,broker,
+    date:orderDate,
     notes:el('oNotes').value,
   });
+
+  // Auto-adjust liquidity for ARS brokers
+  if(isA && broker && isARSBroker(broker)){
+    const totalARS = qty * price + (parseFloat(el('oComm').value)||0);
+    // Check if there's ARS liquidity for this broker
+    const arsOrders = orders.filter(o=>o.ticker==='ARS'&&(o.broker||'').toLowerCase()===broker.toLowerCase());
+    const arsQty = arsOrders.reduce((s,o)=>s+(o.action==='Compra'?o.qty:-o.qty),0);
+    if(arsQty > 0 || !isCompra){
+      orders.push({
+        id:Date.now()+1,
+        ticker:'ARS',type:'Bono/Renta Fija',
+        action:isCompra?'Venta':'Compra',
+        qty:totalARS,price:1,priceOrig:1,
+        currency:'ARS',cclAtOrder:c,comm:0,
+        broker,date:orderDate,
+        notes:`Auto: ${isCompra?'compra':'venta'} de ${ticker}`,
+        auto:true
+      });
+    }
+  }
+
   save();closeOverlay('order');resetOrder();render();doRefresh();
 }
 
