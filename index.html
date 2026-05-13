@@ -376,6 +376,10 @@ body.dark canvas{filter:brightness(0.9)}
         <div class="sec-title" id="brokerDetailTitle" style="margin-bottom:10px"></div>
         <div id="brokerDetailCharts"></div>
         <div id="brokerDetailTable"></div>
+        <div id="brokerLiquidez" style="display:none;margin-top:12px">
+          <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:8px">💰 LIQUIDEZ EN ESTE BROKER</div>
+          <div id="brokerLiquidezCards" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
       </div>
     </div>
 
@@ -900,8 +904,9 @@ async function doRefresh(){
   // Argentine assets
   const argAssets=pf.filter(a=>isARS(a.type));
   for(const a of argAssets){
-    if(a.ticker.toUpperCase()==='ARS'){
-      prices['ARS']=1; prices['ARS_prev']=1; prices['ARS_ars']=true; continue;
+    if(isCash(a.ticker)){
+      // Cash in ARS: price = 1 ARS
+      prices[a.ticker]=1; prices[a.ticker+'_prev']=1; prices[a.ticker+'_ars']=true; continue;
     }
     const data=await fetchArgPrice(a.ticker);
     if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;prices[a.ticker+'_ars']=true;}
@@ -998,8 +1003,20 @@ function render(){
 const CASH_LIST = ['USD','ARS','USDT','USDC','DAI','BUSD','PESOS','CASH'];
 function isCash(ticker){ return CASH_LIST.includes((ticker||'').toUpperCase()); }
 
-function renderCash(pf){
-  const cashAssets = pf.filter(a=>isCash(a.ticker));
+function renderCash(pf, broker){
+  // If broker specified, get cash for that broker specifically
+  let cashAssets;
+  if(broker){
+    const brokerOrders = orders.filter(o=>(o.broker||'').toLowerCase()===broker.toLowerCase()&&isCash(o.ticker));
+    const cashMap={};
+    brokerOrders.forEach(o=>{
+      if(!cashMap[o.ticker]) cashMap[o.ticker]={ticker:o.ticker,qty:0,broker};
+      cashMap[o.ticker].qty += o.action==='Compra' ? o.qty : -o.qty;
+    });
+    cashAssets = Object.values(cashMap).filter(a=>a.qty>0).map(a=>({...a,brkList:[broker]}));
+  } else {
+    cashAssets = pf.filter(a=>isCash(a.ticker));
+  }
   const cashSection = document.getElementById('cashSection');
   const cashCards = document.getElementById('cashCards');
   if(!cashSection || !cashCards) return;
@@ -1021,7 +1038,7 @@ function renderCash(pf){
 
 function renderTable(pf, containerId, totVal, totPnL){
   // Separate cash from investments
-  if(containerId==='assetTable') renderCash(enrich(getPortfolio()));
+  if(containerId==='assetTable') renderCash(pf, null);
   pf = pf.filter(a=>!isCash(a.ticker));
   const el2=el(containerId);
   if(!pf.length){el2.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div>Cargá una orden para empezar.</div></div>';return;}
@@ -1242,11 +1259,46 @@ function showBrokerDetail(name){
   chartsEl.appendChild(lineBox);
   chartsEl.appendChild(grid);
   renderTable(pf,'brokerDetailTable',totVal,totPnL);
+  // Render broker-specific cash
+  renderBrokerCash(name);
 }
 
 function hideBrokerDetail(){
   el('brokerGridView').style.display='block';
   el('brokerDetailView').style.display='none';
+}
+
+function renderBrokerCash(brokerName){
+  const liqDiv = document.getElementById('brokerLiquidez');
+  const liqCards = document.getElementById('brokerLiquidezCards');
+  if(!liqDiv||!liqCards) return;
+
+  // Get cash orders for this broker
+  const brokerOrders = orders.filter(o=>
+    (o.broker||'').toLowerCase()===brokerName.toLowerCase() && isCash(o.ticker)
+  );
+  const cashMap={};
+  brokerOrders.forEach(o=>{
+    const t=o.ticker.toUpperCase();
+    if(!cashMap[t]) cashMap[t]={ticker:t,qty:0};
+    cashMap[t].qty += o.action==='Compra' ? o.qty : -o.qty;
+  });
+  const cashList = Object.values(cashMap).filter(a=>a.qty>0.001);
+
+  if(!cashList.length){ liqDiv.style.display='none'; return; }
+  liqDiv.style.display='block';
+  const c=ccl();
+
+  liqCards.innerHTML = cashList.map(a=>{
+    const isArsT = a.ticker==='ARS';
+    const valueUSD = isArsT ? a.qty/c : a.qty*(prices[a.ticker]||1);
+    const valueARS = isArsT ? a.qty : valueUSD*c;
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;flex:1;min-width:130px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${a.ticker}</div>
+      <div style="font-size:18px;font-weight:800;color:var(--blue);font-family:monospace">${isArsT?$a(a.qty):$u(a.qty)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${isArsT?'≈ '+$u(valueUSD):'≈ '+$a(valueARS)+' ARS'}</div>
+    </div>`;
+  }).join('');
 }
 
 function addBroker(){
