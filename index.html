@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CriFund</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -280,7 +282,11 @@ body.dark canvas{filter:brightness(0.9)}
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-brand">
-    <div class="brand"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></div>
+    <div class="brand">
+      <img src="logo.png" alt="CriFund" style="height:36px;width:auto;object-fit:contain"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="display:none"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></span>
+    </div>
     <div class="hdr-name">
       <h1 id="pfName" onclick="editName()" title="Click para editar">Mi Portfolio ✎</h1>
       <p id="statusBar">Tocá Actualizar para obtener precios</p>
