@@ -298,7 +298,7 @@ body.dark canvas{filter:brightness(0.9)}
     <button class="btn btn-blue" onclick="document.getElementById('impFile').click()">⬆ Import</button>
     <input type="file" id="impFile" accept=".json,application/json,text/plain,*/*" style="display:none" onchange="importData(event)">
     <button class="btn btn-gold" onclick="configFMP()" id="btnFMP">⚙ FMP</button>
-    <button class="btn btn-green" onclick="doRefresh()" id="btnRef">↻ Actualizar</button>
+    <button class="btn btn-green" onclick="doRefresh(true)" id="btnRef">↻ Actualizar</button>
     <button class="btn btn-blue" onclick="handleAuth()" id="btnAuth">Iniciar sesión</button>
     <button class="btn btn-blue" onclick="toggleDark()" id="btnDark" title="Modo oscuro/claro" style="font-size:16px;padding:6px 10px">🌙</button>
   </div>
@@ -764,7 +764,7 @@ async function supaLoad(){
       if(set.brokers) brokers = set.brokers;
       if(set.portfolio_name){
         localStorage.setItem('pf6_name', set.portfolio_name);
-        document.getElementById('pfName').textContent = set.portfolio_name + ' ✎';
+        document.getElementById('pfName').textContent = set.portfolio_name ;
       }
     }
     localSave();
@@ -987,9 +987,16 @@ async function fetchUSPrice(sym){
   return null;
 }
 
-async function doRefresh(){
+async function doRefresh(force=false){
   const pf=getPortfolio();
   if(!pf.length){setStatus('Sin activos',false);return;}
+  // Cache: skip if prices fetched < 30 min ago (unless forced)
+  const lastFetch=parseInt(localStorage.getItem('pf6_lastFetch')||'0');
+  const age=Date.now()-lastFetch;
+  if(!force && age < 30*60*1000 && Object.keys(prices).length > 2){
+    setStatus(`Precios actualizados hace ${Math.round(age/60000)} min`,false);
+    render();return;
+  }
   setStatus('Obteniendo precios...',true);
   document.getElementById('btnRef').textContent='...';
   document.getElementById('btnRef').disabled=true;
@@ -1020,14 +1027,47 @@ async function doRefresh(){
   }
 
   // US assets
-  const STABLE = ['USD','USDC','BUSD','DAI']; // cash/stable = always $1
+  const STABLE = ['USD','USDC','BUSD','DAI'];
   const usAssets=pf.filter(a=>!isARS(a.type)&&a.type!=='Cripto');
-  for(const a of usAssets){
-    if(STABLE.includes(a.ticker.toUpperCase())){
-      prices[a.ticker]=1; prices[a.ticker+'_prev']=1; continue;
+  const toFetch=usAssets.filter(a=>!STABLE.includes(a.ticker.toUpperCase()));
+  usAssets.filter(a=>STABLE.includes(a.ticker.toUpperCase())).forEach(a=>{
+    prices[a.ticker]=1;prices[a.ticker+'_prev']=1;
+  });
+
+  // Batch FMP request - single call for all tickers
+  const fmp=localStorage.getItem('pf6_fmp')||'';
+  if(fmp && toFetch.length){
+    try{
+      const syms=toFetch.map(a=>a.ticker).join(',');
+      const r=await fetch(`https://financialmodelingprep.com/api/v3/quote/${syms}?apikey=${fmp}`);
+      const d=await r.json();
+      if(Array.isArray(d)){
+        d.forEach(q=>{
+          if(q.price>0){
+            prices[q.symbol]=q.price;
+            prices[q.symbol+'_prev']=q.previousClose||q.price;
+            console.log(`FMP batch: ${q.symbol}=${q.price}`);
+          }
+        });
+        // Only fetch missing ones via Yahoo
+        const missing=toFetch.filter(a=>!prices[a.ticker]);
+        for(const a of missing){
+          const data=await fetchUSPrice(a.ticker);
+          if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;}
+        }
+      }
+    }catch(e){
+      // Fallback to individual
+      for(const a of toFetch){
+        const data=await fetchUSPrice(a.ticker);
+        if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;}
+      }
     }
-    const data=await fetchUSPrice(a.ticker);
-    if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;}
+  } else {
+    for(const a of toFetch){
+      const data=await fetchUSPrice(a.ticker);
+      if(data?.price>0){prices[a.ticker]=data.price;prices[a.ticker+'_prev']=data.prev;}
+    }
   }
 
   // Dolar
@@ -1048,6 +1088,7 @@ async function doRefresh(){
   if(currentUser) await supaSnap(today,total);
 
   const got=pf.filter(a=>prices[a.ticker]>0).length;
+  localStorage.setItem('pf6_lastFetch', Date.now().toString());
   setStatus(`${got}/${pf.length} precios · Blue $${n2(mkt.dblue?.price||0,0)} · MEP $${n2(mkt.dmep?.price||0,0)} · CCL $${n2(mkt.dccl?.price||0,0)}`,false);
   document.getElementById('btnRef').textContent='↻ Actualizar';
   document.getElementById('btnRef').disabled=false;
@@ -1698,6 +1739,26 @@ function saveOrder(){
 
 
 
+  // Auto-adjust USD liquidity for non-ARS brokers
+  if(!isA && broker && !isARSBroker(broker)){
+    const totalUSD = qty * priceUSD + commUSD;
+    const usdOrders = orders.filter(o=>
+      o.ticker==='USD' && (o.broker||'').toLowerCase()===broker.toLowerCase()
+    );
+    const usdQty = usdOrders.reduce((s,o)=>s+(o.action==='Compra'?o.qty:-o.qty),0);
+    if(usdQty > 0){
+      orders.push({
+        id:Date.now()+2,
+        ticker:'USD',type:'Acción USA',
+        action:isCompra?'Venta':'Compra',
+        qty:totalUSD,price:1,priceOrig:1,
+        currency:'USD',cclAtOrder:null,comm:0,
+        broker,date:orderDate,
+        notes:`Auto: ${isCompra?'compra':'venta'} de ${ticker}`,
+        auto:true
+      });
+    }
+  }
   save();closeOverlay('order');resetOrder();render();doRefresh();
 }
 
