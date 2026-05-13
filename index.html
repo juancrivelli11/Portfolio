@@ -796,14 +796,48 @@ const DOMAINS = {
   SONY:'sony.com',MSTR:'microstrategy.com',EDN:'edenor.com.ar',
 };
 const CG = {
-  BTC:'1/bitcoin',ETH:'279/ethereum',SOL:'4128/solana',
-  BNB:'825/bnb-icon2_2x',XRP:'44/xrp-symbol-white-128',
-  DOGE:'5/dogecoin',ADA:'975/cardano',MATIC:'8925/matic-token',
-  AVAX:'12559/avalanche-avax-logo',USDT:'325/tether',
-  USDC:'6319/usd-coin',DOT:'12171/polkadot',LINK:'877/chainlink',
-  UNI:'7083/uniswap',ATOM:'1481/cosmos',LTC:'2/litecoin',
+  BTC:'1/bitcoin',
+  ETH:'279/ethereum',
+  SOL:'4128/solana',
+  BNB:'825/bnb-icon2_2x',
+  XRP:'44/xrp-symbol-white-128',
+  DOGE:'5/dogecoin',
+  ADA:'975/cardano',
+  MATIC:'8925/matic-token',
+  AVAX:'12559/avalanche-avax-logo',
+  USDT:'325/tether',
+  USDC:'6319/usd-coin',
+  DOT:'12171/polkadot',
+  LINK:'877/chainlink',
+  UNI:'7083/uniswap',
+  ATOM:'1481/cosmos',
+  LTC:'2/litecoin',
+  MANA:'1298/decentraland',
+  RUNE:'4157/thorchain',
+  CRV:'12124/curve-dao-token',
+  TON:'17980/ton_symbol',
+  ICP:'8916/internet-computer',
+  SUI:'26375/sui',
+  ORDI:'25028/ordinals',
+  JUP:'35084/jupiter-exchange-solana',
+  LDO:'13573/lido-dao',
+  IOTA:'738/iota',
+  ARB:'16547/arbitrum',
+  AAVE:'12645/aave-token-round',
 };
 const CG_URL = 'https://assets.coingecko.com/coins/images/';
+
+// CoinGecko IDs for price fetching
+const CG_IDS = {
+  BTC:'bitcoin',ETH:'ethereum',SOL:'solana',BNB:'binancecoin',
+  XRP:'ripple',ADA:'cardano',DOGE:'dogecoin',USDT:'tether',
+  USDC:'usd-coin',DOT:'polkadot',LINK:'chainlink',UNI:'uniswap',
+  ATOM:'cosmos',LTC:'litecoin',MATIC:'matic-network',AVAX:'avalanche-2',
+  MANA:'decentraland',RUNE:'thorchain',CRV:'curve-dao-token',
+  TON:'the-open-network',ICP:'internet-computer',SUI:'sui',
+  ORDI:'ordinals',JUP:'jupiter-exchange-solana',LDO:'lido-dao',
+  IOTA:'iota',ARB:'arbitrum',AAVE:'aave',
+};
 
 function makeLogo(ticker, type, size=26){
   const c = COLS[(ticker||'?').charCodeAt(0)%COLS.length];
@@ -815,7 +849,7 @@ function makeLogo(ticker, type, size=26){
 
   let src = null;
   if(type==='Cripto' && CG[ticker?.toUpperCase()]){
-    src=CG[ticker?.toUpperCase()]?`${CG_URL}${CG[ticker.toUpperCase()]}.png`:null;
+    const cgEntry=CG[ticker?.toUpperCase()]; src=cgEntry?`${CG_URL}${cgEntry}.png`:null;
   } else {
     const dom = DOMAINS[ticker?.toUpperCase()] || `${ticker?.toLowerCase()}.com`;
     src=`https://www.google.com/s2/favicons?domain=${dom}&sz=64`;
@@ -923,13 +957,12 @@ async function doRefresh(){
   // Crypto
   const cryptos=pf.filter(a=>a.type==='Cripto');
   if(cryptos.length){
-    const CGIDS={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',BNB:'binancecoin',XRP:'ripple',ADA:'cardano',DOGE:'dogecoin',USDT:'tether',MATIC:'matic-network'};
-    const ids=cryptos.map(a=>CGIDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase()).filter(Boolean);
+    const ids=cryptos.map(a=>CG_IDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase()).filter(Boolean);
     try{
       const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`);
       const d=await r.json();
       cryptos.forEach(a=>{
-        const id=CGIDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase();
+        const id=CG_IDS[a.ticker?.toUpperCase()]||a.ticker?.toLowerCase();
         if(d[id]){prices[a.ticker]=d[id].usd;prices[a.ticker+'_prev']=d[id].usd/(1+(d[id].usd_24h_change||0)/100);}
       });
     }catch(e){}
@@ -1117,8 +1150,8 @@ function renderTable(pf, containerId, totVal, totPnL){
       <td class="${gc}" style="font-weight:700">${a.hasPx?(a.pnl>=0?'+':'')+$u(a.pnl):'—'}</td>
       <td class="${gc}" style="font-weight:700">${totStr}</td>
       <td style="position:relative">
-        <button style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px 6px;color:var(--muted)" onclick="toggleMenu('${a.ticker}',event)">⋯</button>
-        <div class="asset-menu" id="menu_${a.ticker}">
+        <button style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px 6px;color:var(--muted)" onclick="toggleMenu('${containerId}_${a.ticker}',event)">⋯</button>
+        <div class="asset-menu" id="menu_${containerId}_${a.ticker}">
           <div style="color:var(--green)" onclick="quickOrder('${a.ticker}','${a.type}','Compra')">📈 Comprar</div>
           <div style="color:var(--red)" onclick="quickOrder('${a.ticker}','${a.type}','Venta')">📉 Vender</div>
           <div onclick="goTV('${a.ticker}','${a.type}')">📊 Ver gráfico</div>
@@ -1651,10 +1684,10 @@ function goTV(ticker,type){
   closeMenu();
 }
 
-function toggleMenu(ticker,e){
+function toggleMenu(id,e){
   e.stopPropagation();
   closeMenu();
-  const m=el('menu_'+ticker);
+  const m=el('menu_'+id);
   if(m) m.style.display='block';
 }
 function closeMenu(){document.querySelectorAll('.asset-menu').forEach(m=>m.style.display='none');}
