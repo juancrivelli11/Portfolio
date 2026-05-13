@@ -377,12 +377,13 @@ body.dark canvas{filter:brightness(0.9)}
           <div class="sec-title" id="brokerDetailTitle"></div>
           <button class="btn btn-green" onclick="openOverlay('order')" style="font-size:12px;padding:6px 12px">+ Nueva orden</button>
         </div>
-        <div id="brokerDetailCharts"></div>
+        <div id="brokerDetailKpi"></div>
         <div id="brokerDetailTable"></div>
         <div id="brokerLiquidez" style="display:none;margin-top:12px">
           <div style="font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:8px">💰 LIQUIDEZ EN ESTE BROKER</div>
           <div id="brokerLiquidezCards" style="display:flex;gap:8px;flex-wrap:wrap"></div>
         </div>
+        <div id="brokerDetailCharts" style="margin-top:12px"></div>
       </div>
     </div>
 
@@ -1245,6 +1246,8 @@ function showBrokerDetail(name){
   // Use value or cost for pie chart
   const pd=pf.map(a=>({name:a.ticker,value:a.hasPx?a.value:a.cost})).filter(a=>a.value>0);
 
+  const kpiEl=el('brokerDetailKpi');
+  kpiEl.innerHTML='';
   const chartsEl=el('brokerDetailCharts');
   chartsEl.innerHTML='';
 
@@ -1260,7 +1263,7 @@ function showBrokerDetail(name){
     d.innerHTML=`<label>${k.l}</label><div class="val" style="color:${k.c}">${k.v}</div>`;
     kpi.appendChild(d);
   });
-  chartsEl.appendChild(kpi);
+  kpiEl.appendChild(kpi);
 
   // Charts grid
   const grid=document.createElement('div');grid.className='charts-grid';
@@ -1307,22 +1310,18 @@ function showBrokerDetail(name){
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b8cba',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#6b8cba',callback:v=>`${v}%`},grid:{color:'#eef2f9'}}}}
   });
 
-  // Line chart: capital evolution from snapshots filtered by broker
+  // Line chart: global portfolio evolution
   const lineBox=document.createElement('div');lineBox.className='chart-box';
-  lineBox.style.marginBottom='12px';
-  lineBox.innerHTML='<h3>Evolución del capital (90 días)</h3>';
+  lineBox.innerHTML='<h3>Evolución del portfolio global (90 días)</h3>';
   const lineC=document.createElement('canvas');lineC.height=120;
   lineBox.appendChild(lineC);
-
-  // Filter snapshots — approximate broker share by proportion of total cost
-  const brokerCostRatio = totCost > 0 ? totCost / Math.max(getPortfolio().reduce((s,a)=>s+a.cost,0),1) : 0;
   const s90=snapshots.slice(-90);
   if(s90.length>=2){
     const labels=s90.map(s=>s.date.slice(5));
-    const vals=s90.map(s=>s.usd*brokerCostRatio);
+    const vals=s90.map(s=>s.usd);
     new Chart(lineC,{
       type:'line',
-      data:{labels,datasets:[{data:vals,borderColor:'var(--blue2)',backgroundColor:'#42a5f514',fill:true,tension:0.4,pointRadius:2,label:name}]},
+      data:{labels,datasets:[{data:vals,borderColor:'var(--blue2)',backgroundColor:'#42a5f514',fill:true,tension:0.4,pointRadius:2}]},
       options:{responsive:true,plugins:{legend:{display:false}},
         scales:{x:{ticks:{color:'#6b8cba',maxTicksLimit:6},grid:{color:'#eef2f9'}},
                 y:{ticks:{color:'#6b8cba',callback:v=>`$${(v/1000).toFixed(0)}k`},grid:{color:'#eef2f9'}}}}
