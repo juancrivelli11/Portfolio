@@ -372,8 +372,11 @@ body.dark canvas{filter:brightness(0.9)}
         </div>
       </div>
       <div id="brokerDetailView" style="display:none">
-        <button class="back-btn" onclick="hideBrokerDetail()">← Volver</button>
-        <div class="sec-title" id="brokerDetailTitle" style="margin-bottom:10px"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <button class="back-btn" onclick="hideBrokerDetail()" style="margin-bottom:0">← Volver</button>
+          <div class="sec-title" id="brokerDetailTitle"></div>
+          <button class="btn btn-green" onclick="openOverlay('order')" style="font-size:12px;padding:6px 12px">+ Nueva orden</button>
+        </div>
         <div id="brokerDetailCharts"></div>
         <div id="brokerDetailTable"></div>
         <div id="brokerLiquidez" style="display:none;margin-top:12px">
@@ -715,13 +718,8 @@ async function supaLoad(){
     const { data: ords } = await supa.from('orders').select('*')
       .eq('user_id', currentUser.id).order('created_at');
     if(ords?.length){
-      // Merge: keep any local orders not yet in Supabase
-      const supaOrders = ords.map(o => o.data);
-      const supaIds = new Set(supaOrders.map(o => String(o.id)));
-      const localOnly = orders.filter(o => !supaIds.has(String(o.id)));
-      orders = [...supaOrders, ...localOnly];
-      // If there were local-only orders, sync them up
-      if(localOnly.length) setTimeout(supaSync, 1000);
+      // Use Supabase as source of truth — no merge to avoid duplicates
+      orders = ords.map(o => o.data);
     }
 
     const { data: snaps } = await supa.from('snapshots').select('*')
@@ -866,7 +864,8 @@ function makeLogo(ticker, type, size=26){
 // ═══════════════════════════════════════════════════════════════════════════
 function getPortfolio(broker=null){
   const map={};
-  const ords = broker ? orders.filter(o=>(o.broker||'').toLowerCase()===(broker||'').toLowerCase()) : orders;
+  const ords = broker ? orders.filter(o=>(o.broker||'').toLowerCase().trim()===(broker||'').toLowerCase().trim()) : orders;
+  if(broker) console.log(`getPortfolio(${broker}): ${ords.length} orders`, ords.map(o=>`${o.action} ${o.ticker} qty=${o.qty} broker="${o.broker}"`));
   ords.forEach(o=>{
     if(!map[o.ticker]) map[o.ticker]={ticker:o.ticker,type:o.type||'Acción USA',qty:0,cost:0,comm:0};
     const m=map[o.ticker];
@@ -901,19 +900,25 @@ function enrich(pf){
 // ═══════════════════════════════════════════════════════════════════════════
 async function fetchArgPrice(ticker){
   const sym=ticker+'.BA';
-  for(const base of ['https://query1','https://query2']){
-    try{
-      const url=`${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
-      const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-      const d=await r.json();
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(meta?.regularMarketPrice>0) return{
-        price:meta.regularMarketPrice,
-        prev:meta.chartPreviousClose||meta.regularMarketPrice,
-        chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0,
-        currency:'ARS'
-      };
-    }catch(e){}
+  const proxies=[
+    url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url=>`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  ];
+  for(const proxy of proxies){
+    for(const base of ['https://query1','https://query2']){
+      try{
+        const url=`${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
+        const r=await fetch(proxy(url));
+        const d=await r.json();
+        const meta=d?.chart?.result?.[0]?.meta;
+        if(meta?.regularMarketPrice>0) return{
+          price:meta.regularMarketPrice,
+          prev:meta.chartPreviousClose||meta.regularMarketPrice,
+          chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0,
+          currency:'ARS'
+        };
+      }catch(e){}
+    }
   }
   return null;
 }
@@ -927,14 +932,16 @@ async function fetchUSPrice(sym){
       if(d?.[0]?.price>0){console.log(`FMP: ${sym}=${d[0].price}`);return{price:d[0].price,prev:d[0].previousClose||d[0].price,chgPct:d[0].changesPercentage||0,currency:'USD'};}
     }catch(e){}
   }
-  for(const base of ['https://query1','https://query2']){
-    try{
-      const url=`${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2d`;
-      const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+  for(const proxy of [u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`]){
+    for(const base of ['https://query1','https://query2']){
+      try{
+        const url=`${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
+        const r=await fetch(proxy(url));
       const d=await r.json();
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(meta?.regularMarketPrice>0){console.log(`Yahoo: ${sym}=${meta.regularMarketPrice}`);return{price:meta.regularMarketPrice,prev:meta.chartPreviousClose||meta.regularMarketPrice,chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0,currency:'USD'};}
-    }catch(e){}
+        const meta=d?.chart?.result?.[0]?.meta;
+        if(meta?.regularMarketPrice>0){console.log(`Yahoo: ${sym}=${meta.regularMarketPrice}`);return{price:meta.regularMarketPrice,prev:meta.chartPreviousClose||meta.regularMarketPrice,chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0,currency:'USD'};}
+      }catch(e){}
+    }
   }
   try{
     const r=await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sym}&apikey=${AV}`);
@@ -1324,11 +1331,10 @@ function showBrokerDetail(name){
     lineC.style.display='none';
     lineBox.innerHTML+='<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">Actualizá precios cada día para ver la evolución.</div>';
   }
+  renderTable(pf,'brokerDetailTable',totVal,totPnL);
+  renderBrokerCash(name);
   chartsEl.appendChild(lineBox);
   chartsEl.appendChild(grid);
-  renderTable(pf,'brokerDetailTable',totVal,totPnL);
-  // Render broker-specific cash
-  renderBrokerCash(name);
 }
 
 function hideBrokerDetail(){
@@ -1428,18 +1434,20 @@ function renderSidebarPie(pf, totGlobal){
 // SIDEBAR MARKET DATA
 // ═══════════════════════════════════════════════════════════════════════════
 async function fetchYahooQuote(sym){
-  for(const base of ['https://query1','https://query2']){
-    try{
-      const url=`${base}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
-      const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+  for(const proxy of [u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`]){
+    for(const base of ['https://query1','https://query2']){
+      try{
+        const url=`${base}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`;
+        const r=await fetch(proxy(url));
       const d=await r.json();
-      const meta=d?.chart?.result?.[0]?.meta;
-      if(meta?.regularMarketPrice>0) return{
-        price:meta.regularMarketPrice,
-        prev:meta.chartPreviousClose||meta.regularMarketPrice,
-        chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0
-      };
-    }catch(e){}
+        const meta=d?.chart?.result?.[0]?.meta;
+        if(meta?.regularMarketPrice>0) return{
+          price:meta.regularMarketPrice,
+          prev:meta.chartPreviousClose||meta.regularMarketPrice,
+          chgPct:meta.chartPreviousClose?(meta.regularMarketPrice-meta.chartPreviousClose)/meta.chartPreviousClose*100:0
+        };
+      }catch(e){}
+    }
   }
   return null;
 }
@@ -1583,7 +1591,7 @@ function saveOrder(){
   const mktVal=el('oMarket').value;
   const typeMap={usa:'Acción USA',cedear:'CEDEAR',arg:'Acción Argentina',cripto:'Cripto',bono:'Bono/Renta Fija'};
   const type=isVenta?(getPortfolio().find(a=>a.ticker===ticker)?.type||'Acción USA'):(typeMap[mktVal]||'Acción USA');
-  const isA=isARS(type)&&!isVenta;
+  const isA=isARS(type);  // ARS applies to both buy and sell for CEDEARs/arg assets
   const c=ccl();
   const priceUSD=isA?price/c:price;
   const commUSD=(parseFloat(el('oComm').value)||0)/(isA?c:1);
