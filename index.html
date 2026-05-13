@@ -433,6 +433,40 @@ body.dark canvas{filter:brightness(0.9)}
 
 </div><!-- /body-wrap -->
 
+<!-- EDIT ORDER OVERLAY -->
+<div class="overlay" id="overlay-edit">
+<div class="modal" style="max-width:420px">
+  <div class="modal-hdr">
+    <h2 id="editOrderTitle">Editar orden</h2>
+    <button class="modal-x" onclick="closeOverlay('edit')">×</button>
+  </div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Modificá los datos de esta orden.</p>
+  <input type="hidden" id="editOrderId">
+  <div class="field"><label>Cantidad</label>
+    <input id="editQty" type="number" inputmode="decimal" min="0">
+  </div>
+  <div class="field"><label id="editPriceLbl">Precio (USD)</label>
+    <input id="editPrice" type="number" inputmode="decimal" min="0">
+  </div>
+  <div class="field"><label>Comisión</label>
+    <input id="editComm" type="number" inputmode="decimal" min="0">
+  </div>
+  <div class="field"><label>Broker</label>
+    <select id="editBroker"><option value="">— Seleccionar —</option></select>
+  </div>
+  <div class="field"><label>Fecha</label>
+    <input id="editDate" type="date">
+  </div>
+  <div class="field"><label>Notas</label>
+    <input id="editNotes" placeholder="Notas...">
+  </div>
+  <div class="modal-btns">
+    <button class="btn btn-green" onclick="saveEditOrder()">Guardar</button>
+    <button class="btn btn-ghost" onclick="closeOverlay('edit')">Cancelar</button>
+  </div>
+</div>
+</div>
+
 <!-- LOGIN OVERLAY -->
 <div class="overlay" id="overlay-login">
 <div class="modal" style="max-width:400px">
@@ -1088,7 +1122,8 @@ function renderTable(pf, containerId, totVal, totPnL){
           <div style="color:var(--green)" onclick="quickOrder('${a.ticker}','${a.type}','Compra')">📈 Comprar</div>
           <div style="color:var(--red)" onclick="quickOrder('${a.ticker}','${a.type}','Venta')">📉 Vender</div>
           <div onclick="goTV('${a.ticker}','${a.type}')">📊 Ver gráfico</div>
-          <div style="color:var(--muted)" onclick="if(confirm('Eliminar ${a.ticker}?'))delTicker('${a.ticker}')">✕ Eliminar</div>
+          <div onclick="editLastOrder('${a.ticker}')">✏️ Editar última orden</div>
+          <div style="color:var(--muted)" onclick="if(confirm('Eliminar todas las órdenes de ${a.ticker}?'))delTicker('${a.ticker}')">✕ Eliminar</div>
         </div>
       </td>`;
     tr.cells[0].replaceWith(td);
@@ -1560,6 +1595,54 @@ function quickOrder(ticker,type,action){
 // ═══════════════════════════════════════════════════════════════════════════
 // ACTIONS
 // ═══════════════════════════════════════════════════════════════════════════
+function editLastOrder(ticker){
+  // Find most recent order for this ticker
+  const tickerOrders = orders.filter(o=>o.ticker===ticker).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(!tickerOrders.length){ alert('No hay órdenes para '+ticker); return; }
+  const o = tickerOrders[0];
+
+  el('editOrderId').value = String(o.id);
+  el('editOrderTitle').textContent = `Editar orden: ${o.action} ${o.ticker}`;
+  el('editQty').value = o.qty;
+  el('editPriceLbl').textContent = o.currency==='ARS' ? 'Precio (ARS)' : 'Precio (USD)';
+  el('editPrice').value = o.currency==='ARS' ? (o.priceOrig||o.price*(o.cclAtOrder||ccl())) : o.price;
+  el('editComm').value = o.comm||0;
+  el('editDate').value = o.date;
+  el('editNotes').value = o.notes||'';
+
+  // Populate broker select
+  const sel = el('editBroker');
+  sel.innerHTML = '<option value="">— Seleccionar —</option>';
+  brokers.forEach(b => sel.innerHTML += `<option value="${b}" ${o.broker===b?'selected':''}>${b}</option>`);
+
+  closeMenu();
+  openOverlay('edit');
+}
+
+function saveEditOrder(){
+  const id = el('editOrderId').value;
+  const idx = orders.findIndex(o=>String(o.id)===id);
+  if(idx===-1){ alert('Orden no encontrada'); return; }
+
+  const o = orders[idx];
+  const qty = parseFloat(el('editQty').value);
+  const price = parseFloat(el('editPrice').value);
+  if(!qty||!price){ alert('Faltan datos'); return; }
+
+  // Recalculate USD price if ARS order
+  const priceUSD = o.currency==='ARS' ? price/(o.cclAtOrder||ccl()) : price;
+  const commRaw = parseFloat(el('editComm').value)||0;
+  const commUSD = o.currency==='ARS' ? commRaw/(o.cclAtOrder||ccl()) : commRaw;
+
+  orders[idx] = {...o, qty, price:priceUSD, priceOrig:price, comm:commUSD,
+    broker:el('editBroker').value,
+    date:el('editDate').value||o.date,
+    notes:el('editNotes').value
+  };
+
+  save(); closeOverlay('edit'); render();
+}
+
 function delOrder(id){orders=orders.filter(o=>String(o.id)!==String(id));save();render();}
 function delTicker(ticker){orders=orders.filter(o=>o.ticker!==ticker);save();render();}
 function goTV(ticker,type){
