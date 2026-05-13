@@ -419,11 +419,11 @@ body.dark canvas{filter:brightness(0.9)}
   <!-- SIDEBAR -->
   <div class="sidebar">
 
-    <div class="side-box" id="sidebarBrokerPieBox" style="display:none">
-      <div class="side-hdr">🥧 <span id="sidebarBrokerPieTitle">Composición</span></div>
+    <div class="side-box" id="sidebarPieBox">
+      <div class="side-hdr">🥧 <span id="sidebarPieTitle">Composición</span></div>
       <div style="padding:10px;display:flex;gap:8px;align-items:center">
-        <canvas id="sidebarBrokerPie" width="100" height="100" style="flex-shrink:0"></canvas>
-        <div id="sidebarBrokerLegend" style="flex:1;font-size:10px"></div>
+        <canvas id="sidebarPieCanvas" width="100" height="100" style="flex-shrink:0"></canvas>
+        <div id="sidebarPieLegend" style="flex:1;font-size:10px"></div>
       </div>
     </div>
     <div class="side-box">
@@ -584,6 +584,9 @@ const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const COLS = ['#1565c0','#42a5f5','#00a876','#f59f00','#e53935','#7c3aed','#0891b2','#f97316','#14b8a6','#8b5cf6'];
+
+const ARS_BROKERS = ['Bull Market','IOL Argentina','Galicia','Santander','Balanz','PPI'];
+function isARSBroker(name){ return ARS_BROKERS.some(b=>b.toLowerCase()===name?.toLowerCase()); }
 
 const BROKER_LOGOS = {
   'IOL Dólares':   'invertironline.com',
@@ -1094,6 +1097,7 @@ function render(){
   renderOrders();
   renderBrokerGrid();
   renderMainCharts(pf, totGlobal, totARS_usd, totUSD_usd, c);
+  renderSidebarPie(pfInv, 'Portfolio', totGlobal);
 }
 
 const CASH_LIST = ['USD','ARS','USDT','USDC','DAI','BUSD','PESOS','CASH'];
@@ -1195,10 +1199,16 @@ function renderTable(pf, containerId, totVal, totPnL){
   const pnlClass=totPnL>=0?'up':'dn';
   // Calculate totals in native currencies
   const _c=ccl();
-  const _arsTotal=pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost)*_c,0);
+  const _mep = mkt.dmep?.price || _c;
+  // Determine display currency based on container
+  const _isARSCtx = containerId==='brokerDetailTable';
+  const _arsTotal = _isARSCtx
+    ? pf.reduce((s,a)=>{const v=a.hasPx?a.value:a.cost;return s+(isARS(a.type)?v*_c:v*_mep);},0)
+    : pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost)*_c,0);
   const _usdTotal=pf.filter(a=>!isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
-  const _totStr = _arsTotal>0&&_usdTotal>0 ? `${$u(_usdTotal)} + ${$a(_arsTotal)}` :
-                  _arsTotal>0 ? $a(_arsTotal) : $u(_usdTotal);
+  const _totStr = _isARSCtx ? $a(_arsTotal) :
+                  (_arsTotal>0&&_usdTotal>0 ? `${$u(_usdTotal)} + ${$a(_arsTotal)}` :
+                  _arsTotal>0 ? $a(_arsTotal) : $u(_usdTotal));
   tot.innerHTML=`<td colspan="7" style="font-weight:700">TOTAL</td>
     <td class="${pnlClass}">${(totPnL>=0?'+':'')+$u(totPnL)}</td>
     <td style="font-weight:800">${_totStr}</td><td></td>`;
@@ -1282,11 +1292,13 @@ function showBrokerDetail(name){
   // KPI row
   const kpi=document.createElement('div');kpi.className='kpi-row';
   const c3=ccl();
-  const totValARS = pf.filter(a=>isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0)*c3;
-  const totValUSD = pf.filter(a=>!isARS(a.type)).reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
-  const totValDisplay = totValARS>0 && totValUSD===0 ? $a(totValARS) :
-                        totValARS===0 ? $u(totValUSD) :
-                        `${$u(totValUSD)} + ${$a(totValARS)}`;
+  const mep = mkt.dmep?.price || c3;
+  const totAllUSD = pf.reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
+  const totAllARS = pf.reduce((s,a)=>{
+    const val = a.hasPx?a.value:a.cost;
+    return s + (isARS(a.type) ? val*c3 : val*mep);
+  },0);
+  const totValDisplay = isARSBroker(name) ? $a(totAllARS) : $u(totAllUSD);
   [
     {l:'Valor Total',v:totValDisplay,c:roe>=0?'var(--blue)':'var(--txt)'},
     {l:'Costo Base',v:$u(totCost),c:'var(--txt)'},
@@ -1366,16 +1378,17 @@ function showBrokerDetail(name){
   }
   renderTable(pf,'brokerDetailTable',totVal,totPnL);
   renderBrokerCash(name);
-  renderSidebarBrokerPie(pf, name, totVal);
+  renderSidebarPie(pf, name, totVal);
   chartsEl.appendChild(grid);
 }
 
 function hideBrokerDetail(){
   el('brokerGridView').style.display='block';
   el('brokerDetailView').style.display='none';
-  const box=el('sidebarBrokerPieBox');
-  if(box) box.style.display='none';
-  if(_sidebarPie){_sidebarPie.destroy();_sidebarPie=null;}
+  // Restore global portfolio pie
+  const pf=enrich(getPortfolio()).filter(a=>!isCash(a.ticker));
+  const tot=pf.reduce((s,a)=>s+(a.hasPx?a.value:a.cost),0);
+  renderSidebarPie(pf,'Portfolio',tot);
 }
 
 function renderBrokerCash(brokerName){
@@ -1458,24 +1471,23 @@ function renderMainCharts(pf, totGlobal, totARS, totUSD, c){
     <div style="margin-top:8px;font-size:11px"><strong>Total:</strong> ${$u(totGlobal)}</div>`;
 }
 
-function renderSidebarBrokerPie(pf, brokerName, totVal){
-  const box = el('sidebarBrokerPieBox');
-  if(!box) return;
-  if(!pf.length){ box.style.display='none'; return; }
-  box.style.display='block';
-  el('sidebarBrokerPieTitle').textContent = brokerName;
+function renderSidebarPie(pf, title, totVal){
+  const canvas = el('sidebarPieCanvas');
+  if(!canvas) return;
+  if(_sidebarPie){_sidebarPie.destroy();_sidebarPie=null;}
+  el('sidebarPieTitle').textContent = title || 'Composición';
   const pd=pf.map(a=>({name:a.ticker,value:a.hasPx?a.value:a.cost})).filter(a=>a.value>0);
-  if(_sidebarPie) _sidebarPie.destroy();
-  if(!pd.length) return;
-  _sidebarPie=new Chart(el('sidebarBrokerPie'),{
+  if(!pd.length){el('sidebarPieLegend').innerHTML='<span style="color:var(--muted)">Sin activos</span>';return;}
+  const tot=totVal||pd.reduce((s,d)=>s+d.value,0);
+  _sidebarPie=new Chart(canvas,{
     type:'doughnut',
     data:{labels:pd.map(d=>d.name),datasets:[{data:pd.map(d=>d.value),backgroundColor:COLS,borderWidth:2,borderColor:'#f5f7fa'}]},
     options:{responsive:false,plugins:{legend:{display:false}}}
   });
-  el('sidebarBrokerLegend').innerHTML=pd.slice(0,6).map((d,i)=>
+  el('sidebarPieLegend').innerHTML=pd.slice(0,6).map((d,i)=>
     `<div style="display:flex;justify-content:space-between;margin-bottom:4px">
       <div><span class="pie-dot" style="background:${COLS[i%COLS.length]}"></span><strong>${d.name}</strong></div>
-      <span style="color:var(--muted)">${n2(totVal>0?d.value/totVal*100:0)}%</span>
+      <span style="color:var(--muted)">${n2(tot>0?d.value/tot*100:0)}%</span>
     </div>`).join('')+(pd.length>6?`<div style="color:var(--muted);font-size:10px">+${pd.length-6} más</div>`:'');
 }
 
