@@ -280,13 +280,13 @@ body.dark canvas{filter:brightness(0.9)}
 <body>
 
 <!-- HEADER -->
-<div style="background:transparent;padding:14px 16px 6px;text-align:center">
-  <img src="logo.png" alt="CriFund" style="height:70px;width:auto;object-fit:contain"
-    onerror="this.style.display='none'">
-</div>
 <div class="hdr">
   <div class="hdr-brand">
     <div class="brand"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></div>
+    <div style="display:flex;align-items:center;padding:0 16px">
+      <img src="logo.png" alt="CriFund" style="height:44px;width:auto;object-fit:contain"
+        onerror="this.style.display='none'">
+    </div>
     <div class="hdr-name">
       <h1 id="pfName" onclick="editName()" title="Click para editar" style="cursor:pointer">Mi Portfolio</h1>
       <p id="statusBar">Tocá Actualizar para obtener precios</p>
@@ -691,7 +691,7 @@ const TICKERS = {
 let orders    = JSON.parse(localStorage.getItem('pf6_orders')  || '[]');
 let snapshots = JSON.parse(localStorage.getItem('pf6_snaps')   || '[]');
 let brokers   = JSON.parse(localStorage.getItem('pf6_brokers') || JSON.stringify(DEFAULT_BROKERS));
-let prices    = {};
+let prices    = JSON.parse(localStorage.getItem('pf6_prices')||'{}');
 let mkt       = {};
 let currency  = 'USD';
 let currentUser = null;
@@ -1103,6 +1103,7 @@ async function doRefresh(force=false){
 
   const got=pf.filter(a=>prices[a.ticker]>0).length;
   localStorage.setItem('pf6_lastFetch', Date.now().toString());
+  localStorage.setItem('pf6_prices', JSON.stringify(prices));
   setStatus(`${got}/${pf.length} precios · Blue $${n2(mkt.dblue?.price||0,0)} · MEP $${n2(mkt.dmep?.price||0,0)} · CCL $${n2(mkt.dccl?.price||0,0)}`,false);
   document.getElementById('btnRef').textContent='↻ Actualizar';
   document.getElementById('btnRef').disabled=false;
