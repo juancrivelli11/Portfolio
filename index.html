@@ -283,14 +283,14 @@ body.dark canvas{filter:brightness(0.9)}
 <div class="hdr">
   <div class="hdr-brand">
     <div class="brand"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></div>
-    <div style="display:flex;align-items:center;padding:0 16px">
-      <img src="logo.png" alt="CriFund" style="height:44px;width:auto;object-fit:contain"
-        onerror="this.style.display='none'">
-    </div>
     <div class="hdr-name">
       <h1 id="pfName" onclick="editName()" title="Click para editar" style="cursor:pointer">Mi Portfolio</h1>
       <p id="statusBar">Tocá Actualizar para obtener precios</p>
     </div>
+  </div>
+  <div style="flex:1;display:flex;justify-content:center;align-items:center">
+    <img src="logo.png" alt="CriFund" style="height:88px;width:auto;object-fit:contain"
+      onerror="this.style.display='none'">
   </div>
   <div class="hdr-btns">
     <button class="btn btn-blue" onclick="toggleCur()" id="btnCur">USD</button>
