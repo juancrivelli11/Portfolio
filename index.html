@@ -425,6 +425,19 @@ body.dark canvas{filter:brightness(0.9)}
   <!-- SIDEBAR -->
   <div class="sidebar">
 
+    <div class="side-box" id="liquidezSummaryBox" style="display:none">
+      <div class="side-hdr">💰 Liquidez Total</div>
+      <div style="padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:80px;background:var(--blueLL);border-radius:8px;padding:8px 10px">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Pesos</div>
+          <div id="liqTotalARS" style="font-size:14px;font-weight:800;color:var(--gold);font-family:monospace;margin-top:2px">$—</div>
+        </div>
+        <div style="flex:1;min-width:80px;background:var(--blueLL);border-radius:8px;padding:8px 10px">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Dólares</div>
+          <div id="liqTotalUSD" style="font-size:14px;font-weight:800;color:var(--green);font-family:monospace;margin-top:2px">$—</div>
+        </div>
+      </div>
+    </div>
     <div class="side-box" id="sidebarPieBox">
       <div class="side-hdr">🥧 <span id="sidebarPieTitle">Composición</span></div>
       <div style="padding:10px;display:flex;gap:8px;align-items:center">
@@ -993,7 +1006,8 @@ async function doRefresh(force=false){
   // Cache: skip if prices fetched < 30 min ago (unless forced)
   const lastFetch=parseInt(localStorage.getItem('pf6_lastFetch')||'0');
   const age=Date.now()-lastFetch;
-  if(!force && age < 30*60*1000 && Object.keys(prices).length > 2){
+  const hasPrices=Object.keys(prices).filter(k=>!k.includes('_')).length > 2;
+  if(!force && age < 30*60*1000 && hasPrices){
     setStatus(`Precios actualizados hace ${Math.round(age/60000)} min`,false);
     render();return;
   }
@@ -1152,6 +1166,16 @@ function render(){
 })();
   renderMainCharts(pf, totGlobal, totARS_usd, totUSD_usd, c);
   renderSidebarPie(pfInv, 'Portfolio', totGlobal);
+
+  // Liquidity summary
+  const liqARS = pfCash.filter(a=>a.ticker.toUpperCase()==='ARS').reduce((s,a)=>s+a.qty,0);
+  const liqUSD = pfCash.filter(a=>a.ticker.toUpperCase()!=='ARS').reduce((s,a)=>s+a.qty*(prices[a.ticker]||1),0);
+  const liqBox = document.getElementById('liquidezSummaryBox');
+  if(liqBox){
+    liqBox.style.display=(liqARS>0||liqUSD>0)?'block':'none';
+    document.getElementById('liqTotalARS').textContent=liqARS>0?$a(liqARS):'$0';
+    document.getElementById('liqTotalUSD').textContent=liqUSD>0?$u(liqUSD):'$0';
+  }
 }
 
 const CASH_LIST = ['USD','ARS','USDT','USDC','DAI','BUSD','PESOS','CASH'];
