@@ -282,15 +282,15 @@ body.dark canvas{filter:brightness(0.9)}
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-brand">
-    <div class="brand"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <img src="logo.png" alt="CriFund" style="height:40px;width:auto;object-fit:contain"
+        onerror="this.style.display='none'">
+      <div class="brand"><span class="brand-cri">CRI</span><span class="brand-fund">FUND</span></div>
+    </div>
     <div class="hdr-name">
       <h1 id="pfName" onclick="editName()" title="Click para editar" style="cursor:pointer">Mi Portfolio</h1>
       <p id="statusBar">Tocá Actualizar para obtener precios</p>
     </div>
-  </div>
-  <div style="flex:1;display:flex;justify-content:center;align-items:center">
-    <img src="logo.png" alt="CriFund" style="height:88px;width:auto;object-fit:contain"
-      onerror="this.style.display='none'">
   </div>
   <div class="hdr-btns">
     <button class="btn btn-blue" onclick="toggleCur()" id="btnCur">USD</button>
@@ -895,7 +895,7 @@ function makeLogo(ticker, type, size=26){
     const cgEntry=CG[ticker?.toUpperCase()]; src=cgEntry?`${CG_URL}${cgEntry}.png`:null;
   } else {
     const dom = DOMAINS[ticker?.toUpperCase()] || `${ticker?.toLowerCase()}.com`;
-    src=`https://www.google.com/s2/favicons?domain=${dom}&sz=64`;
+    src=`https://logo.clearbit.com/${dom}`;
   }
   const img=document.createElement('img');
   img.className='alogo'; img.src=src; img.alt=ticker;
@@ -1053,8 +1053,11 @@ async function doRefresh(force=false){
   if(fmp && toFetch.length){
     try{
       const syms=toFetch.map(a=>a.ticker).join(',');
+      console.log(`FMP batch request: ${syms}`);
       const r=await fetch(`https://financialmodelingprep.com/api/v3/quote/${syms}?apikey=${fmp}`);
+      console.log(`FMP response status: ${r.status}`);
       const d=await r.json();
+      console.log(`FMP response:`, d?.length, 'quotes');
       if(Array.isArray(d)){
         d.forEach(q=>{
           if(q.price>0){
