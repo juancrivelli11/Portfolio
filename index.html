@@ -895,7 +895,7 @@ function makeLogo(ticker, type, size=26){
     const cgEntry=CG[ticker?.toUpperCase()]; src=cgEntry?`${CG_URL}${cgEntry}.png`:null;
   } else {
     const dom = DOMAINS[ticker?.toUpperCase()] || `${ticker?.toLowerCase()}.com`;
-    src=`https://logo.clearbit.com/${dom}`;
+    src=`https://www.google.com/s2/favicons?domain=${dom}&sz=64`;
   }
   const img=document.createElement('img');
   img.className='alogo'; img.src=src; img.alt=ticker;
@@ -946,9 +946,8 @@ function enrich(pf){
 async function fetchArgPrice(ticker){
   const sym=ticker+'.BA';
   const proxies=[
-    url=>`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url=>`https://thingproxy.freeboard.io/fetch/${url}`,
+    url=>`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
   ];
   for(const proxy of proxies){
     for(const base of ['https://query1','https://query2']){
@@ -978,7 +977,7 @@ async function fetchUSPrice(sym){
       if(d?.[0]?.price>0){console.log(`FMP: ${sym}=${d[0].price}`);return{price:d[0].price,prev:d[0].previousClose||d[0].price,chgPct:d[0].changesPercentage||0,currency:'USD'};}
     }catch(e){}
   }
-  for(const proxy of [u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,u=>`https://thingproxy.freeboard.io/fetch/${u}`]){
+  for(const proxy of [u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`]){
     for(const base of ['https://query1','https://query2']){
       try{
         const url=`${base}.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
@@ -1589,7 +1588,7 @@ function renderSidebarPie(pf, title, totVal){
 // SIDEBAR MARKET DATA
 // ═══════════════════════════════════════════════════════════════════════════
 async function fetchYahooQuote(sym){
-  for(const proxy of [u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,u=>`https://thingproxy.freeboard.io/fetch/${u}`]){
+  for(const proxy of [u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`]){
     for(const base of ['https://query1','https://query2']){
       try{
         const url=`${base}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`;
@@ -1767,17 +1766,21 @@ function saveOrder(){
 
 
 
-  // Auto-adjust USD liquidity for non-ARS brokers
+  // Auto-adjust USD/USDT liquidity for non-ARS brokers
   if(!isA && broker && !isARSBroker(broker)){
     const totalUSD = qty * priceUSD + commUSD;
-    const usdOrders = orders.filter(o=>
-      o.ticker==='USD' && (o.broker||'').toLowerCase()===broker.toLowerCase()
-    );
-    const usdQty = usdOrders.reduce((s,o)=>s+(o.action==='Compra'?o.qty:-o.qty),0);
-    if(usdQty > 0){
+    // Check for USD or USDT liquidity in this broker
+    const stableTickers = ['USD','USDT','USDC'];
+    let liqTicker = null;
+    for(const st of stableTickers){
+      const stOrds = orders.filter(o=>o.ticker===st&&(o.broker||'').toLowerCase()===broker.toLowerCase());
+      const stQty = stOrds.reduce((s,o)=>s+(o.action==='Compra'?o.qty:-o.qty),0);
+      if(stQty > 0){ liqTicker = st; break; }
+    }
+    if(liqTicker){
       orders.push({
         id:Date.now()+2,
-        ticker:'USD',type:'Acción USA',
+        ticker:liqTicker,type:liqTicker==='USD'?'Acción USA':'Cripto',
         action:isCompra?'Venta':'Compra',
         qty:totalUSD,price:1,priceOrig:1,
         currency:'USD',cclAtOrder:null,comm:0,
